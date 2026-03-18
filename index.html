@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLAX — Allegro Pricing Dashboard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1a;min-height:100vh;padding:1.75rem}
+
+/* HEADER */
+.header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1.5px solid #ddd9d0}
+.logo{width:46px;height:46px;background:#BA7517;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;letter-spacing:1px;flex-shrink:0}
+.header h1{font-size:26px;font-weight:800;letter-spacing:4px;color:#1a1a1a}
+.header p{font-size:12px;color:#888;margin-top:3px}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;margin-bottom:1.25rem;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:#555;font-weight:500}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* STORES GRID */
+.stores{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:1.5rem}
+@media(max-width:900px){.stores{grid-template-columns:1fr}}
+
+/* STORE CARD */
+.sc{background:#fff;border:1px solid #e0dcd4;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.sc.amber-border{border:2.5px solid #BA7517}
+.sc.blue-border{border:2.5px solid #185FA5}
+
+.sc-head{padding:12px 16px 10px;border-bottom:1px solid #f0ece4;background:#fdfaf4}
+.sc-name{font-size:14px;font-weight:700;color:#1a1a1a;letter-spacing:0.3px}
+.sc-sub{font-size:10px;color:#999;margin-top:2px}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:6px}
+.t-amber{background:#FAEEDA;color:#BA7517}
+.t-teal{background:#E1F5EE;color:#0F6E56}
+.t-blue{background:#E6F1FB;color:#185FA5}
+
+/* RULES SECTION */
+.section-label{font-size:9px;font-weight:700;letter-spacing:1px;color:#aaa;padding:8px 16px 4px;text-transform:uppercase;background:#faf9f6}
+
+.rules{padding:4px 0 4px}
+.rule{display:flex;align-items:flex-start;gap:8px;padding:7px 16px;border-bottom:1px solid #f5f2ec}
+.rule:last-child{border-bottom:none}
+.ri{flex-shrink:0;width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+.ri-d{background:#EAF3DE;color:#3B6D11}
+.ri-u{background:#FAEEDA;color:#BA7517}
+.rb{flex:1}
+.rt{font-size:12px;color:#1a1a1a;line-height:1.45;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.rc{font-size:10px;color:#aaa;margin-top:2px}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.bd{background:#EAF3DE;color:#3B6D11}
+.bu{background:#FAEEDA;color:#BA7517}
+.ref{font-size:9px;color:#999;font-style:italic;margin-top:2px}
+
+/* ADS SECTION */
+.ads-block{border-top:1.5px dashed #e5e1d8;background:#f7f5f0;padding:10px 16px 12px}
+.ads-title{font-size:9px;font-weight:800;letter-spacing:1.2px;color:#BA7517;text-transform:uppercase;margin-bottom:8px}
+.ads-campaign{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px}
+.ads-campaign:last-child{margin-bottom:0}
+.camp-num{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#BA7517;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.camp-num.blue{background:#185FA5}
+.camp-body{flex:1}
+.camp-name{font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:3px}
+.camp-tags{display:flex;flex-wrap:wrap;gap:4px}
+.camp-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:#FAEEDA;color:#BA7517;font-weight:600}
+.camp-tag.tl{background:#E1F5EE;color:#0F6E56}
+.camp-tag.bl{background:#E6F1FB;color:#185FA5}
+
+.ads-empty{font-size:11px;color:#bbb;font-style:italic;padding:2px 0}
+
+/* CALCULATOR */
+.calc{background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.calc h2{font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:14px}
+.calc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:600px){.calc-inputs{grid-template-columns:1fr}}
+.ig label{font-size:11px;color:#777;display:block;margin-bottom:5px;font-weight:600}
+.ig input,.ig select{width:100%;padding:8px 10px;font-size:13px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#1a1a1a}
+.res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.res-grid{grid-template-columns:1fr}}
+.rcard{background:#F4F2EE;border:1px solid #e5e1d8;border-radius:9px;padding:12px 14px}
+.rstore{font-size:10px;color:#888;margin-bottom:5px;font-weight:600;letter-spacing:0.3px}
+.rprice{font-size:22px;font-weight:800}
+.rdiff{font-size:10px;margin-top:3px;font-weight:500}
+.rref{font-size:10px;color:#bbb;margin-top:2px;font-style:italic}
+.cdown{color:#3B6D11}.cup{color:#BA7517}
+
+.footer{text-align:center;font-size:11px;color:#ccc;margin-top:0.5rem;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">P</div>
+  <div>
+    <h1>POLAX</h1>
+    <p>Правила ценообразования · Allegro · 3 магазина</p>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="li"><div class="dot" style="background:#3B6D11"></div> Дешевле рынка (−zł / −%)</div>
+  <div class="li"><div class="dot" style="background:#BA7517"></div> Дороже мин. цены (+20%)</div>
+  <div class="li"><div class="dot" style="background:#BA7517;border:2px dashed #BA7517;background:transparent"></div> Ориентир: самая дешёвая цена на рынке</div>
+</div>
+
+<div class="stores">
+
+  <!-- ===== Mlot_i_Klucz ===== -->
+  <div class="sc">
+    <div class="sc-head">
+      <div class="sc-name">Mlot_i_Klucz</div>
+      <div><span class="tag t-amber">2 правила цены</span></div>
+    </div>
+    <div class="section-label">Правила ценообразования</div>
+    <div class="rules">
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">Młotek <span class="badge bd">−0.4 zł</span></div>
+          <div class="ref">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">Все товары <span class="badge bu">+20%</span></div>
+          <div class="ref">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+    </div>
+    <div class="ads-block">
+      <div class="ads-title">ADS · Рекламные кампании</div>
+      <div class="ads-campaign">
+        <div class="camp-num">1</div>
+        <div class="camp-body">
+          <div class="camp-name">Компания Mlotek</div>
+          <div class="camp-tags"><span class="camp-tag">Młotek</span><span class="camp-tag">Молотки</span></div>
+        </div>
+      </div>
+      <div class="ads-campaign">
+        <div class="camp-num">2</div>
+        <div class="camp-body">
+          <div class="camp-name">Компания Walek</div>
+          <div class="camp-tags"><span class="camp-tag tl">WAŁEK</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PolaxEuroGroup ===== -->
+  <div class="sc amber-border">
+    <div class="sc-head">
+      <div class="sc-name">PolaxEuroGroup</div>
+      <div><span class="tag t-teal">5 правил цены + ADS</span></div>
+    </div>
+    <div class="section-label">Правила ценообразования</div>
+    <div class="rules">
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">OPRYSKIWACZ <span class="badge bd">−1.00 zł</span></div>
+          <div class="ref">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">WAŁEK <span class="badge bd">−0.5%</span></div>
+          <div class="ref">чем самая дешёвая цена на рынке · отдельный ADS</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">Żyłka, Zacisk <span class="badge bd">−0.5%</span></div>
+          <div class="ref">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">Plandeka <span class="badge bd">−1.00 zł</span></div>
+          <div class="ref">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">Все остальные товары <span class="badge bu">+20%</span></div>
+          <div class="ref">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+    </div>
+    <div class="ads-block">
+      <div class="ads-title">ADS · Рекламные кампании</div>
+      <div class="ads-campaign">
+        <div class="camp-num">1</div>
+        <div class="camp-body">
+          <div class="camp-name">Компания OPRYSKIWACZ + группа</div>
+          <div class="camp-tags">
+            <span class="camp-tag">OPRYSKIWACZ</span>
+            <span class="camp-tag">Żyłka</span>
+            <span class="camp-tag">Zacisk</span>
+            <span class="camp-tag">Plandeka</span>
+          </div>
+        </div>
+      </div>
+      <div class="ads-campaign">
+        <div class="camp-num">2</div>
+        <div class="camp-body">
+          <div class="camp-name">Компания WAŁEK</div>
+          <div class="camp-tags"><span class="camp-tag tl">WAŁEK</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Sila_Narzedzi ===== -->
+  <div class="sc blue-border">
+    <div class="sc-head">
+      <div class="sc-name">Sila_Narzedzi</div>
+      <div><span class="tag t-blue">6 правил цены</span></div>
+    </div>
+    <div class="section-label">Правила ценообразования</div>
+    <div class="rules">
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">Młotek <span class="badge bu">+20%</span></div>
+          <div class="ref">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">OPRYSKIWACZ <span class="badge bu">+20%</span></div>
+          <div class="ref">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">Żyłka, Zacisk <span class="badge bu">+20%</span></div>
+          <div class="ref">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">WAŁEK <span class="badge bu">+20%</span></div>
+          <div class="ref">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">Plandeka <span class="badge bu">+20%</span></div>
+          <div class="ref">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">Все остальные товары <span class="badge bd">−0.5%</span></div>
+          <div class="ref">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+    </div>
+    <div class="ads-block">
+      <div class="ads-title">ADS · Рекламные кампании</div>
+      <div class="ads-empty">Кампании не указаны</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">POLAX · ALLEGRO PRICING RULES · 2026</div>
+</body>
+</html>
