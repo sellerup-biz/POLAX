@@ -1,0 +1,42 @@
+name: Fetch Allegro Sales Daily
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # каждый день в 23:00 UTC = 01:00 Варшава
+  workflow_dispatch:        # кнопка ручного запуска
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run fetch
+        run: python fetch.py
+        env:
+          CLIENT_ID_MLOT:      ${{ secrets.CLIENT_ID_MLOT }}
+          CLIENT_SECRET_MLOT:  ${{ secrets.CLIENT_SECRET_MLOT }}
+          CLIENT_ID_POLAX:     ${{ secrets.CLIENT_ID_POLAX }}
+          CLIENT_SECRET_POLAX: ${{ secrets.CLIENT_SECRET_POLAX }}
+          CLIENT_ID_SILA:      ${{ secrets.CLIENT_ID_SILA }}
+          CLIENT_SECRET_SILA:  ${{ secrets.CLIENT_SECRET_SILA }}
+
+      - name: Save data.json
+        run: |
+          git config user.email "bot@polax"
+          git config user.name "POLAX Bot"
+          git add data.json
+          git commit -m "Sales $(date +%Y-%m-%d)" || echo "No changes"
+          git push
