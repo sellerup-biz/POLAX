@@ -153,11 +153,11 @@
       },
       "costs": {
         "commission": 26.07,
-        "delivery": 5.39,
+        "delivery": 15.38,
         "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 9.99
+        "other": 0.0
       }
     },
     {
@@ -176,7 +176,7 @@
         "delivery": 8.08,
         "ads": 0.0,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 10.28,
         "other": 0.0
       }
     },
@@ -196,7 +196,7 @@
         "delivery": 0.0,
         "ads": 70.01,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 11.4,
         "other": 0.0
       }
     },
@@ -236,7 +236,7 @@
         "delivery": 0.0,
         "ads": 244.08,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 11.98,
         "other": 0.0
       }
     },
@@ -253,11 +253,11 @@
       },
       "costs": {
         "commission": 168.2,
-        "delivery": 74.18,
+        "delivery": 102.64,
         "ads": 249.63,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 28.46
+        "other": 0.0
       }
     },
     {
@@ -273,11 +273,11 @@
       },
       "costs": {
         "commission": 259.47,
-        "delivery": 119.17,
+        "delivery": 122.95,
         "ads": 496.54,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 3.78
+        "discount": 2.68,
+        "other": 0.0
       }
     },
     {
@@ -293,11 +293,11 @@
       },
       "costs": {
         "commission": 232.53,
-        "delivery": 64.02,
+        "delivery": 95.89,
         "ads": 394.76,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 31.87
+        "other": 0.0
       }
     },
     {
@@ -313,11 +313,11 @@
       },
       "costs": {
         "commission": 188.53,
-        "delivery": 57.58,
+        "delivery": 94.43,
         "ads": 382.26,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 36.85
+        "discount": 21.87,
+        "other": 0.0
       }
     },
     {
@@ -333,11 +333,11 @@
       },
       "costs": {
         "commission": 165.74,
-        "delivery": 48.3,
+        "delivery": 62.38,
         "ads": 447.71,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 14.08
+        "other": 0.0
       }
     },
     {
@@ -356,7 +356,7 @@
         "delivery": 29.05,
         "ads": 392.75,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 8.1,
         "other": 0.0
       }
     },
@@ -376,7 +376,7 @@
         "delivery": 75.1,
         "ads": 362.7,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 11.24,
         "other": 0.0
       }
     },
@@ -393,11 +393,11 @@
       },
       "costs": {
         "commission": 331.62,
-        "delivery": 101.38,
+        "delivery": 119.55,
         "ads": 396.3,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 18.17
+        "other": 0.0
       }
     },
     {
@@ -413,11 +413,11 @@
       },
       "costs": {
         "commission": 384.47,
-        "delivery": 85.66,
+        "delivery": 101.94,
         "ads": 560.17,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 16.28
+        "discount": 13.84,
+        "other": 0.0
       }
     },
     {
@@ -433,11 +433,11 @@
       },
       "costs": {
         "commission": 153.15,
-        "delivery": 202.16,
+        "delivery": 253.69,
         "ads": 474.51,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 51.53
+        "discount": 6.97,
+        "other": 0.0
       }
     },
     {
@@ -453,11 +453,11 @@
       },
       "costs": {
         "commission": 205.46,
-        "delivery": 89.51,
+        "delivery": 110.48,
         "ads": 506.06,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 20.97
+        "other": 0.0
       }
     },
     {
@@ -473,11 +473,11 @@
       },
       "costs": {
         "commission": 66.05,
-        "delivery": 54.21,
+        "delivery": 57.8,
         "ads": 543.71,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 3.59
+        "other": 0.0
       }
     },
     {
@@ -493,11 +493,11 @@
       },
       "costs": {
         "commission": 210.73,
-        "delivery": 0.0,
+        "delivery": 1.89,
         "ads": 376.68,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 1.89
+        "discount": 20.03,
+        "other": 0.0
       }
     },
     {
@@ -533,11 +533,11 @@
       },
       "costs": {
         "commission": 229.11,
-        "delivery": 77.04,
+        "delivery": 98.71,
         "ads": 417.21,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 21.67
+        "other": 0.0
       }
     },
     {
@@ -553,11 +553,11 @@
       },
       "costs": {
         "commission": 295.65,
-        "delivery": 81.23,
+        "delivery": 88.51,
         "ads": 549.41,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 7.28
+        "discount": 3.96,
+        "other": 0.0
       }
     },
     {
@@ -573,11 +573,11 @@
       },
       "costs": {
         "commission": 222.45,
-        "delivery": 95.43,
+        "delivery": 108.6,
         "ads": 482.72,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 13.17
+        "discount": 1.76,
+        "other": 0.0
       }
     },
     {
@@ -613,11 +613,11 @@
       },
       "costs": {
         "commission": 147.6,
-        "delivery": 104.5,
+        "delivery": 114.99,
         "ads": 484.07,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 10.49
+        "other": 0.0
       }
     },
     {
@@ -653,11 +653,11 @@
       },
       "costs": {
         "commission": 90.29,
-        "delivery": 8.88,
+        "delivery": 10.77,
         "ads": 314.98,
         "subscription": 199.0,
-        "discount": 0.0,
-        "other": 1.89
+        "discount": 4.07,
+        "other": 0.0
       }
     },
     {
@@ -673,11 +673,11 @@
       },
       "costs": {
         "commission": 262.67,
-        "delivery": 48.59,
+        "delivery": 50.48,
         "ads": 356.15,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 1.89
+        "other": 0.0
       }
     },
     {
@@ -696,7 +696,7 @@
         "delivery": 59.89,
         "ads": 0.0,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 5.44,
         "other": 0.0
       }
     },
@@ -713,11 +713,11 @@
       },
       "costs": {
         "commission": 182.15,
-        "delivery": 27.44,
+        "delivery": 58.91,
         "ads": 0.0,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 31.47
+        "discount": 8.24,
+        "other": 0.0
       }
     },
     {
@@ -736,7 +736,7 @@
         "delivery": 23.65,
         "ads": 0.0,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 13.0,
         "other": 0.0
       }
     },
@@ -753,11 +753,11 @@
       },
       "costs": {
         "commission": 32.98,
-        "delivery": 26.16,
+        "delivery": 32.05,
         "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 5.89
+        "other": 0.0
       }
     },
     {
@@ -776,7 +776,7 @@
         "delivery": 1.89,
         "ads": 94.28,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 1.47,
         "other": 0.0
       }
     },
@@ -813,11 +813,11 @@
       },
       "costs": {
         "commission": 94.28,
-        "delivery": 77.83,
+        "delivery": 95.7,
         "ads": 91.54,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 17.87
+        "discount": 251.71,
+        "other": 0.0
       }
     },
     {
@@ -833,11 +833,11 @@
       },
       "costs": {
         "commission": 275.46,
-        "delivery": 49.86,
+        "delivery": 53.64,
         "ads": 102.27,
         "subscription": 0.0,
-        "discount": 0.0,
-        "other": 3.78
+        "discount": 4.77,
+        "other": 0.0
       }
     },
     {
@@ -853,11 +853,11 @@
       },
       "costs": {
         "commission": 469.17,
-        "delivery": 88.26,
+        "delivery": 109.24,
         "ads": 119.55,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 20.98
+        "other": 0.0
       }
     },
     {
@@ -873,11 +873,11 @@
       },
       "costs": {
         "commission": 15.79,
-        "delivery": 103.43,
+        "delivery": 105.32,
         "ads": 215.2,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 1.89
+        "other": 0.0
       }
     },
     {
@@ -913,11 +913,11 @@
       },
       "costs": {
         "commission": 27.0,
-        "delivery": 18.61,
+        "delivery": 29.1,
         "ads": 92.18,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 10.49
+        "other": 0.0
       }
     },
     {
@@ -956,7 +956,7 @@
         "delivery": 30.25,
         "ads": 35.2,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 17.02,
         "other": 0.0
       }
     },
@@ -996,7 +996,7 @@
         "delivery": 31.35,
         "ads": 54.3,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 86.26,
         "other": 0.0
       }
     },
@@ -1013,11 +1013,11 @@
       },
       "costs": {
         "commission": 137.39,
-        "delivery": 76.47,
+        "delivery": 90.45,
         "ads": 50.97,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 13.98
+        "other": 0.0
       }
     },
     {
@@ -1036,7 +1036,7 @@
         "delivery": 40.12,
         "ads": 49.57,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 15.31,
         "other": 0.0
       }
     },
@@ -1076,7 +1076,7 @@
         "delivery": 11.88,
         "ads": 136.88,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 8.19,
         "other": 0.0
       }
     },
@@ -1096,7 +1096,7 @@
         "delivery": 56.1,
         "ads": 39.27,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 2.08,
         "other": 0.0
       }
     },
@@ -1113,11 +1113,11 @@
       },
       "costs": {
         "commission": 53.93,
-        "delivery": 52.71,
+        "delivery": 95.46,
         "ads": 73.14,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 42.75
+        "other": 0.0
       }
     },
     {
@@ -1156,7 +1156,7 @@
         "delivery": 63.29,
         "ads": 63.57,
         "subscription": 0.0,
-        "discount": 0.0,
+        "discount": 2.21,
         "other": 0.0
       }
     },
@@ -1173,11 +1173,11 @@
       },
       "costs": {
         "commission": 16.03,
-        "delivery": 12.36,
+        "delivery": 22.85,
         "ads": 65.62,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 10.49
+        "other": 0.0
       }
     }
   ],
@@ -1195,11 +1195,11 @@
       },
       "costs": {
         "commission": 4851.94,
-        "delivery": 1505.38,
+        "delivery": 1795.45,
         "ads": 8968.75,
         "subscription": 199.0,
-        "discount": 0.0,
-        "other": 290.07
+        "discount": 124.11,
+        "other": 0.0
       }
     },
     {
@@ -1215,11 +1215,11 @@
       },
       "costs": {
         "commission": 3913.04,
-        "delivery": 1059.02,
+        "delivery": 1222.39,
         "ads": 2790.42,
         "subscription": 199.0,
-        "discount": 0.0,
-        "other": 163.37
+        "discount": 419.77,
+        "other": 0.0
       }
     }
   ]
