@@ -458,9 +458,9 @@
     },
     {
       "date": "2026-03-18",
-      "Mlot_i_Klucz": 6736.26,
-      "PolaxEuroGroup": 6795.17,
-      "Sila_Narzedzi": 6378.13
+      "Mlot_i_Klucz": 1598.22,
+      "PolaxEuroGroup": 242.81,
+      "Sila_Narzedzi": 5337.05
     }
   ],
   "months": [
@@ -478,9 +478,9 @@
     },
     {
       "month": "Мар 2026",
-      "Mlot_i_Klucz": 123635.7,
-      "PolaxEuroGroup": 86340.03,
-      "Sila_Narzedzi": 90789.72
+      "Mlot_i_Klucz": 118497.66,
+      "PolaxEuroGroup": 79787.67,
+      "Sila_Narzedzi": 89748.64
     }
   ]
 }
