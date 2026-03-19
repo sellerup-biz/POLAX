@@ -1,0 +1,31 @@
+name: Diagnose Billing Types
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - run: python diagnose_billing.py
+        env:
+          CLIENT_ID_POLAX:     ${{ secrets.CLIENT_ID_POLAX }}
+          CLIENT_SECRET_POLAX: ${{ secrets.CLIENT_SECRET_POLAX }}
+          REFRESH_TOKEN_POLAX: ${{ secrets.REFRESH_TOKEN_POLAX }}
+          GH_TOKEN:            ${{ secrets.GH_TOKEN }}
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add billing_raw_jan.json || true
+          git commit -m "Billing diagnostic Jan 2026" || echo "No changes"
+          git push
