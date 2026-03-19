@@ -26,12 +26,11 @@ jobs:
       - name: Run fetch
         run: python fetch.py
         env:
-          CLIENT_ID_MLOT:      ${{ secrets.CLIENT_ID_MLOT }}
-          CLIENT_SECRET_MLOT:  ${{ secrets.CLIENT_SECRET_MLOT }}
-          CLIENT_ID_POLAX:     ${{ secrets.CLIENT_ID_POLAX }}
-          CLIENT_SECRET_POLAX: ${{ secrets.CLIENT_SECRET_POLAX }}
-          CLIENT_ID_SILA:      ${{ secrets.CLIENT_ID_SILA }}
-          CLIENT_SECRET_SILA:  ${{ secrets.CLIENT_SECRET_SILA }}
+          CLIENT_ID:           ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET:       ${{ secrets.CLIENT_SECRET }}
+          REFRESH_TOKEN_MLOT:  ${{ secrets.REFRESH_TOKEN_MLOT }}
+          REFRESH_TOKEN_POLAX: ${{ secrets.REFRESH_TOKEN_POLAX }}
+          REFRESH_TOKEN_SILA:  ${{ secrets.REFRESH_TOKEN_SILA }}
 
       - name: Save data.json
         run: |
