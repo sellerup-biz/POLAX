@@ -1,28 +1,56 @@
-import requests, json, os
+import requests, json, os, base64
 from datetime import datetime, timedelta
 from collections import defaultdict
+from nacl import encoding, public
 
 REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
+GH_TOKEN     = os.environ.get("GH_TOKEN", "")
+GH_REPO      = "sellerup-biz/POLAX"
 
 SHOPS = {}
 if os.environ.get("CLIENT_ID_SILA") and os.environ.get("REFRESH_TOKEN_SILA"):
     SHOPS["Sila_Narzedzi"] = {
         "client_id":     os.environ["CLIENT_ID_SILA"],
         "client_secret": os.environ["CLIENT_SECRET_SILA"],
-        "refresh_token": os.environ["REFRESH_TOKEN_SILA"]
+        "refresh_token": os.environ["REFRESH_TOKEN_SILA"],
+        "secret_name":   "REFRESH_TOKEN_SILA"
     }
 if os.environ.get("CLIENT_ID_POLAX") and os.environ.get("REFRESH_TOKEN_POLAX"):
     SHOPS["PolaxEuroGroup"] = {
         "client_id":     os.environ["CLIENT_ID_POLAX"],
         "client_secret": os.environ["CLIENT_SECRET_POLAX"],
-        "refresh_token": os.environ["REFRESH_TOKEN_POLAX"]
+        "refresh_token": os.environ["REFRESH_TOKEN_POLAX"],
+        "secret_name":   "REFRESH_TOKEN_POLAX"
     }
 if os.environ.get("CLIENT_ID_MLOT") and os.environ.get("REFRESH_TOKEN_MLOT"):
     SHOPS["Mlot_i_Klucz"] = {
         "client_id":     os.environ["CLIENT_ID_MLOT"],
         "client_secret": os.environ["CLIENT_SECRET_MLOT"],
-        "refresh_token": os.environ["REFRESH_TOKEN_MLOT"]
+        "refresh_token": os.environ["REFRESH_TOKEN_MLOT"],
+        "secret_name":   "REFRESH_TOKEN_MLOT"
     }
+
+def get_gh_public_key():
+    r = requests.get(
+        f"https://api.github.com/repos/{GH_REPO}/actions/secrets/public-key",
+        headers={"Authorization": f"token {GH_TOKEN}", "Accept": "application/vnd.github+json"}
+    )
+    return r.json()
+
+def encrypt_secret(public_key_str, secret_value):
+    pk = public.PublicKey(public_key_str.encode("utf-8"), encoding.Base64Encoder())
+    box = public.SealedBox(pk)
+    encrypted = box.encrypt(secret_value.encode("utf-8"))
+    return base64.b64encode(encrypted).decode("utf-8")
+
+def update_gh_secret(secret_name, secret_value, key_id, key_val):
+    encrypted = encrypt_secret(key_val, secret_value)
+    r = requests.put(
+        f"https://api.github.com/repos/{GH_REPO}/actions/secrets/{secret_name}",
+        headers={"Authorization": f"token {GH_TOKEN}", "Accept": "application/vnd.github+json"},
+        json={"encrypted_value": encrypted, "key_id": key_id}
+    )
+    return r.status_code in (201, 204)
 
 def get_access_token(client_id, client_secret, refresh_token):
     r = requests.post(
@@ -36,9 +64,9 @@ def get_access_token(client_id, client_secret, refresh_token):
     )
     d = r.json()
     if "access_token" not in d:
-        print(f"Ошибка токена: {d}")
-        return None
-    return d["access_token"]
+        print(f"  Ошибка токена: {d}")
+        return None, None
+    return d["access_token"], d.get("refresh_token", refresh_token)
 
 def get_sales_for_day(access_token, date_key):
     headers = {
@@ -79,14 +107,22 @@ while d <= end:
 
 print(f"Дат: {len(all_dates)} | Магазины: {list(SHOPS.keys())}")
 
-# Получаем access_token один раз для каждого магазина
+# GitHub public key для шифрования
+gh_key = get_gh_public_key()
+gh_key_id  = gh_key.get("key_id")
+gh_key_val = gh_key.get("key")
+
+# Получаем access_token и сразу сохраняем новый refresh_token
 tokens = {}
 for shop, creds in SHOPS.items():
     print(f"Токен для {shop}...")
-    t = get_access_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
+    t, new_refresh = get_access_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
     if t:
         tokens[shop] = t
-        print(f"  OK")
+        # Сохраняем новый refresh_token в GitHub Secrets
+        if new_refresh and gh_key_id and gh_key_val:
+            ok = update_gh_secret(creds["secret_name"], new_refresh, gh_key_id, gh_key_val)
+            print(f"  Токен обновлён в Secrets: {'OK' if ok else 'ОШИБКА'}")
     else:
         print(f"  ОШИБКА — пропускаем")
 
