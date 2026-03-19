@@ -98,10 +98,49 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
   </div>
 </div>
 
+<!-- DAILY SALES -->
+<div style="background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#1a1a1a">Продажи по дням</div>
+      <div style="font-size:11px;color:#999;margin-top:2px">данные из Allegro · обновляется каждую ночь автоматически</div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#BA7517;display:inline-block"></span>Mlot_i_Klucz</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#0F6E56;display:inline-block"></span>PolaxEuroGroup</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#185FA5;display:inline-block"></span>Sila_Narzedzi</div>
+    </div>
+  </div>
+  <canvas id="salesChart" style="width:100%;max-height:300px"></canvas>
+  <div style="margin-top:1.25rem;border-top:1px solid #f0ece4;padding-top:1rem">
+    <div style="font-size:11px;font-weight:700;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Сумма за каждый день</div>
+    <div style="overflow-x:auto"><table id="salesTable" style="width:100%;font-size:12px;border-collapse:collapse"></table></div>
+  </div>
+  <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px" id="totalsGrid"></div>
+</div>
+
+<!-- MONTHLY SALES -->
+<div style="background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#1a1a1a">Продажи по месяцам · 2026</div>
+      <div style="font-size:11px;color:#999;margin-top:2px">данные из Allegro · обновляется каждую ночь автоматически</div>
+    </div>
+  </div>
+  <canvas id="monthlyChart" style="width:100%;max-height:320px"></canvas>
+  <div style="margin-top:1.25rem;border-top:1px solid #f0ece4;padding-top:1rem">
+    <div style="font-size:11px;font-weight:700;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Сумма по месяцам</div>
+    <div style="overflow-x:auto"><table id="monthlyTable" style="width:100%;font-size:12px;border-collapse:collapse"></table></div>
+  </div>
+  <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px" id="monthTotalsGrid"></div>
+</div>
+
+<!-- PRICING RULES -->
+<div style="font-size:11px;font-weight:700;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.75rem;padding-left:2px">Правила ценообразования · Allegro</div>
 <div class="legend">
   <div class="li"><div class="dot" style="background:#3B6D11"></div> Дешевле рынка (−zł / −%)</div>
   <div class="li"><div class="dot" style="background:#BA7517"></div> Дороже мин. цены (+20%)</div>
-  <div class="li"><div class="dot" style="background:#BA7517;border:2px dashed #BA7517;background:transparent"></div> Ориентир: самая дешёвая цена на рынке</div>
+  <div class="li"><div class="dot" style="background:transparent;border:2px dashed #aaa"></div> Ориентир: самая дешёвая цена на рынке</div>
 </div>
 
 <div class="stores">
@@ -316,5 +355,85 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 </div>
 
 <div class="footer">POLAX · ALLEGRO PRICING RULES · 2026</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+var SHOPS=['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
+var COLORS=['#BA7517','#0F6E56','#185FA5'];
+var BG=['rgba(186,117,23,0.18)','rgba(15,110,86,0.18)','rgba(24,95,165,0.18)'];
+
+function mkTotals(rows,key,elId){
+  var gS=SHOPS.map(function(s){return rows.reduce(function(sum,r){return sum+(r[s]||0);},0);});
+  var gT=gS.reduce(function(a,b){return a+b;},0);
+  var html=SHOPS.map(function(s,i){
+    return'<div style="background:#f9f7f2;border:1px solid #e5e1d8;border-radius:8px;padding:10px 14px">'
+      +'<div style="font-size:10px;color:'+COLORS[i]+';font-weight:700;margin-bottom:4px">'+s+'</div>'
+      +'<div style="font-size:17px;font-weight:800;color:#1a1a1a">'+gS[i].toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</div>'
+      +'<div style="font-size:10px;color:#aaa;margin-top:2px">всего за период</div></div>';
+  }).join('');
+  html+='<div style="background:#BA7517;border-radius:8px;padding:10px 14px">'
+    +'<div style="font-size:10px;color:rgba(255,255,255,0.8);font-weight:700;margin-bottom:4px">ВСЕ МАГАЗИНЫ</div>'
+    +'<div style="font-size:17px;font-weight:800;color:#fff">'+gT.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px">общая сумма</div></div>';
+  document.getElementById(elId).innerHTML=html;
+}
+
+function mkTable(rows,labelKey,elId,fmt){
+  var th='<thead><tr><th style="text-align:left;padding:6px 10px;color:#999;font-weight:600;border-bottom:1px solid #f0ece4">'+(labelKey==='date'?'Дата':'Месяц')+'</th>'
+    +SHOPS.map(function(s,i){return'<th style="text-align:right;padding:6px 10px;color:'+COLORS[i]+';font-weight:600;border-bottom:1px solid #f0ece4">'+s+'</th>';}).join('')
+    +'<th style="text-align:right;padding:6px 10px;font-weight:700;border-bottom:1px solid #f0ece4">Итого</th></tr></thead>';
+  var tb='<tbody>'+rows.map(function(r,i){
+    var tot=SHOPS.reduce(function(s,k){return s+(r[k]||0);},0);
+    return'<tr style="background:'+(i%2===0?'#fdfaf4':'#fff')+'">'
+      +'<td style="padding:6px 10px;color:#555;font-weight:'+(labelKey==='date'?'500':'600')+'">'+r[labelKey]+'</td>'
+      +SHOPS.map(function(s){return'<td style="text-align:right;padding:6px 10px">'+(fmt?(r[s]||0).toFixed(2):(r[s]||0).toLocaleString())+' zł</td>';}).join('')
+      +'<td style="text-align:right;padding:6px 10px;font-weight:700">'+(fmt?tot.toFixed(2):tot.toLocaleString())+' zł</td></tr>';
+  }).join('')+'</tbody>';
+  document.getElementById(elId).innerHTML=th+tb;
+}
+
+function renderDaily(days){
+  new Chart(document.getElementById('salesChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:days.map(function(d){return d.date;}),
+      datasets:SHOPS.map(function(s,i){return{label:s,data:days.map(function(d){return d[s]||0;}),backgroundColor:BG[i],borderColor:COLORS[i],borderWidth:2,borderRadius:4};})},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toFixed(2)+' zł';}}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999'}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999',callback:function(v){return v+' zł';}}}}}
+  });
+  mkTable(days,'date','salesTable',true);
+  mkTotals(days,'date','totalsGrid');
+}
+
+function renderMonthly(months){
+  var ds=SHOPS.map(function(s,i){
+    return{type:'bar',label:s,data:months.map(function(m){return m[s]||0;}),backgroundColor:BG[i],borderColor:COLORS[i],borderWidth:2,borderRadius:4};
+  });
+  ds.push({type:'line',label:'Все магазины',
+    data:months.map(function(m){return SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);}),
+    borderColor:'#1a1a1a',backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1a1a1a',tension:0.3,order:0});
+  new Chart(document.getElementById('monthlyChart').getContext('2d'),{
+    data:{labels:months.map(function(m){return m.month;}),datasets:ds},
+    options:{responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},color:'#555',boxWidth:12,padding:14}},
+        tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toLocaleString()+' zł';}}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999',callback:function(v){return v.toLocaleString()+' zł';}}}}}
+  });
+  mkTable(months,'month','monthlyTable',false);
+  mkTotals(months,'month','monthTotalsGrid');
+}
+
+fetch('data.json')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.days && d.days.length>0) renderDaily(d.days);
+    if(d.months && d.months.length>0) renderMonthly(d.months);
+  })
+  .catch(function(){
+    document.getElementById('salesChart').closest('div').style.display='none';
+    document.getElementById('monthlyChart').closest('div').style.display='none';
+  });
+</script>
 </body>
 </html>
+
