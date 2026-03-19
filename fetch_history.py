@@ -1,5 +1,5 @@
 import requests, json, os, base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from nacl import encoding, public
 
@@ -68,7 +68,15 @@ def get_access_token(client_id, client_secret, refresh_token):
         return None, None
     return d["access_token"], d.get("refresh_token", refresh_token)
 
+def get_tz_offset(month):
+    return 2 if 3 <= month <= 10 else 1
+
 def get_sales_for_day(access_token, date_key):
+    month = int(date_key[5:7])
+    tz = get_tz_offset(month)
+    tz_str = f"+0{tz}:00"
+    date_from = date_key + f"T00:00:00{tz_str}"
+    date_to   = date_key + f"T23:59:59{tz_str}"
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/vnd.allegro.public.v1+json"
@@ -80,8 +88,9 @@ def get_sales_for_day(access_token, date_key):
             "https://api.allegro.pl/order/checkout-forms",
             headers=headers,
             params={
-                "lineItems.boughtAt.gte": date_key + "T00:00:00Z",
-                "lineItems.boughtAt.lte": date_key + "T23:59:59Z",
+                "status":                 "READY_FOR_PROCESSING",
+                "lineItems.boughtAt.gte": date_from,
+                "lineItems.boughtAt.lte": date_to,
                 "limit": 100, "offset": offset
             }
         )
@@ -96,9 +105,15 @@ def get_sales_for_day(access_token, date_key):
         offset += 100
     return round(total, 2)
 
-# Диапазон с 1 января 2026 до вчера
+# Диапазон с 1 января 2026 до вчера (польское время)
+now_utc = datetime.now(timezone.utc)
+month = now_utc.month
+tz_offset = get_tz_offset(month)
+polish_now = now_utc + timedelta(hours=tz_offset)
+yesterday_polish = polish_now - timedelta(days=1)
+
 start = datetime(2026, 1, 1)
-end   = datetime.utcnow() - timedelta(days=1)
+end   = yesterday_polish.replace(tzinfo=None)
 all_dates = []
 d = start
 while d <= end:
@@ -107,30 +122,29 @@ while d <= end:
 
 print(f"Дат: {len(all_dates)} | Магазины: {list(SHOPS.keys())}")
 
-# GitHub public key для шифрования
+# GitHub key
 gh_key = get_gh_public_key()
 gh_key_id  = gh_key.get("key_id")
 gh_key_val = gh_key.get("key")
 
-# Получаем access_token и сразу сохраняем новый refresh_token
+# Токены + сразу обновляем refresh_token в Secrets
 tokens = {}
 for shop, creds in SHOPS.items():
     print(f"Токен для {shop}...")
     t, new_refresh = get_access_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
     if t:
         tokens[shop] = t
-        # Сохраняем новый refresh_token в GitHub Secrets
         if new_refresh and gh_key_id and gh_key_val:
             ok = update_gh_secret(creds["secret_name"], new_refresh, gh_key_id, gh_key_val)
             print(f"  Токен обновлён в Secrets: {'OK' if ok else 'ОШИБКА'}")
     else:
         print(f"  ОШИБКА — пропускаем")
 
-# Строим структуру дней
+# Структура дней
 days_data = {date: {"date": date, "Mlot_i_Klucz": 0, "PolaxEuroGroup": 0, "Sila_Narzedzi": 0}
              for date in all_dates}
 
-# Заполняем продажи
+# Продажи
 for shop, token in tokens.items():
     print(f"\n=== {shop} ===")
     for date_key in all_dates:
@@ -141,7 +155,6 @@ for shop, token in tokens.items():
 
 days_list = [days_data[d] for d in sorted(days_data.keys())]
 
-# Считаем месяцы
 months_ru = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"]
 monthly = defaultdict(lambda: {"Mlot_i_Klucz": 0, "PolaxEuroGroup": 0, "Sila_Narzedzi": 0})
 month_order = {}
