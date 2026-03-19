@@ -30,6 +30,30 @@ if os.environ.get("CLIENT_ID_MLOT") and os.environ.get("REFRESH_TOKEN_MLOT"):
         "secret_name":   "REFRESH_TOKEN_MLOT"
     }
 
+_rates_cache = {}
+
+def get_rate_to_pln(currency, date_str):
+    if currency == "PLN":
+        return 1.0
+    key = f"{currency}_{date_str}"
+    if key in _rates_cache:
+        return _rates_cache[key]
+    cur = currency.lower()
+    for delta in range(0, 7):
+        try_date = (datetime.strptime(date_str, "%Y-%m-%d") - timedelta(days=delta)).strftime("%Y-%m-%d")
+        try:
+            r = requests.get(
+                f"https://api.nbp.pl/api/exchangerates/rates/a/{cur}/{try_date}/?format=json",
+                timeout=5
+            )
+            if r.status_code == 200:
+                rate = float(r.json()["rates"][0]["mid"])
+                _rates_cache[key] = rate
+                return rate
+        except:
+            pass
+    return 1.0
+
 def get_gh_public_key():
     r = requests.get(
         f"https://api.github.com/repos/{GH_REPO}/actions/secrets/public-key",
@@ -72,62 +96,61 @@ def get_tz_offset(month):
     return 2 if 3 <= month <= 10 else 1
 
 def get_sales_for_day(access_token, date_key):
-    month = int(date_key[5:7])
-    tz = get_tz_offset(month)
-    tz_str = f"+0{tz}:00"
+    month     = int(date_key[5:7])
+    tz        = get_tz_offset(month)
+    tz_str    = f"+0{tz}:00"
     date_from = date_key + f"T00:00:00{tz_str}"
     date_to   = date_key + f"T23:59:59{tz_str}"
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/vnd.allegro.public.v1+json"
     }
-    total = 0.0
+    total_pln = 0.0
     offset = 0
     while True:
         r = requests.get(
-            "https://api.allegro.pl/order/checkout-forms",
+            "https://api.allegro.pl/payments/payment-operations",
             headers=headers,
             params={
-                "status":                 "READY_FOR_PROCESSING",
-                "lineItems.boughtAt.gte": date_from,
-                "lineItems.boughtAt.lte": date_to,
+                "group":          "INCOME",
+                "occurredAt.gte": date_from,
+                "occurredAt.lte": date_to,
                 "limit": 100, "offset": offset
             }
         )
-        orders = r.json().get("checkoutForms", [])
-        for o in orders:
+        ops = r.json().get("paymentOperations", [])
+        for op in ops:
             try:
-                total += float(o["summary"]["totalToPay"]["amount"])
+                amount   = float(op["value"]["amount"])
+                currency = op["value"]["currency"]
+                rate     = get_rate_to_pln(currency, date_key)
+                total_pln += amount * rate
             except:
                 pass
-        if len(orders) < 100:
+        if len(ops) < 100:
             break
         offset += 100
-    return round(total, 2)
+    return round(total_pln, 2)
 
-# Диапазон с 1 января 2026 до вчера (польское время)
-now_utc = datetime.now(timezone.utc)
-month = now_utc.month
-tz_offset = get_tz_offset(month)
+# Диапазон с 1 января 2026 до вчера
+now_utc    = datetime.now(timezone.utc)
+tz_offset  = get_tz_offset(now_utc.month)
 polish_now = now_utc + timedelta(hours=tz_offset)
-yesterday_polish = polish_now - timedelta(days=1)
+yesterday  = (polish_now - timedelta(days=1)).replace(tzinfo=None)
 
 start = datetime(2026, 1, 1)
-end   = yesterday_polish.replace(tzinfo=None)
 all_dates = []
 d = start
-while d <= end:
+while d <= yesterday:
     all_dates.append(d.strftime("%Y-%m-%d"))
     d += timedelta(days=1)
 
 print(f"Дат: {len(all_dates)} | Магазины: {list(SHOPS.keys())}")
 
-# GitHub key
-gh_key = get_gh_public_key()
+gh_key    = get_gh_public_key()
 gh_key_id  = gh_key.get("key_id")
 gh_key_val = gh_key.get("key")
 
-# Токены + сразу обновляем refresh_token в Secrets
 tokens = {}
 for shop, creds in SHOPS.items():
     print(f"Токен для {shop}...")
@@ -136,22 +159,20 @@ for shop, creds in SHOPS.items():
         tokens[shop] = t
         if new_refresh and gh_key_id and gh_key_val:
             ok = update_gh_secret(creds["secret_name"], new_refresh, gh_key_id, gh_key_val)
-            print(f"  Токен обновлён в Secrets: {'OK' if ok else 'ОШИБКА'}")
+            print(f"  Токен обновлён: {'OK' if ok else 'ОШИБКА'}")
     else:
         print(f"  ОШИБКА — пропускаем")
 
-# Структура дней
 days_data = {date: {"date": date, "Mlot_i_Klucz": 0, "PolaxEuroGroup": 0, "Sila_Narzedzi": 0}
              for date in all_dates}
 
-# Продажи
 for shop, token in tokens.items():
     print(f"\n=== {shop} ===")
     for date_key in all_dates:
         sales = get_sales_for_day(token, date_key)
         days_data[date_key][shop] = sales
         if sales > 0:
-            print(f"  {date_key}: {sales} zł")
+            print(f"  {date_key}: {sales:.2f} PLN")
 
 days_list = [days_data[d] for d in sorted(days_data.keys())]
 
@@ -176,4 +197,4 @@ with open("data.json", "w") as f:
 print(f"\nГотово! Дней: {len(days_list)} | Месяцев: {len(months_list)}")
 for m in months_list:
     total = sum(m[s] for s in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"])
-    print(f"  {m['month']}: {total:.2f} zł")
+    print(f"  {m['month']}: {total:.2f} PLN")
