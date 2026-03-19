@@ -2,19 +2,19 @@
   "days": [
     {
       "date": "2026-01-01",
-      "Mlot_i_Klucz": 62.72,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 199.09,
-      "Sila_Narzedzi": 81.87,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 326.39,
-        "allegro-cz": 17.29,
+        "allegro-pl": 199.09,
+        "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 50.47,
-        "delivery": 3.09,
-        "ads": 187.88,
+        "commission": 29.42,
+        "delivery": 0.0,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -22,19 +22,19 @@
     },
     {
       "date": "2026-01-02",
-      "Mlot_i_Klucz": 284.88,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 255.79,
-      "Sila_Narzedzi": 156.87,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 675.58,
-        "allegro-cz": 21.96,
+        "allegro-pl": 255.79,
+        "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 146.32,
+        "commission": 63.67,
         "delivery": 0.0,
-        "ads": 10.71,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -42,19 +42,19 @@
     },
     {
       "date": "2026-01-03",
-      "Mlot_i_Klucz": 378.45,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 0.0,
-      "Sila_Narzedzi": 54.9,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 398.32,
-        "allegro-cz": 35.03,
+        "allegro-pl": 0.0,
+        "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 87.98,
-        "delivery": 1.89,
-        "ads": 1.84,
+        "commission": 0.0,
+        "delivery": 0.0,
+        "ads": 0.0,
         "subscription": 199.0,
         "discount": 0.0,
         "other": 0.0
@@ -62,19 +62,19 @@
     },
     {
       "date": "2026-01-04",
-      "Mlot_i_Klucz": 502.37,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 354.24,
-      "Sila_Narzedzi": 84.9,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 643.89,
+        "allegro-pl": 56.62,
         "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 297.62
       },
       "costs": {
-        "commission": 101.66,
+        "commission": 9.14,
         "delivery": 0.0,
-        "ads": 93.42,
+        "ads": 89.7,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -82,19 +82,19 @@
     },
     {
       "date": "2026-01-05",
-      "Mlot_i_Klucz": 953.13,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 214.84,
-      "Sila_Narzedzi": 118.63,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 1213.99,
-        "allegro-cz": 20.9,
+        "allegro-pl": 214.84,
+        "allegro-cz": 0.0,
         "allegro-hu": 0.0,
-        "allegro-sk": 51.71
+        "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 228.98,
-        "delivery": 29.96,
-        "ads": 48.72,
+        "commission": 42.87,
+        "delivery": 0.0,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -102,19 +102,19 @@
     },
     {
       "date": "2026-01-06",
-      "Mlot_i_Klucz": 408.01,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 0.0,
-      "Sila_Narzedzi": 159.11,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 548.31,
-        "allegro-cz": 18.81,
+        "allegro-pl": 0.0,
+        "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 114.1,
-        "delivery": 9.98,
-        "ads": 78.37,
+        "commission": 0.0,
+        "delivery": 0.0,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -122,19 +122,19 @@
     },
     {
       "date": "2026-01-07",
-      "Mlot_i_Klucz": 949.95,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 119.94,
-      "Sila_Narzedzi": 573.61,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 1582.85,
-        "allegro-cz": 16.34,
-        "allegro-hu": 44.31,
+        "allegro-pl": 119.94,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 304.33,
-        "delivery": 55.0,
-        "ads": 61.87,
+        "commission": 12.64,
+        "delivery": 24.15,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -142,19 +142,19 @@
     },
     {
       "date": "2026-01-08",
-      "Mlot_i_Klucz": 1073.98,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 198.82,
-      "Sila_Narzedzi": 922.09,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 2003.13,
+        "allegro-pl": 107.39,
         "allegro-cz": 91.43,
         "allegro-hu": 0.0,
-        "allegro-sk": 100.33
+        "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 352.12,
-        "delivery": 66.17,
-        "ads": 77.27,
+        "commission": 26.07,
+        "delivery": 5.39,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 9.99
@@ -162,19 +162,19 @@
     },
     {
       "date": "2026-01-09",
-      "Mlot_i_Klucz": 104.01,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 556.78,
-      "Sila_Narzedzi": 880.79,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 1504.8,
+        "allegro-pl": 520.0,
         "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 36.78
       },
       "costs": {
-        "commission": 415.26,
-        "delivery": 94.22,
-        "ads": 83.94,
+        "commission": 75.39,
+        "delivery": 8.08,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -182,19 +182,19 @@
     },
     {
       "date": "2026-01-10",
-      "Mlot_i_Klucz": 400.81,
-      "PolaxEuroGroup": 297.41,
-      "Sila_Narzedzi": 390.68,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 377.81,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 991.39,
-        "allegro-cz": 97.51,
+        "allegro-pl": 281.82,
+        "allegro-cz": 15.59,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 166.18,
-        "delivery": 9.27,
-        "ads": 134.9,
+        "commission": 52.35,
+        "delivery": 0.0,
+        "ads": 70.01,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -202,19 +202,19 @@
     },
     {
       "date": "2026-01-11",
-      "Mlot_i_Klucz": 226.95,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 683.47,
-      "Sila_Narzedzi": 1118.72,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 1959.34,
-        "allegro-cz": 69.8,
+        "allegro-pl": 683.47,
+        "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 301.16,
+        "commission": 96.04,
         "delivery": 0.0,
-        "ads": 477.21,
+        "ads": 153.04,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 0.0
@@ -222,259 +222,259 @@
     },
     {
       "date": "2026-01-12",
-      "Mlot_i_Klucz": 1759.53,
-      "PolaxEuroGroup": 2277.18,
-      "Sila_Narzedzi": 2095.33,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 2466.3,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 6132.04,
+        "allegro-pl": 2277.18,
         "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 888.52,
+        "commission": 378.08,
         "delivery": 0.0,
-        "ads": 337.03,
+        "ads": 244.08,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 8.59
+        "other": 0.0
       }
     },
     {
       "date": "2026-01-13",
-      "Mlot_i_Klucz": 598.45,
-      "PolaxEuroGroup": 1033.09,
-      "Sila_Narzedzi": 2717.79,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1126.0,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 4254.08,
-        "allegro-cz": 95.25,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 677.7,
-        "delivery": 393.33,
-        "ads": 348.46,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 51.71
-      }
-    },
-    {
-      "date": "2026-01-14",
-      "Mlot_i_Klucz": 203.5,
-      "PolaxEuroGroup": 1369.99,
-      "Sila_Narzedzi": 1534.01,
-      "countries": {
-        "allegro-pl": 3025.34,
-        "allegro-cz": 26.78,
-        "allegro-hu": 55.38,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 605.22,
-        "delivery": 358.25,
-        "ads": 620.36,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 40.64
-      }
-    },
-    {
-      "date": "2026-01-15",
-      "Mlot_i_Klucz": 569.21,
-      "PolaxEuroGroup": 1604.62,
-      "Sila_Narzedzi": 1922.48,
-      "countries": {
-        "allegro-pl": 4096.31,
+        "allegro-pl": 1033.09,
         "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 690.31,
-        "delivery": 223.96,
-        "ads": 533.59,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 42.35
-      }
-    },
-    {
-      "date": "2026-01-16",
-      "Mlot_i_Klucz": 658.36,
-      "PolaxEuroGroup": 1199.05,
-      "Sila_Narzedzi": 3653.82,
-      "countries": {
-        "allegro-pl": 5407.7,
-        "allegro-cz": 103.53,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 795.05,
-        "delivery": 216.14,
-        "ads": 558.2,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 47.34
-      }
-    },
-    {
-      "date": "2026-01-17",
-      "Mlot_i_Klucz": 634.04,
-      "PolaxEuroGroup": 830.69,
-      "Sila_Narzedzi": 625.44,
-      "countries": {
-        "allegro-pl": 1901.91,
-        "allegro-cz": 42.04,
-        "allegro-hu": 146.22,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 337.55,
-        "delivery": 145.3,
-        "ads": 620.47,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 23.76
-      }
-    },
-    {
-      "date": "2026-01-18",
-      "Mlot_i_Klucz": 239.88,
-      "PolaxEuroGroup": 630.25,
-      "Sila_Narzedzi": 2072.75,
-      "countries": {
-        "allegro-pl": 2835.19,
-        "allegro-cz": 107.69,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 472.36,
-        "delivery": 66.19,
-        "ads": 579.58,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 1.89
-      }
-    },
-    {
-      "date": "2026-01-19",
-      "Mlot_i_Klucz": 770.14,
-      "PolaxEuroGroup": 1268.14,
-      "Sila_Narzedzi": 4087.69,
-      "countries": {
-        "allegro-pl": 5990.06,
-        "allegro-cz": 135.91,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 1076.83,
-        "delivery": 146.86,
-        "ads": 503.46,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 27.17
-      }
-    },
-    {
-      "date": "2026-01-20",
-      "Mlot_i_Klucz": 696.6,
-      "PolaxEuroGroup": 2099.9,
-      "Sila_Narzedzi": 1707.11,
-      "countries": {
-        "allegro-pl": 4480.13,
-        "allegro-cz": 23.48,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 719.72,
-        "delivery": 227.26,
-        "ads": 529.22,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 75.37
-      }
-    },
-    {
-      "date": "2026-01-21",
-      "Mlot_i_Klucz": 825.45,
-      "PolaxEuroGroup": 2475.9,
-      "Sila_Narzedzi": 2398.17,
-      "countries": {
-        "allegro-pl": 5535.64,
-        "allegro-cz": 74.82,
-        "allegro-hu": 0.0,
-        "allegro-sk": 89.06
-      },
-      "costs": {
-        "commission": 965.42,
-        "delivery": 397.61,
-        "ads": 1012.92,
+        "commission": 168.2,
+        "delivery": 74.18,
+        "ads": 249.63,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 28.46
       }
     },
     {
-      "date": "2026-01-22",
-      "Mlot_i_Klucz": 769.55,
-      "PolaxEuroGroup": 1454.11,
-      "Sila_Narzedzi": 2344.45,
+      "date": "2026-01-14",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1426.99,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 4196.57,
-        "allegro-cz": 213.9,
+        "allegro-pl": 1343.21,
+        "allegro-cz": 26.78,
         "allegro-hu": 0.0,
-        "allegro-sk": 157.64
+        "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 676.19,
-        "delivery": 340.48,
-        "ads": 692.33,
+        "commission": 259.47,
+        "delivery": 119.17,
+        "ads": 496.54,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 88.79
+        "other": 3.78
+      }
+    },
+    {
+      "date": "2026-01-15",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1677.2,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 1604.62,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 232.53,
+        "delivery": 64.02,
+        "ads": 394.76,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 31.87
+      }
+    },
+    {
+      "date": "2026-01-16",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1336.25,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 1199.05,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 188.53,
+        "delivery": 57.58,
+        "ads": 382.26,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 36.85
+      }
+    },
+    {
+      "date": "2026-01-17",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1043.09,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 830.69,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 165.74,
+        "delivery": 48.3,
+        "ads": 447.71,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 14.08
+      }
+    },
+    {
+      "date": "2026-01-18",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 630.25,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 630.25,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 88.4,
+        "delivery": 29.05,
+        "ads": 392.75,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-01-19",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1517.84,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 1268.14,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 272.53,
+        "delivery": 75.1,
+        "ads": 362.7,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-01-20",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 2569.88,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 2099.9,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 331.62,
+        "delivery": 101.38,
+        "ads": 396.3,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 18.17
+      }
+    },
+    {
+      "date": "2026-01-21",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 2750.86,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 2475.9,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 384.47,
+        "delivery": 85.66,
+        "ads": 560.17,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 16.28
+      }
+    },
+    {
+      "date": "2026-01-22",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1604.8,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 1366.3,
+        "allegro-cz": 87.81,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 153.15,
+        "delivery": 202.16,
+        "ads": 474.51,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 51.53
       }
     },
     {
       "date": "2026-01-23",
-      "Mlot_i_Klucz": 784.04,
-      "PolaxEuroGroup": 1382.28,
-      "Sila_Narzedzi": 1970.02,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1428.28,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 4022.76,
-        "allegro-cz": 71.92,
+        "allegro-pl": 1340.62,
+        "allegro-cz": 0.0,
         "allegro-hu": 41.66,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 655.2,
-        "delivery": 294.65,
-        "ads": 710.03,
+        "commission": 205.46,
+        "delivery": 89.51,
+        "ads": 506.06,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 30.14
+        "other": 20.97
       }
     },
     {
       "date": "2026-01-24",
-      "Mlot_i_Klucz": 231.29,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 531.3,
-      "Sila_Narzedzi": 1028.55,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 1577.65,
-        "allegro-cz": 154.41,
-        "allegro-hu": 59.08,
+        "allegro-pl": 531.3,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 240.82,
-        "delivery": 179.91,
-        "ads": 715.24,
+        "commission": 66.05,
+        "delivery": 54.21,
+        "ads": 543.71,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 3.59
@@ -482,19 +482,19 @@
     },
     {
       "date": "2026-01-25",
-      "Mlot_i_Klucz": 404.85,
+      "Mlot_i_Klucz": 0,
       "PolaxEuroGroup": 1498.33,
-      "Sila_Narzedzi": 1438.8,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 3290.16,
-        "allegro-cz": 51.82,
+        "allegro-pl": 1498.33,
+        "allegro-cz": 0.0,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 534.6,
-        "delivery": 14.95,
-        "ads": 555.24,
+        "commission": 210.73,
+        "delivery": 0.0,
+        "ads": 376.68,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 1.89
@@ -502,1104 +502,724 @@
     },
     {
       "date": "2026-01-26",
-      "Mlot_i_Klucz": 2261.15,
-      "PolaxEuroGroup": 1477.72,
-      "Sila_Narzedzi": 3572.57,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1578.98,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 5708.23,
-        "allegro-cz": 131.14,
-        "allegro-hu": 1435.09,
-        "allegro-sk": 36.98
+        "allegro-pl": 1457.05,
+        "allegro-cz": 20.67,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 1005.01,
-        "delivery": 67.19,
-        "ads": 539.14,
+        "commission": 245.65,
+        "delivery": 13.77,
+        "ads": 365.67,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 18.17
+        "other": 0.0
       }
     },
     {
       "date": "2026-01-27",
-      "Mlot_i_Klucz": 413.34,
-      "PolaxEuroGroup": 1367.53,
-      "Sila_Narzedzi": 3265.29,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1572.17,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 4899.03,
-        "allegro-cz": 147.13,
+        "allegro-pl": 1345.84,
+        "allegro-cz": 21.69,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 874.74,
-        "delivery": 408.14,
-        "ads": 578.23,
+        "commission": 229.11,
+        "delivery": 77.04,
+        "ads": 417.21,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 64.49
+        "other": 21.67
       }
     },
     {
       "date": "2026-01-28",
-      "Mlot_i_Klucz": 548.4,
-      "PolaxEuroGroup": 1887.8,
-      "Sila_Narzedzi": 4000.01,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1972.3,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 6371.82,
-        "allegro-cz": 64.39,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 1098.62,
-        "delivery": 323.95,
-        "ads": 775.99,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 67.69
-      }
-    },
-    {
-      "date": "2026-01-29",
-      "Mlot_i_Klucz": 884.51,
-      "PolaxEuroGroup": 1203.51,
-      "Sila_Narzedzi": 2593.94,
-      "countries": {
-        "allegro-pl": 4533.09,
-        "allegro-cz": 148.87,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 854.47,
-        "delivery": 292.25,
-        "ads": 779.9,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 52.61
-      }
-    },
-    {
-      "date": "2026-01-30",
-      "Mlot_i_Klucz": 1033.46,
-      "PolaxEuroGroup": 1156.01,
-      "Sila_Narzedzi": 2128.3,
-      "countries": {
-        "allegro-pl": 4138.83,
-        "allegro-cz": 21.29,
-        "allegro-hu": 0.0,
-        "allegro-sk": 157.65
-      },
-      "costs": {
-        "commission": 808.35,
-        "delivery": 327.8,
-        "ads": 831.83,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 31.76
-      }
-    },
-    {
-      "date": "2026-01-31",
-      "Mlot_i_Klucz": 780.47,
-      "PolaxEuroGroup": 913.68,
-      "Sila_Narzedzi": 990.19,
-      "countries": {
-        "allegro-pl": 2471.19,
-        "allegro-cz": 63.7,
-        "allegro-hu": 44.96,
-        "allegro-sk": 104.49
-      },
-      "costs": {
-        "commission": 439.69,
-        "delivery": 254.19,
-        "ads": 1029.95,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 22.87
-      }
-    },
-    {
-      "date": "2026-02-01",
-      "Mlot_i_Klucz": 1180.18,
-      "PolaxEuroGroup": 811.81,
-      "Sila_Narzedzi": 1672.25,
-      "countries": {
-        "allegro-pl": 3164.26,
-        "allegro-cz": 137.97,
-        "allegro-hu": 334.08,
-        "allegro-sk": 27.93
-      },
-      "costs": {
-        "commission": 592.96,
-        "delivery": 30.9,
-        "ads": 667.85,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 1.89
-      }
-    },
-    {
-      "date": "2026-02-02",
-      "Mlot_i_Klucz": 1874.69,
-      "PolaxEuroGroup": 907.65,
-      "Sila_Narzedzi": 2663.27,
-      "countries": {
-        "allegro-pl": 5246.31,
-        "allegro-cz": 199.3,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 932.3,
-        "delivery": 66.1,
-        "ads": 527.1,
-        "subscription": 199.0,
-        "discount": 0.0,
-        "other": 21.37
-      }
-    },
-    {
-      "date": "2026-02-03",
-      "Mlot_i_Klucz": 1915.7,
-      "PolaxEuroGroup": 485.07,
-      "Sila_Narzedzi": 2410.16,
-      "countries": {
-        "allegro-pl": 4364.37,
-        "allegro-cz": 210.18,
-        "allegro-hu": 84.3,
-        "allegro-sk": 152.08
-      },
-      "costs": {
-        "commission": 989.8,
-        "delivery": 385.61,
-        "ads": 572.73,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 63.88
-      }
-    },
-    {
-      "date": "2026-02-04",
-      "Mlot_i_Klucz": 1730.61,
-      "PolaxEuroGroup": 371.93,
-      "Sila_Narzedzi": 1574.68,
-      "countries": {
-        "allegro-pl": 3590.99,
+        "allegro-pl": 1887.8,
         "allegro-cz": 0.0,
-        "allegro-hu": 41.75,
-        "allegro-sk": 44.48
-      },
-      "costs": {
-        "commission": 884.85,
-        "delivery": 361.28,
-        "ads": 271.16,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 49.92
-      }
-    },
-    {
-      "date": "2026-02-05",
-      "Mlot_i_Klucz": 2109.95,
-      "PolaxEuroGroup": 893.34,
-      "Sila_Narzedzi": 2079.81,
-      "countries": {
-        "allegro-pl": 4993.45,
-        "allegro-cz": 89.65,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 894.54,
-        "delivery": 327.78,
-        "ads": 324.17,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 56.03
-      }
-    },
-    {
-      "date": "2026-02-06",
-      "Mlot_i_Klucz": 927.49,
-      "PolaxEuroGroup": 757.9,
-      "Sila_Narzedzi": 1758.77,
-      "countries": {
-        "allegro-pl": 3260.44,
-        "allegro-cz": 93.26,
-        "allegro-hu": 90.46,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 631.31,
-        "delivery": 256.79,
-        "ads": 393.97,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 59.72
-      }
-    },
-    {
-      "date": "2026-02-07",
-      "Mlot_i_Klucz": 1035.57,
-      "PolaxEuroGroup": 403.8,
-      "Sila_Narzedzi": 1015.91,
-      "countries": {
-        "allegro-pl": 2133.96,
-        "allegro-cz": 149.3,
-        "allegro-hu": 172.02,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 317.19,
-        "delivery": 151.29,
-        "ads": 321.38,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 16.38
-      }
-    },
-    {
-      "date": "2026-02-08",
-      "Mlot_i_Klucz": 1012.14,
-      "PolaxEuroGroup": 937.28,
-      "Sila_Narzedzi": 2105.93,
-      "countries": {
-        "allegro-pl": 3763.2,
-        "allegro-cz": 235.42,
-        "allegro-hu": 56.73,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 602.81,
-        "delivery": 45.91,
-        "ads": 433.52,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 1.89
-      }
-    },
-    {
-      "date": "2026-02-09",
-      "Mlot_i_Klucz": 1507.41,
-      "PolaxEuroGroup": 819.35,
-      "Sila_Narzedzi": 1656.78,
-      "countries": {
-        "allegro-pl": 3854.68,
-        "allegro-cz": 88.92,
-        "allegro-hu": 39.94,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 841.39,
-        "delivery": 79.25,
-        "ads": 335.0,
+        "commission": 295.65,
+        "delivery": 81.23,
+        "ads": 549.41,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 7.28
       }
     },
     {
-      "date": "2026-02-10",
-      "Mlot_i_Klucz": 1735.52,
-      "PolaxEuroGroup": 652.64,
-      "Sila_Narzedzi": 1550.39,
+      "date": "2026-01-29",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1501.57,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 3766.66,
-        "allegro-cz": 171.89,
+        "allegro-pl": 1135.48,
+        "allegro-cz": 68.03,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 739.33,
-        "delivery": 581.81,
-        "ads": 486.34,
+        "commission": 222.45,
+        "delivery": 95.43,
+        "ads": 482.72,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 61.48
+        "other": 13.17
       }
     },
     {
-      "date": "2026-02-11",
-      "Mlot_i_Klucz": 2852.22,
-      "PolaxEuroGroup": 1414.41,
-      "Sila_Narzedzi": 2760.86,
+      "date": "2026-01-30",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1314.42,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 7003.84,
-        "allegro-cz": 23.65,
-        "allegro-hu": 0.0,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 1292.23,
-        "delivery": 294.69,
-        "ads": 384.14,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 21.84
-      }
-    },
-    {
-      "date": "2026-02-12",
-      "Mlot_i_Klucz": 1248.05,
-      "PolaxEuroGroup": 1503.51,
-      "Sila_Narzedzi": 2026.56,
-      "countries": {
-        "allegro-pl": 4753.64,
+        "allegro-pl": 1156.01,
         "allegro-cz": 0.0,
         "allegro-hu": 0.0,
-        "allegro-sk": 24.48
-      },
-      "costs": {
-        "commission": 1144.49,
-        "delivery": 443.47,
-        "ads": 403.84,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 49.24
-      }
-    },
-    {
-      "date": "2026-02-13",
-      "Mlot_i_Klucz": 1249.5,
-      "PolaxEuroGroup": 360.75,
-      "Sila_Narzedzi": 1588.02,
-      "countries": {
-        "allegro-pl": 2957.42,
-        "allegro-cz": 169.36,
-        "allegro-hu": 48.44,
-        "allegro-sk": 23.05
-      },
-      "costs": {
-        "commission": 566.11,
-        "delivery": 375.72,
-        "ads": 528.43,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 32.33
-      }
-    },
-    {
-      "date": "2026-02-14",
-      "Mlot_i_Klucz": 647.39,
-      "PolaxEuroGroup": 597.07,
-      "Sila_Narzedzi": 945.0,
-      "countries": {
-        "allegro-pl": 1694.14,
-        "allegro-cz": 477.5,
-        "allegro-hu": 17.82,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 287.56,
-        "delivery": 231.78,
-        "ads": 431.51,
+        "commission": 198.93,
+        "delivery": 95.47,
+        "ads": 529.06,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 12.38
+        "other": 0.0
       }
     },
     {
-      "date": "2026-02-15",
-      "Mlot_i_Klucz": 1550.52,
-      "PolaxEuroGroup": 504.85,
-      "Sila_Narzedzi": 1490.35,
+      "date": "2026-01-31",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 913.68,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 2952.24,
-        "allegro-cz": 245.27,
-        "allegro-hu": 113.24,
-        "allegro-sk": 234.97
-      },
-      "costs": {
-        "commission": 467.53,
-        "delivery": 36.66,
-        "ads": 325.33,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 14.08
-      }
-    },
-    {
-      "date": "2026-02-16",
-      "Mlot_i_Klucz": 2144.71,
-      "PolaxEuroGroup": 746.42,
-      "Sila_Narzedzi": 2744.36,
-      "countries": {
-        "allegro-pl": 5004.05,
-        "allegro-cz": 337.46,
-        "allegro-hu": 99.23,
-        "allegro-sk": 194.75
-      },
-      "costs": {
-        "commission": 818.03,
-        "delivery": 94.44,
-        "ads": 260.41,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 8.59
-      }
-    },
-    {
-      "date": "2026-02-17",
-      "Mlot_i_Klucz": 1219.69,
-      "PolaxEuroGroup": 1045.61,
-      "Sila_Narzedzi": 2358.6,
-      "countries": {
-        "allegro-pl": 4571.34,
+        "allegro-pl": 854.57,
         "allegro-cz": 0.0,
         "allegro-hu": 0.0,
-        "allegro-sk": 52.56
+        "allegro-sk": 59.11
       },
       "costs": {
-        "commission": 753.72,
-        "delivery": 313.92,
-        "ads": 211.19,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 30.15
-      }
-    },
-    {
-      "date": "2026-02-18",
-      "Mlot_i_Klucz": 1398.03,
-      "PolaxEuroGroup": 146.92,
-      "Sila_Narzedzi": 1842.04,
-      "countries": {
-        "allegro-pl": 3178.31,
-        "allegro-cz": 177.87,
-        "allegro-hu": 0.0,
-        "allegro-sk": 30.81
-      },
-      "costs": {
-        "commission": 616.65,
-        "delivery": 266.73,
-        "ads": 328.16,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 12.38
-      }
-    },
-    {
-      "date": "2026-02-19",
-      "Mlot_i_Klucz": 2956.54,
-      "PolaxEuroGroup": 757.03,
-      "Sila_Narzedzi": 2257.89,
-      "countries": {
-        "allegro-pl": 5824.28,
-        "allegro-cz": 45.81,
-        "allegro-hu": 0.0,
-        "allegro-sk": 101.37
-      },
-      "costs": {
-        "commission": 1163.15,
-        "delivery": 187.27,
-        "ads": 319.04,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 17.67
-      }
-    },
-    {
-      "date": "2026-02-20",
-      "Mlot_i_Klucz": 1411.56,
-      "PolaxEuroGroup": 979.39,
-      "Sila_Narzedzi": 1383.78,
-      "countries": {
-        "allegro-pl": 3086.19,
-        "allegro-cz": 151.21,
-        "allegro-hu": 73.65,
-        "allegro-sk": 463.68
-      },
-      "costs": {
-        "commission": 524.76,
-        "delivery": 500.6,
-        "ads": 491.61,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 40.62
-      }
-    },
-    {
-      "date": "2026-02-21",
-      "Mlot_i_Klucz": 645.32,
-      "PolaxEuroGroup": 419.33,
-      "Sila_Narzedzi": 1220.9,
-      "countries": {
-        "allegro-pl": 2006.75,
-        "allegro-cz": 177.34,
-        "allegro-hu": 0.0,
-        "allegro-sk": 101.46
-      },
-      "costs": {
-        "commission": 348.59,
-        "delivery": 228.11,
-        "ads": 388.13,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 3.59
-      }
-    },
-    {
-      "date": "2026-02-22",
-      "Mlot_i_Klucz": 2164.47,
-      "PolaxEuroGroup": 817.12,
-      "Sila_Narzedzi": 1722.48,
-      "countries": {
-        "allegro-pl": 4458.17,
-        "allegro-cz": 95.12,
-        "allegro-hu": 92.53,
-        "allegro-sk": 58.25
-      },
-      "costs": {
-        "commission": 800.76,
-        "delivery": 45.72,
-        "ads": 329.64,
+        "commission": 147.6,
+        "delivery": 104.5,
+        "ads": 484.07,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 10.49
       }
     },
     {
-      "date": "2026-02-23",
-      "Mlot_i_Klucz": 1522.41,
-      "PolaxEuroGroup": 1261.51,
-      "Sila_Narzedzi": 1389.08,
+      "date": "2026-02-01",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 811.8,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 3616.92,
-        "allegro-cz": 176.02,
-        "allegro-hu": 309.0,
-        "allegro-sk": 71.06
+        "allegro-pl": 438.06,
+        "allegro-cz": 77.9,
+        "allegro-hu": 295.85,
+        "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 798.1,
-        "delivery": 114.28,
-        "ads": 351.58,
+        "commission": 69.51,
+        "delivery": 8.07,
+        "ads": 421.25,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 24.47
+        "other": 0.0
       }
     },
     {
-      "date": "2026-02-24",
-      "Mlot_i_Klucz": 2214.87,
-      "PolaxEuroGroup": 1550.34,
-      "Sila_Narzedzi": 1384.0,
+      "date": "2026-02-02",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 907.65,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 4729.57,
-        "allegro-cz": 177.93,
-        "allegro-hu": 94.92,
-        "allegro-sk": 146.79
-      },
-      "costs": {
-        "commission": 873.56,
-        "delivery": 455.59,
-        "ads": 272.81,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 65.2
-      }
-    },
-    {
-      "date": "2026-02-25",
-      "Mlot_i_Klucz": 2259.3,
-      "PolaxEuroGroup": 337.35,
-      "Sila_Narzedzi": 3057.35,
-      "countries": {
-        "allegro-pl": 5271.74,
-        "allegro-cz": 308.51,
-        "allegro-hu": 17.14,
-        "allegro-sk": 56.61
-      },
-      "costs": {
-        "commission": 952.59,
-        "delivery": 341.48,
-        "ads": 426.29,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 58.72
-      }
-    },
-    {
-      "date": "2026-02-26",
-      "Mlot_i_Klucz": 1396.89,
-      "PolaxEuroGroup": 1626.13,
-      "Sila_Narzedzi": 2389.61,
-      "countries": {
-        "allegro-pl": 5119.2,
-        "allegro-cz": 181.52,
-        "allegro-hu": 15.81,
-        "allegro-sk": 96.1
-      },
-      "costs": {
-        "commission": 1156.29,
-        "delivery": 297.4,
-        "ads": 425.6,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 26.36
-      }
-    },
-    {
-      "date": "2026-02-27",
-      "Mlot_i_Klucz": 1322.52,
-      "PolaxEuroGroup": 523.84,
-      "Sila_Narzedzi": 1429.6,
-      "countries": {
-        "allegro-pl": 2843.16,
-        "allegro-cz": 44.77,
-        "allegro-hu": 69.97,
-        "allegro-sk": 318.06
-      },
-      "costs": {
-        "commission": 466.12,
-        "delivery": 362.11,
-        "ads": 382.93,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 26.37
-      }
-    },
-    {
-      "date": "2026-02-28",
-      "Mlot_i_Klucz": 543.14,
-      "PolaxEuroGroup": 99.87,
-      "Sila_Narzedzi": 1348.09,
-      "countries": {
-        "allegro-pl": 1753.84,
-        "allegro-cz": 237.26,
+        "allegro-pl": 735.56,
+        "allegro-cz": 172.09,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 319.87,
-        "delivery": 135.06,
-        "ads": 401.79,
-        "subscription": 0.0,
+        "commission": 90.29,
+        "delivery": 8.88,
+        "ads": 314.98,
+        "subscription": 199.0,
         "discount": 0.0,
-        "other": 28.35
+        "other": 1.89
       }
     },
     {
-      "date": "2026-03-01",
-      "Mlot_i_Klucz": 1316.41,
-      "PolaxEuroGroup": 1068.22,
-      "Sila_Narzedzi": 1668.33,
+      "date": "2026-02-03",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1595.07,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 3610.53,
-        "allegro-cz": 380.79,
-        "allegro-hu": 27.43,
-        "allegro-sk": 34.21
+        "allegro-pl": 185.76,
+        "allegro-cz": 139.31,
+        "allegro-hu": 84.3,
+        "allegro-sk": 75.7
       },
       "costs": {
-        "commission": 581.66,
-        "delivery": 27.74,
-        "ads": 348.94,
+        "commission": 262.67,
+        "delivery": 48.59,
+        "ads": 356.15,
         "subscription": 0.0,
         "discount": 0.0,
         "other": 1.89
       }
     },
     {
-      "date": "2026-03-02",
-      "Mlot_i_Klucz": 1215.15,
-      "PolaxEuroGroup": 1488.42,
-      "Sila_Narzedzi": 1901.02,
+      "date": "2026-02-04",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 498.87,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 4286.5,
-        "allegro-cz": 154.34,
-        "allegro-hu": 25.71,
-        "allegro-sk": 138.04
+        "allegro-pl": 285.7,
+        "allegro-cz": 0.0,
+        "allegro-hu": 41.75,
+        "allegro-sk": 44.48
       },
       "costs": {
-        "commission": 772.01,
-        "delivery": 93.74,
-        "ads": 392.73,
+        "commission": 70.47,
+        "delivery": 59.89,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 26.65
+        "other": 0.0
       }
     },
     {
-      "date": "2026-03-03",
-      "Mlot_i_Klucz": 1763.54,
-      "PolaxEuroGroup": 643.73,
-      "Sila_Narzedzi": 3767.79,
+      "date": "2026-02-05",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1663.06,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 5969.7,
-        "allegro-cz": 145.31,
-        "allegro-hu": 60.05,
-        "allegro-sk": 0.0
-      },
-      "costs": {
-        "commission": 1590.51,
-        "delivery": 170.21,
-        "ads": 191.9,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 16.28
-      }
-    },
-    {
-      "date": "2026-03-04",
-      "Mlot_i_Klucz": 2069.8,
-      "PolaxEuroGroup": 908.31,
-      "Sila_Narzedzi": 2588.16,
-      "countries": {
-        "allegro-pl": 5350.19,
-        "allegro-cz": 216.08,
+        "allegro-pl": 803.69,
+        "allegro-cz": 89.65,
         "allegro-hu": 0.0,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 928.74,
-        "delivery": 424.36,
-        "ads": 355.88,
-        "subscription": 199.0,
-        "discount": 0.0,
-        "other": 60.29
-      }
-    },
-    {
-      "date": "2026-03-05",
-      "Mlot_i_Klucz": 1756.7,
-      "PolaxEuroGroup": 944.56,
-      "Sila_Narzedzi": 2448.5,
-      "countries": {
-        "allegro-pl": 4382.69,
-        "allegro-cz": 261.4,
-        "allegro-hu": 117.51,
-        "allegro-sk": 388.16
-      },
-      "costs": {
-        "commission": 780.68,
-        "delivery": 416.63,
-        "ads": 427.71,
+        "commission": 182.15,
+        "delivery": 27.44,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 50.03
+        "other": 31.47
       }
     },
     {
-      "date": "2026-03-06",
-      "Mlot_i_Klucz": 1654.11,
-      "PolaxEuroGroup": 253.64,
-      "Sila_Narzedzi": 2334.61,
+      "date": "2026-02-06",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 852.13,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 4150.26,
-        "allegro-cz": 75.42,
+        "allegro-pl": 684.65,
+        "allegro-cz": 73.25,
         "allegro-hu": 0.0,
-        "allegro-sk": 16.68
-      },
-      "costs": {
-        "commission": 717.07,
-        "delivery": 321.08,
-        "ads": 393.74,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 50.23
-      }
-    },
-    {
-      "date": "2026-03-07",
-      "Mlot_i_Klucz": 706.9,
-      "PolaxEuroGroup": 372.63,
-      "Sila_Narzedzi": 1244.31,
-      "countries": {
-        "allegro-pl": 2176.41,
-        "allegro-cz": 73.14,
-        "allegro-hu": 74.29,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 349.1,
-        "delivery": 187.36,
-        "ads": 360.13,
+        "commission": 117.8,
+        "delivery": 23.65,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 16.68
+        "other": 0.0
       }
     },
     {
-      "date": "2026-03-08",
-      "Mlot_i_Klucz": 1453.78,
-      "PolaxEuroGroup": 491.04,
-      "Sila_Narzedzi": 2517.74,
+      "date": "2026-02-07",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 403.8,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 3969.99,
-        "allegro-cz": 249.25,
-        "allegro-hu": 183.51,
-        "allegro-sk": 59.81
-      },
-      "costs": {
-        "commission": 604.38,
-        "delivery": 40.01,
-        "ads": 378.02,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 16.68
-      }
-    },
-    {
-      "date": "2026-03-09",
-      "Mlot_i_Klucz": 1868.37,
-      "PolaxEuroGroup": 466.18,
-      "Sila_Narzedzi": 3273.48,
-      "countries": {
-        "allegro-pl": 5219.91,
-        "allegro-cz": 368.86,
-        "allegro-hu": 19.26,
+        "allegro-pl": 214.16,
+        "allegro-cz": 54.81,
+        "allegro-hu": 134.83,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 927.71,
-        "delivery": 52.4,
-        "ads": 248.1,
+        "commission": 32.98,
+        "delivery": 26.16,
+        "ads": 0.0,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 16.08
+        "other": 5.89
       }
     },
     {
-      "date": "2026-03-10",
-      "Mlot_i_Klucz": 2362.99,
-      "PolaxEuroGroup": 1019.18,
-      "Sila_Narzedzi": 4370.25,
+      "date": "2026-02-08",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 937.28,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 7544.12,
-        "allegro-cz": 141.85,
-        "allegro-hu": 66.45,
+        "allegro-pl": 797.38,
+        "allegro-cz": 83.17,
+        "allegro-hu": 56.73,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 1542.98,
-        "delivery": 493.62,
-        "ads": 271.77,
+        "commission": 122.38,
+        "delivery": 1.89,
+        "ads": 94.28,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 69.86
+        "other": 0.0
       }
     },
     {
-      "date": "2026-03-11",
-      "Mlot_i_Klucz": 2866.29,
-      "PolaxEuroGroup": 1915.19,
-      "Sila_Narzedzi": 3972.87,
+      "date": "2026-02-09",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 927.81,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 8222.89,
-        "allegro-cz": 514.79,
+        "allegro-pl": 779.41,
+        "allegro-cz": 0.0,
+        "allegro-hu": 39.94,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 157.42,
+        "delivery": 16.67,
+        "ads": 80.44,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-10",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 717.33,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 600.67,
+        "allegro-cz": 51.97,
         "allegro-hu": 0.0,
-        "allegro-sk": 16.67
-      },
-      "costs": {
-        "commission": 1506.45,
-        "delivery": 400.74,
-        "ads": 337.91,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 51.7
-      }
-    },
-    {
-      "date": "2026-03-12",
-      "Mlot_i_Klucz": 1915.61,
-      "PolaxEuroGroup": 903.78,
-      "Sila_Narzedzi": 3865.66,
-      "countries": {
-        "allegro-pl": 6585.41,
-        "allegro-cz": 66.91,
-        "allegro-hu": 32.73,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 1512.32,
-        "delivery": 419.82,
-        "ads": 618.58,
+        "commission": 94.28,
+        "delivery": 77.83,
+        "ads": 91.54,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 92.47
+        "other": 17.87
       }
     },
     {
-      "date": "2026-03-13",
-      "Mlot_i_Klucz": 2343.13,
-      "PolaxEuroGroup": 740.34,
-      "Sila_Narzedzi": 2295.66,
+      "date": "2026-02-11",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1570.16,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 4974.26,
-        "allegro-cz": 125.96,
+        "allegro-pl": 1414.41,
+        "allegro-cz": 0.0,
         "allegro-hu": 0.0,
-        "allegro-sk": 278.91
-      },
-      "costs": {
-        "commission": 940.12,
-        "delivery": 553.83,
-        "ads": 447.54,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 96.57
-      }
-    },
-    {
-      "date": "2026-03-14",
-      "Mlot_i_Klucz": 1330.13,
-      "PolaxEuroGroup": 221.3,
-      "Sila_Narzedzi": 1826.85,
-      "countries": {
-        "allegro-pl": 2957.6,
-        "allegro-cz": 52.41,
-        "allegro-hu": 198.91,
-        "allegro-sk": 169.36
-      },
-      "costs": {
-        "commission": 487.17,
-        "delivery": 209.11,
-        "ads": 475.8,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 39.14
-      }
-    },
-    {
-      "date": "2026-03-15",
-      "Mlot_i_Klucz": 1857.94,
-      "PolaxEuroGroup": 722.53,
-      "Sila_Narzedzi": 2879.42,
-      "countries": {
-        "allegro-pl": 4877.42,
-        "allegro-cz": 72.15,
-        "allegro-hu": 477.7,
-        "allegro-sk": 32.62
-      },
-      "costs": {
-        "commission": 747.93,
-        "delivery": 93.92,
-        "ads": 516.89,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 32.95
-      }
-    },
-    {
-      "date": "2026-03-16",
-      "Mlot_i_Klucz": 3364.36,
-      "PolaxEuroGroup": 972.41,
-      "Sila_Narzedzi": 2796.32,
-      "countries": {
-        "allegro-pl": 6617.65,
-        "allegro-cz": 145.7,
-        "allegro-hu": 132.28,
-        "allegro-sk": 237.46
-      },
-      "costs": {
-        "commission": 1139.03,
-        "delivery": 99.92,
-        "ads": 308.39,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 31.46
-      }
-    },
-    {
-      "date": "2026-03-17",
-      "Mlot_i_Klucz": 2206.76,
-      "PolaxEuroGroup": 1159.38,
-      "Sila_Narzedzi": 3096.42,
-      "countries": {
-        "allegro-pl": 6051.7,
-        "allegro-cz": 152.34,
-        "allegro-hu": 146.61,
-        "allegro-sk": 111.91
-      },
-      "costs": {
-        "commission": 977.99,
-        "delivery": 429.73,
-        "ads": 286.77,
-        "subscription": 0.0,
-        "discount": 0.0,
-        "other": 33.46
-      }
-    },
-    {
-      "date": "2026-03-18",
-      "Mlot_i_Klucz": 1530.9,
-      "PolaxEuroGroup": 242.81,
-      "Sila_Narzedzi": 5138.29,
-      "countries": {
-        "allegro-pl": 6617.94,
-        "allegro-cz": 164.46,
-        "allegro-hu": 129.6,
         "allegro-sk": 0.0
       },
       "costs": {
-        "commission": 1120.68,
-        "delivery": 395.03,
-        "ads": 545.48,
+        "commission": 275.46,
+        "delivery": 49.86,
+        "ads": 102.27,
         "subscription": 0.0,
         "discount": 0.0,
-        "other": 66.69
+        "other": 3.78
+      }
+    },
+    {
+      "date": "2026-02-12",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1801.65,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 1503.51,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 469.17,
+        "delivery": 88.26,
+        "ads": 119.55,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 20.98
+      }
+    },
+    {
+      "date": "2026-02-13",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 360.75,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 213.18,
+        "allegro-cz": 76.08,
+        "allegro-hu": 48.44,
+        "allegro-sk": 23.05
+      },
+      "costs": {
+        "commission": 15.79,
+        "delivery": 103.43,
+        "ads": 215.2,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 1.89
+      }
+    },
+    {
+      "date": "2026-02-14",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 597.07,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 464.96,
+        "allegro-cz": 114.29,
+        "allegro-hu": 17.82,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 65.23,
+        "delivery": 38.21,
+        "ads": 102.32,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-15",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 504.85,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 213.22,
+        "allegro-cz": 104.05,
+        "allegro-hu": 56.06,
+        "allegro-sk": 131.52
+      },
+      "costs": {
+        "commission": 27.0,
+        "delivery": 18.61,
+        "ads": 92.18,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 10.49
+      }
+    },
+    {
+      "date": "2026-02-16",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 746.41,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 540.96,
+        "allegro-cz": 82.07,
+        "allegro-hu": 62.96,
+        "allegro-sk": 60.43
+      },
+      "costs": {
+        "commission": 50.71,
+        "delivery": 16.07,
+        "ads": 33.89,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-17",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1045.61,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 993.05,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 52.56
+      },
+      "costs": {
+        "commission": 175.76,
+        "delivery": 30.25,
+        "ads": 35.2,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-18",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 146.92,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 125.38,
+        "allegro-cz": 21.54,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 47.52,
+        "delivery": 24.76,
+        "ads": 58.43,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-19",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1985.02,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 609.85,
+        "allegro-cz": 45.81,
+        "allegro-hu": 0.0,
+        "allegro-sk": 101.37
+      },
+      "costs": {
+        "commission": 347.39,
+        "delivery": 31.35,
+        "ads": 54.3,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-20",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 979.39,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 832.33,
+        "allegro-cz": 0.0,
+        "allegro-hu": 73.65,
+        "allegro-sk": 73.41
+      },
+      "costs": {
+        "commission": 137.39,
+        "delivery": 76.47,
+        "ads": 50.97,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 13.98
+      }
+    },
+    {
+      "date": "2026-02-21",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 419.33,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 317.87,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 101.46
+      },
+      "costs": {
+        "commission": 41.54,
+        "delivery": 40.12,
+        "ads": 49.57,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-22",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 849.83,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 598.05,
+        "allegro-cz": 68.29,
+        "allegro-hu": 92.53,
+        "allegro-sk": 58.25
+      },
+      "costs": {
+        "commission": 142.7,
+        "delivery": 1.89,
+        "ads": 40.46,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-23",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1370.23,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 858.64,
+        "allegro-cz": 22.81,
+        "allegro-hu": 309.0,
+        "allegro-sk": 71.06
+      },
+      "costs": {
+        "commission": 198.95,
+        "delivery": 11.88,
+        "ads": 136.88,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-24",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 2081.39,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 1403.45,
+        "allegro-cz": 0.0,
+        "allegro-hu": 51.24,
+        "allegro-sk": 95.65
+      },
+      "costs": {
+        "commission": 207.82,
+        "delivery": 56.1,
+        "ads": 39.27,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-25",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 337.35,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 263.6,
+        "allegro-cz": 0.0,
+        "allegro-hu": 17.14,
+        "allegro-sk": 56.61
+      },
+      "costs": {
+        "commission": 53.93,
+        "delivery": 52.71,
+        "ads": 73.14,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 42.75
+      }
+    },
+    {
+      "date": "2026-02-26",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 1999.37,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 1429.73,
+        "allegro-cz": 84.49,
+        "allegro-hu": 15.81,
+        "allegro-sk": 96.1
+      },
+      "costs": {
+        "commission": 373.8,
+        "delivery": 44.33,
+        "ads": 98.96,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-27",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 523.84,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 389.55,
+        "allegro-cz": 0.0,
+        "allegro-hu": 69.97,
+        "allegro-sk": 64.32
+      },
+      "costs": {
+        "commission": 66.9,
+        "delivery": 63.29,
+        "ads": 63.57,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 0.0
+      }
+    },
+    {
+      "date": "2026-02-28",
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 99.87,
+      "Sila_Narzedzi": 0,
+      "countries": {
+        "allegro-pl": 99.87,
+        "allegro-cz": 0.0,
+        "allegro-hu": 0.0,
+        "allegro-sk": 0.0
+      },
+      "costs": {
+        "commission": 16.03,
+        "delivery": 12.36,
+        "ads": 65.62,
+        "subscription": 0.0,
+        "discount": 0.0,
+        "other": 10.49
       }
     }
   ],
   "months": [
     {
       "month": "Янв 2026",
-      "Mlot_i_Klucz": 20411.48,
-      "PolaxEuroGroup": 30541.46,
-      "Sila_Narzedzi": 50688.88,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 33421.27,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 96715.72,
-        "allegro-cz": 2067.14,
-        "allegro-hu": 1826.7,
-        "allegro-sk": 1032.26
+        "allegro-pl": 29774.29,
+        "allegro-cz": 332.0,
+        "allegro-hu": 41.66,
+        "allegro-sk": 393.51
       },
       "costs": {
-        "commission": 16684.93,
-        "delivery": 4947.99,
-        "ads": 14107.3,
+        "commission": 4851.94,
+        "delivery": 1505.38,
+        "ads": 8968.75,
         "subscription": 199.0,
         "discount": 0.0,
-        "other": 739.27
+        "other": 290.07
       }
     },
     {
       "month": "Фев 2026",
-      "Mlot_i_Klucz": 43776.39,
-      "PolaxEuroGroup": 21732.22,
-      "Sila_Narzedzi": 51826.52,
+      "Mlot_i_Klucz": 0,
+      "PolaxEuroGroup": 26733.84,
+      "Sila_Narzedzi": 0,
       "countries": {
-        "allegro-pl": 108963.12,
-        "allegro-cz": 4402.49,
-        "allegro-hu": 1771.03,
-        "allegro-sk": 2198.49
+        "allegro-pl": 17796.65,
+        "allegro-cz": 1361.58,
+        "allegro-hu": 1468.02,
+        "allegro-sk": 1105.97
       },
       "costs": {
-        "commission": 20776.59,
-        "delivery": 7011.75,
-        "ads": 10995.65,
+        "commission": 3913.04,
+        "delivery": 1059.02,
+        "ads": 2790.42,
         "subscription": 199.0,
         "discount": 0.0,
-        "other": 822.67
-      }
-    },
-    {
-      "month": "Мар 2026",
-      "Mlot_i_Klucz": 33582.87,
-      "PolaxEuroGroup": 14533.65,
-      "Sila_Narzedzi": 51985.68,
-      "countries": {
-        "allegro-pl": 93565.17,
-        "allegro-cz": 3361.16,
-        "allegro-hu": 1692.04,
-        "allegro-sk": 1483.83
-      },
-      "costs": {
-        "commission": 17226.53,
-        "delivery": 4829.25,
-        "ads": 6906.28,
-        "subscription": 199.0,
-        "discount": 0.0,
-        "other": 769.11
+        "other": 163.37
       }
     }
   ]
