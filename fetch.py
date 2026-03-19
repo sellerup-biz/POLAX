@@ -39,6 +39,35 @@ if os.environ.get("CLIENT_ID_MLOT") and os.environ.get("REFRESH_TOKEN_MLOT"):
         "secret_name":   "REFRESH_TOKEN_MLOT"
     }
 
+# Кэш курсов НБП
+_rates_cache = {}
+
+def get_rate_to_pln(currency, date_str):
+    """Получить курс валюты к PLN через NBP API на конкретную дату"""
+    if currency == "PLN":
+        return 1.0
+    key = f"{currency}_{date_str}"
+    if key in _rates_cache:
+        return _rates_cache[key]
+    cur = currency.lower()
+    # Пробуем дату, если выходной — берём предыдущий рабочий день
+    for delta in range(0, 7):
+        try_date = (datetime.strptime(date_str, "%Y-%m-%d") - timedelta(days=delta)).strftime("%Y-%m-%d")
+        try:
+            r = requests.get(
+                f"https://api.nbp.pl/api/exchangerates/rates/a/{cur}/{try_date}/?format=json",
+                timeout=5
+            )
+            if r.status_code == 200:
+                rate = float(r.json()["rates"][0]["mid"])
+                _rates_cache[key] = rate
+                print(f"  Курс {currency}/PLN на {try_date}: {rate}")
+                return rate
+        except:
+            pass
+    print(f"  Курс {currency} не найден, используем 1.0")
+    return 1.0
+
 def get_gh_public_key():
     r = requests.get(
         f"https://api.github.com/repos/{GH_REPO}/actions/secrets/public-key",
@@ -77,47 +106,53 @@ def get_access_token(client_id, client_secret, refresh_token):
         return None, None
     return d["access_token"], d.get("refresh_token", refresh_token)
 
-def get_sales(access_token, date_from, date_to):
-    """
-    Используем /payments/payment-operations с group=INCOME
-    Это реальные поступления денег от покупателей с корректной фильтрацией по дате
-    """
+def get_sales(access_token, date_from, date_to, date_key):
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/vnd.allegro.public.v1+json"
     }
-    total = 0.0
+    total_pln = 0.0
+    by_currency = defaultdict(float)
     offset = 0
     while True:
         r = requests.get(
             "https://api.allegro.pl/payments/payment-operations",
             headers=headers,
             params={
-                "group":            "INCOME",
-                "occurredAt.gte":   date_from,
-                "occurredAt.lte":   date_to,
+                "group":          "INCOME",
+                "occurredAt.gte": date_from,
+                "occurredAt.lte": date_to,
                 "limit":  100,
                 "offset": offset
             }
         )
-        data = r.json()
-        ops = data.get("paymentOperations", [])
+        ops = r.json().get("paymentOperations", [])
         print(f"  Операций INCOME: {len(ops)} (offset={offset})")
         for op in ops:
             try:
-                total += float(op["value"]["amount"])
+                amount   = float(op["value"]["amount"])
+                currency = op["value"]["currency"]
+                by_currency[currency] += amount
+                rate = get_rate_to_pln(currency, date_key)
+                total_pln += amount * rate
             except:
                 pass
         if len(ops) < 100:
             break
         offset += 100
-    return round(total, 2)
+
+    # Печатаем разбивку по валютам
+    for cur, amt in by_currency.items():
+        rate = get_rate_to_pln(cur, date_key)
+        print(f"  {cur}: {amt:.2f} × {rate:.4f} = {amt*rate:.2f} PLN")
+
+    return round(total_pln, 2)
 
 print(f"Дата (Польша UTC+{tz_offset}): {date_key}")
 print(f"Период: {date_from} → {date_to}")
 print(f"Магазины: {list(SHOPS.keys())}")
 
-gh_key = get_gh_public_key()
+gh_key    = get_gh_public_key()
 gh_key_id  = gh_key.get("key_id")
 gh_key_val = gh_key.get("key")
 
@@ -142,9 +177,9 @@ for shop, creds in SHOPS.items():
     if new_refresh and gh_key_id and gh_key_val:
         ok = update_gh_secret(creds["secret_name"], new_refresh, gh_key_id, gh_key_val)
         print(f"  Токен обновлён: {'OK' if ok else 'ОШИБКА'}")
-    sales = get_sales(token, date_from, date_to)
+    sales = get_sales(token, date_from, date_to, date_key)
     existing[shop] = sales
-    print(f"  Итого: {sales} zł")
+    print(f"  Итого в PLN: {sales} zł")
 
 months_ru = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"]
 monthly = defaultdict(lambda: {"Mlot_i_Klucz": 0, "PolaxEuroGroup": 0, "Sila_Narzedzi": 0})
