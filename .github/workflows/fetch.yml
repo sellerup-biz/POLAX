@@ -34,33 +34,3 @@ jobs:
           git add data.json
           git commit -m "Sales $(date +%Y-%m-%d)" || echo "No changes"
           git push
-
-  history:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Python setup
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install deps
-        run: pip install requests
-      - name: Run history fetch
-        run: python fetch_history.py
-        env:
-          CLIENT_ID:           ${{ secrets.CLIENT_ID }}
-          CLIENT_SECRET:       ${{ secrets.CLIENT_SECRET }}
-          REFRESH_TOKEN_MLOT:  ${{ secrets.REFRESH_TOKEN_MLOT }}
-          REFRESH_TOKEN_POLAX: ${{ secrets.REFRESH_TOKEN_POLAX }}
-          REFRESH_TOKEN_SILA:  ${{ secrets.REFRESH_TOKEN_SILA }}
-      - name: Save data.json
-        run: |
-          git config user.email "bot@polax"
-          git config user.name "POLAX Bot"
-          git add data.json
-          git commit -m "History $(date +%Y-%m-%d)" || echo "No changes"
-          git push
