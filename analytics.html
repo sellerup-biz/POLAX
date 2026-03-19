@@ -194,18 +194,19 @@ function renderCards(){
 
 // ── COUNTRIES BREAKDOWN ───────────────────────────────────────
 function renderCountriesBreakdown(){
-  var m = DATA.months[activeMonth];
-  var c = m.countries;
-  var total = c.PL + c.CZ + c.HU + c.SK;
+  var m     = DATA.months[activeMonth];
+  var c     = m.countries||{};
+  var realTotal = SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);
+  var ctrTotal  = (c.PL||0)+(c.CZ||0)+(c.HU||0)+(c.SK||0);
   var rows = [
-    {flag:'🇵🇱', name:'Польша · PLN',    val:c.PL, color:'#BA7517'},
-    {flag:'🇨🇿', name:'Чехия · CZK→PLN', val:c.CZ, color:'#185FA5'},
-    {flag:'🇭🇺', name:'Венгрия · HUF→PLN',val:c.HU, color:'#0F6E56'},
-    {flag:'🇸🇰', name:'Словакия · EUR→PLN',val:c.SK, color:'#854F0B'}
+    {flag:'🇵🇱', name:'Польша · PLN',     val:c.PL||0, color:'#BA7517'},
+    {flag:'🇨🇿', name:'Чехия · CZK→PLN',  val:c.CZ||0, color:'#185FA5'},
+    {flag:'🇭🇺', name:'Венгрия · HUF→PLN', val:c.HU||0, color:'#0F6E56'},
+    {flag:'🇸🇰', name:'Словакия · EUR→PLN',val:c.SK||0, color:'#854F0B'}
   ];
   var html = rows.map(function(r){
-    var pct = total>0 ? (r.val/total*100).toFixed(1) : 0;
-    var barW = total>0 ? Math.round(r.val/total*100) : 0;
+    var pct  = realTotal>0 ? (r.val/realTotal*100).toFixed(1) : '0.0';
+    var barW = realTotal>0 ? Math.round(r.val/realTotal*100) : 0;
     return '<div class="crow"><span>'+r.flag+' '+r.name+'</span>'
       +'<div class="crow-r">'
       +'<div style="text-align:right">'
@@ -215,7 +216,12 @@ function renderCountriesBreakdown(){
       +'<span class="pct">'+pct+'%</span>'
       +'</div></div>';
   }).join('');
-  html += '<div class="crow"><span>Итого</span><div class="crow-r"><span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(total)+' zł</span><span class="pct">100%</span></div></div>';
+  // Итого = реальные продажи магазина (не сумма стран — часть транзакций без marketplaceId)
+  html += '<div class="crow"><span style="font-weight:700;color:#1a1a1a">Итого</span>'
+    +'<div class="crow-r">'
+    +'<span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(realTotal)+' zł</span>'
+    +'<span class="pct">100%</span>'
+    +'</div></div>';
   document.getElementById('countries-breakdown').innerHTML = html;
 }
 
