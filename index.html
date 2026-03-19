@@ -112,11 +112,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
     </div>
   </div>
   <canvas id="salesChart" style="width:100%;max-height:300px"></canvas>
-  <div style="margin-top:1.25rem;border-top:1px solid #f0ece4;padding-top:1rem">
-    <div style="font-size:11px;font-weight:700;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Сумма за каждый день</div>
-    <div style="overflow-x:auto"><table id="salesTable" style="width:100%;font-size:12px;border-collapse:collapse"></table></div>
-  </div>
-  <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px" id="totalsGrid"></div>
 </div>
 
 <!-- MONTHLY SALES -->
@@ -400,8 +395,6 @@ function renderDaily(days){
     options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toFixed(2)+' zł';}}}},
       scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999'}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999',callback:function(v){return v+' zł';}}}}}
   });
-  mkTable(days,'date','salesTable',true);
-  mkTotals(days,'date','totalsGrid');
 }
 
 function renderMonthly(months){
