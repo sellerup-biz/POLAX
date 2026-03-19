@@ -349,6 +349,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 
 </div>
 
+<div id="goalBlock"></div>
+
 <div class="footer">POLAX · ALLEGRO PRICING RULES · 2026</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -420,12 +422,80 @@ fetch('data.json')
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.days && d.days.length>0) renderDaily(d.days);
-    if(d.months && d.months.length>0) renderMonthly(d.months);
+    if(d.months && d.months.length>0){
+      renderMonthly(d.months);
+      renderGoal(d.months);
+    }
   })
   .catch(function(){
     document.getElementById('salesChart').closest('div').style.display='none';
     document.getElementById('monthlyChart').closest('div').style.display='none';
   });
+
+function renderGoal(months){
+  var GOAL = 200000;
+  var SHOPS_LIST = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
+
+  // Находим лучший месяц
+  var best = null;
+  var bestTotal = 0;
+  for(var i=0;i<months.length;i++){
+    var tot = SHOPS_LIST.reduce(function(s,k){return s+(months[i][k]||0);},0);
+    if(tot > bestTotal){ bestTotal = tot; best = months[i].month; }
+  }
+
+  // Текущий месяц (последний в массиве)
+  var cur = months[months.length-1];
+  var curTotal = SHOPS_LIST.reduce(function(s,k){return s+(cur[k]||0);},0);
+  var curMonth = cur.month;
+
+  var bestPct  = Math.min(100, Math.round(bestTotal / GOAL * 100));
+  var curPct   = Math.min(100, Math.round(curTotal  / GOAL * 100));
+
+  var isSame = best === curMonth;
+
+  var html =
+    '<div style="background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">'
+    +'<div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px">Цель: 200 000 zł в месяц</div>'
+    +'<div style="font-size:11px;color:#999;margin-bottom:1.25rem">суммарно по всем 3 магазинам</div>'
+
+    // --- Лучший месяц ---
+    +(isSame ? '' :
+      '<div style="margin-bottom:1.25rem">'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">'
+      +'<div style="font-size:12px;font-weight:600;color:#555">Лучший месяц — <span style="color:#BA7517">'+best+'</span></div>'
+      +'<div style="font-size:13px;font-weight:700;color:#BA7517">'+bestTotal.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł &nbsp;·&nbsp; '+bestPct+'%</div>'
+      +'</div>'
+      +'<div style="background:#f0ece4;border-radius:50px;height:14px;overflow:hidden">'
+      +'<div style="height:100%;border-radius:50px;background:#BA7517;width:'+bestPct+'%;transition:width 1s ease;position:relative">'
+      +(bestPct>=10?'<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#fff">'+bestPct+'%</span>':'')
+      +'</div></div>'
+      +'</div>'
+    )
+
+    // --- Текущий месяц ---
+    +'<div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">'
+    +'<div style="font-size:12px;font-weight:600;color:#555">'+( isSame ? 'Лучший и текущий месяц — <span style="color:#185FA5">'+curMonth+'</span>' : 'Текущий месяц — <span style="color:#185FA5">'+curMonth+'</span>')+'</div>'
+    +'<div style="font-size:13px;font-weight:700;color:#185FA5">'+curTotal.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł &nbsp;·&nbsp; '+curPct+'%</div>'
+    +'</div>'
+    +'<div style="background:#f0ece4;border-radius:50px;height:14px;overflow:hidden">'
+    +'<div style="height:100%;border-radius:50px;background:#185FA5;width:'+curPct+'%;transition:width 1s ease;position:relative">'
+    +(curPct>=10?'<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#fff">'+curPct+'%</span>':'')
+    +'</div></div>'
+    +'</div>'
+
+    // --- До цели ---
+    +'<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0ece4;display:flex;gap:16px;flex-wrap:wrap">'
+    +'<div style="font-size:11px;color:#aaa">До цели (лучший): <span style="color:#1a1a1a;font-weight:600">'+Math.max(0,(GOAL-bestTotal)).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</span></div>'
+    +(isSame?'':
+      '<div style="font-size:11px;color:#aaa">До цели (текущий): <span style="color:#1a1a1a;font-weight:600">'+Math.max(0,(GOAL-curTotal)).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</span></div>'
+    )
+    +'</div>'
+    +'</div>';
+
+  document.getElementById('goalBlock').innerHTML = html;
+}
 </script>
 </body>
 </html>
