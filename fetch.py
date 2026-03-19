@@ -70,3 +70,18 @@ with open("data.json", "w") as f:
     json.dump(data, f, indent=2)
 
 print("data.json updated!")
+
+# Считаем месяцы из дневных данных
+from collections import defaultdict
+monthly = defaultdict(lambda: {"Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0})
+
+for day in data["days"]:
+    month_key = day["date"][:7]  # "2026-03"
+    month_label = datetime.strptime(month_key, "%Y-%m").strftime("%b %Y")
+    for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]:
+        monthly[month_label][shop] += day.get(shop, 0)
+
+data["months"] = [{"month": k, **v} for k, v in sorted(monthly.items())]
+
+with open("data.json", "w") as f:
+    json.dump(data, f, indent=2)
