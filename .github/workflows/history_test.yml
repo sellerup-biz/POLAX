@@ -1,0 +1,26 @@
+name: Load History TEST (PolaxEuroGroup Jan+Feb)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install requests PyNaCl
+      - run: python fetch_history_test.py
+        env:
+          CLIENT_ID_POLAX:     ${{ secrets.CLIENT_ID_POLAX }}
+          CLIENT_SECRET_POLAX: ${{ secrets.CLIENT_SECRET_POLAX }}
+          REFRESH_TOKEN_POLAX: ${{ secrets.REFRESH_TOKEN_POLAX }}
+          GH_TOKEN:            ${{ secrets.GH_TOKEN }}
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data.json
+          git commit -m "Test history PolaxEuroGroup Jan+Feb" || echo "No changes"
+          git push
