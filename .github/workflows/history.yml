@@ -1,0 +1,31 @@
+name: Load History
+
+on:
+  workflow_dispatch:
+
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Run history
+        run: python fetch_history.py
+        env:
+          CLIENT_ID:           ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET:       ${{ secrets.CLIENT_SECRET }}
+          REFRESH_TOKEN_MLOT:  ${{ secrets.REFRESH_TOKEN_MLOT }}
+          REFRESH_TOKEN_POLAX: ${{ secrets.REFRESH_TOKEN_POLAX }}
+          REFRESH_TOKEN_SILA:  ${{ secrets.REFRESH_TOKEN_SILA }}
+      - name: Save data.json
+        run: |
+          git config user.email "bot@polax"
+          git config user.name "POLAX Bot"
+          git add data.json
+          git commit -m "History $(date +%Y-%m-%d)" || echo "No changes"
+          git push
