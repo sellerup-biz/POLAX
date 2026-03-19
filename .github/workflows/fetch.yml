@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install deps
-        run: pip install requests
+      - run: pip install requests PyNaCl
       - name: Run fetch
         run: python fetch.py
         env:
