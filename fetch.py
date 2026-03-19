@@ -7,17 +7,14 @@ REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
 GH_TOKEN     = os.environ.get("GH_TOKEN", "")
 GH_REPO      = "sellerup-biz/POLAX"
 
-# Польское время UTC+1 (зима) / UTC+2 (лето)
-# Определяем смещение автоматически (упрощённо: март-октябрь = UTC+2, остальное = UTC+1)
-now_utc = datetime.now(timezone.utc)
-month = now_utc.month
-tz_offset = 2 if 3 <= month <= 10 else 1
-polish_now = now_utc + timedelta(hours=tz_offset)
-yesterday_polish = polish_now - timedelta(days=1)
-
-date_from = yesterday_polish.strftime("%Y-%m-%dT00:00:00") + ("+02:00" if tz_offset == 2 else "+01:00")
-date_to   = yesterday_polish.strftime("%Y-%m-%dT23:59:59") + ("+02:00" if tz_offset == 2 else "+01:00")
-date_key  = yesterday_polish.strftime("%Y-%m-%d")
+now_utc   = datetime.now(timezone.utc)
+tz_offset = 2 if 3 <= now_utc.month <= 10 else 1
+polish_now   = now_utc + timedelta(hours=tz_offset)
+yesterday_pl = polish_now - timedelta(days=1)
+tz_str       = f"+0{tz_offset}:00"
+date_from    = yesterday_pl.strftime("%Y-%m-%dT00:00:00") + tz_str
+date_to      = yesterday_pl.strftime("%Y-%m-%dT23:59:59") + tz_str
+date_key     = yesterday_pl.strftime("%Y-%m-%d")
 
 SHOPS = {}
 if os.environ.get("CLIENT_ID_SILA") and os.environ.get("REFRESH_TOKEN_SILA"):
@@ -81,6 +78,10 @@ def get_access_token(client_id, client_secret, refresh_token):
     return d["access_token"], d.get("refresh_token", refresh_token)
 
 def get_sales(access_token, date_from, date_to):
+    """
+    Используем /payments/payment-operations с group=INCOME
+    Это реальные поступления денег от покупателей с корректной фильтрацией по дате
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/vnd.allegro.public.v1+json"
@@ -89,29 +90,30 @@ def get_sales(access_token, date_from, date_to):
     offset = 0
     while True:
         r = requests.get(
-            "https://api.allegro.pl/order/checkout-forms",
+            "https://api.allegro.pl/payments/payment-operations",
             headers=headers,
             params={
-                "status":                    "READY_FOR_PROCESSING",
-                "lineItems.boughtAt.gte":    date_from,
-                "lineItems.boughtAt.lte":    date_to,
+                "group":            "INCOME",
+                "occurredAt.gte":   date_from,
+                "occurredAt.lte":   date_to,
                 "limit":  100,
                 "offset": offset
             }
         )
-        orders = r.json().get("checkoutForms", [])
-        print(f"  Заказов READY_FOR_PROCESSING: {len(orders)} (offset={offset})")
-        for o in orders:
+        data = r.json()
+        ops = data.get("paymentOperations", [])
+        print(f"  Операций INCOME: {len(ops)} (offset={offset})")
+        for op in ops:
             try:
-                total += float(o["summary"]["totalToPay"]["amount"])
+                total += float(op["value"]["amount"])
             except:
                 pass
-        if len(orders) < 100:
+        if len(ops) < 100:
             break
         offset += 100
     return round(total, 2)
 
-print(f"Дата (польское время): {date_key} | UTC+{tz_offset}")
+print(f"Дата (Польша UTC+{tz_offset}): {date_key}")
 print(f"Период: {date_from} → {date_to}")
 print(f"Магазины: {list(SHOPS.keys())}")
 
