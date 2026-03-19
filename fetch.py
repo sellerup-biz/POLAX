@@ -45,27 +45,23 @@ def get_sales(token, date_from, date_to):
     )
     return round(total, 2)
 
-# Вчерашняя дата
 yesterday = datetime.now() - timedelta(days=1)
 date_from = yesterday.strftime("%Y-%m-%dT00:00:00Z")
 date_to   = yesterday.strftime("%Y-%m-%dT23:59:59Z")
 date_key  = yesterday.strftime("%Y-%m-%d")
 
-# Читаем старый data.json
 try:
     with open("data.json", "r") as f:
         data = json.load(f)
 except:
     data = {"days": []}
 
-# Получаем продажи
 entry = {"date": date_key}
 for shop_name, creds in SHOPS.items():
     token = get_token(creds["client_id"], creds["client_secret"])
     entry[shop_name] = get_sales(token, date_from, date_to)
     print(f"{shop_name}: {entry[shop_name]} zł")
 
-# Проверяем чтобы не было дублей
 dates = [d["date"] for d in data["days"]]
 if date_key not in dates:
     data["days"].append(entry)
@@ -73,13 +69,4 @@ if date_key not in dates:
 with open("data.json", "w") as f:
     json.dump(data, f, indent=2)
 
-print("data.json обновлён!")
-```
-
----
-
-**ШАГ 5 — Создай файл автозапуска**
-
-Нажми **Add file → Create new file**, в поле имени файла напиши точно так:
-```
-.github/workflows/fetch.yml
+print("data.json updated!")
