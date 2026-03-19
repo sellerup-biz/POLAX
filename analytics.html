@@ -223,7 +223,7 @@ function renderCountriesBreakdown(){
 function renderSummaryBlock(){
   var m = DATA.months[activeMonth];
   var sales = SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);
-  var costs = m.costs.commission+m.costs.ads+m.costs.delivery+m.costs.promo+m.costs.other;
+  var costs = (c.commission||0)+(c.delivery||0)+(c.ads||0)+(c.subscription||0);
   var profit = sales - costs;
   var margin = sales>0 ? (profit/sales*100).toFixed(1) : 0;
   var html =
@@ -255,53 +255,84 @@ function renderShopsBreakdown(){
 }
 
 // ── COSTS BREAKDOWN ───────────────────────────────────────────
+function totalCostsVal(c){
+  return (c.commission||0)+(c.delivery||0)+(c.ads||0)+(c.subscription||0)+(c.other||0);
+}
 function renderCostsBreakdown(){
-  var m = DATA.months[activeMonth];
-  var total = SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);
-  var c = m.costs;
-  var totalCosts = c.commission + c.ads + c.delivery + c.promo + c.other;
+  var m     = DATA.months[activeMonth];
+  var sales = SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);
+  var c     = m.costs||{};
+  var net   = totalCostsVal(c);
+  var discount = c.discount||0;
+  // Строки точно как в Allegro веб: Obowiązkowe / Dostawa / Reklama / Abonament / Rabaty
   var rows = [
-    {name:'Комиссия Allegro', val:c.commission},
-    {name:'Реклама · Allegro Ads', val:c.ads},
-    {name:'Доставка', val:c.delivery},
-    {name:'Опции продвижения', val:c.promo},
-    {name:'Прочие услуги', val:c.other}
+    {name:'Obowiązkowe (комиссия)',      val: c.commission||0,   sign:-1},
+    {name:'Dostawa (доставка)',           val: c.delivery||0,     sign:-1},
+    {name:'Reklama i promowanie',         val: c.ads||0,          sign:-1},
+    {name:'Abonament',                    val: c.subscription||0, sign:-1},
+    {name:'Rabaty od Allegro',            val: discount,          sign:+1}
   ];
   var html = rows.map(function(r){
-    var pct = total>0 ? (r.val/total*100).toFixed(1) : 0;
+    if(r.val === 0) return '';
+    var pct  = sales>0 ? (r.val/sales*100).toFixed(1) : '0.0';
+    var sign = r.sign === 1 ? '+' : '-';
+    var cls  = r.sign === 1 ? 'style="color:#0F6E56;font-size:11px;font-weight:600"' : 'class="neg" style="font-size:11px;font-weight:600"';
+    var pctCls = r.sign === 1 ? 'style="color:#0F6E56;min-width:38px;text-align:right;font-size:10px"' : 'class="pct neg"';
     return '<div class="crow"><span>'+r.name+'</span>'
       +'<div class="crow-r">'
-      +'<span class="neg" style="font-size:11px;font-weight:600">-'+fmt(r.val)+' zł</span>'
-      +'<span class="pct neg">'+pct+'%</span>'
+      +'<span '+cls+'>'+sign+fmt(r.val)+' zł</span>'
+      +'<span '+pctCls+'>'+pct+'%</span>'
       +'</div></div>';
   }).join('');
-  var totalPct = total>0 ? (totalCosts/total*100).toFixed(1) : 0;
-  html += '<div class="crow"><span>Итого расходы</span>'
+  var netPct = sales>0 ? (net/sales*100).toFixed(1) : '0.0';
+  html += '<div class="crow" style="border-top:1px solid #e0dcd4;margin-top:4px;padding-top:8px">'
+    +'<span style="font-weight:700;color:#1a1a1a">Итого расходы</span>'
     +'<div class="crow-r">'
-    +'<span class="neg" style="font-size:12px;font-weight:700">-'+fmt(totalCosts)+' zł</span>'
-    +'<span class="pct neg" style="font-weight:700">'+totalPct+'%</span>'
+    +'<span class="neg" style="font-size:12px;font-weight:700">-'+fmt(net)+' zł</span>'
+    +'<span class="pct neg" style="font-weight:700">'+netPct+'%</span>'
     +'</div></div>';
   document.getElementById('costs-breakdown').innerHTML = html;
 }
 
 // ── SHOP TABLES ───────────────────────────────────────────────
 function renderShopTables(){
-  var m = DATA.months[activeMonth];
-  var totalCosts = m.costs.commission + m.costs.ads + m.costs.delivery + m.costs.promo + m.costs.other;
+  var m      = DATA.months[activeMonth];
+  var c      = m.costs||{};
+  var allSales = SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);
   var html = SHOPS.map(function(s,i){
     var sales = m[s]||0;
-    var shopCosts = Math.round(totalCosts * sales / SHOPS.reduce(function(sum,k){return sum+(m[k]||0);},0));
-    var pct = sales>0 ? (shopCosts/sales*100).toFixed(1) : 0;
+    var ratio = allSales > 0 ? sales/allSales : 0;
+    // Расходы пропорционально доле продаж магазина
+    var sc = {
+      commission:   Math.round((c.commission||0)   * ratio * 100)/100,
+      delivery:     Math.round((c.delivery||0)     * ratio * 100)/100,
+      ads:          Math.round((c.ads||0)           * ratio * 100)/100,
+      subscription: Math.round((c.subscription||0) * ratio * 100)/100,
+      discount:     Math.round((c.discount||0)      * ratio * 100)/100
+    };
+    var net = sc.commission + sc.delivery + sc.ads + sc.subscription;
+    var pct = sales>0 ? (net/sales*100).toFixed(1) : '0.0';
+    function row(label, val, isPos){
+      if(val===0) return '';
+      var sign = isPos?'+':'-';
+      var cls  = isPos?'style="color:#0F6E56"':'class="neg-c"';
+      var pp   = sales>0?(val/sales*100).toFixed(1):'0.0';
+      return '<tr><td>'+label+'</td><td '+cls+'>'+sign+fmt(val)+' zł</td><td '+cls+'>'+pp+'%</td></tr>';
+    }
     return '<div class="pn">'
       +'<div class="pt">'+s+' <span class="tag '+TAGS[i]+'">'+m.month+'</span></div>'
       +'<table class="tbl">'
-      +'<thead><tr><th style="text-align:left">Показатель</th><th>Сумма</th><th>% продаж</th></tr></thead>'
+      +'<thead><tr><th style="text-align:left">Категория</th><th>Сумма</th><th>% продаж</th></tr></thead>'
       +'<tbody>'
       +'<tr><td>Продажи</td><td>'+fmt(sales)+' zł</td><td>100%</td></tr>'
-      +'<tr><td>Комиссия</td><td class="neg-c">-'+fmt(Math.round(m.costs.commission*sales/SHOPS.reduce(function(sum,k){return sum+(m[k]||0);},0)))+' zł</td><td class="neg-c">'+(sales>0?(m.costs.commission*sales/SHOPS.reduce(function(sum,k){return sum+(m[k]||0);},0)/sales*100).toFixed(1):0)+'%</td></tr>'
-      +'<tr><td>Реклама</td><td class="neg-c">-'+fmt(Math.round(m.costs.ads*sales/SHOPS.reduce(function(sum,k){return sum+(m[k]||0);},0)))+' zł</td><td class="neg-c">'+(sales>0?(m.costs.ads*sales/SHOPS.reduce(function(sum,k){return sum+(m[k]||0);},0)/sales*100).toFixed(1):0)+'%</td></tr>'
-      +'<tr><td>Доставка + прочее</td><td class="neg-c">-'+fmt(Math.round((m.costs.delivery+m.costs.promo+m.costs.other)*sales/SHOPS.reduce(function(sum,k){return sum+(m[k]||0);},0)))+' zł</td><td class="neg-c">'+(sales>0?((m.costs.delivery+m.costs.promo+m.costs.other)*sales/SHOPS.reduce(function(sum,k){return sum+(m[k]||0);},0)/sales*100).toFixed(1):0)+'%</td></tr>'
-      +'<tr><td>Итого расходы</td><td class="neg-c">-'+fmt(shopCosts)+' zł</td><td class="neg-c">'+pct+'%</td></tr>'
+      +row('Obowiązkowe', sc.commission, false)
+      +row('Dostawa', sc.delivery, false)
+      +row('Reklama', sc.ads, false)
+      +row('Abonament', sc.subscription, false)
+      +row('Rabaty', sc.discount, true)
+      +'<tr style="border-top:1px solid #e0dcd4"><td style="font-weight:700">Итого расходы</td>'
+      +'<td class="neg-c" style="font-weight:700">-'+fmt(net)+' zł</td>'
+      +'<td class="neg-c" style="font-weight:700">'+pct+'%</td></tr>'
       +'</tbody></table>'
       +'</div>';
   }).join('');
@@ -312,7 +343,10 @@ function renderShopTables(){
 function renderDynChart(){
   var labels  = DATA.months.map(function(m){return m.month;});
   var sales   = DATA.months.map(function(m){return SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);});
-  var costs   = DATA.months.map(function(m){return m.costs.commission+m.costs.ads+m.costs.delivery+m.costs.promo+m.costs.other;});
+  var costs   = DATA.months.map(function(m){
+    var c=m.costs||{};
+    return (c.commission||0)+(c.delivery||0)+(c.ads||0)+(c.subscription||0);
+  });
   var costsPct= DATA.months.map(function(m,i){
     return sales[i]>0 ? parseFloat((costs[i]/sales[i]*100).toFixed(1)) : 0;
   });
