@@ -3,11 +3,16 @@ name: Load History TEST (PolaxEuroGroup Jan+Feb)
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
