@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install deps
-      - run: pip install requests PyNaCl
+        run: pip install requests PyNaCl
       - name: Run fetch
         run: python fetch.py
         env:
@@ -31,7 +31,7 @@ jobs:
           CLIENT_ID_MLOT:      ${{ secrets.CLIENT_ID_MLOT }}
           CLIENT_SECRET_MLOT:  ${{ secrets.CLIENT_SECRET_MLOT }}
           REFRESH_TOKEN_MLOT:  ${{ secrets.REFRESH_TOKEN_MLOT }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN:            ${{ secrets.GH_TOKEN }}
       - name: Save data.json
         run: |
           git config user.email "bot@polax"
