@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family:sans-serif;padding:2rem;background:#F4F2EE">
+<h2>POLAX · Allegro Auth</h2>
+<p>Твой код:</p>
+<div id="code" style="background:#fff;padding:1rem;border-radius:8px;font-size:13px;word-break:break-all;border:2px solid #BA7517"></div>
+<script>
+  var code = new URLSearchParams(window.location.search).get('code');
+  document.getElementById('code').innerText = code || 'Код не найден';
+</script>
+</body>
+</html>
+```
+
+---
+
+**Шаг 2** — На `developers.allegro.pl` добавь Redirect URI:
+```
+https://sellerup-biz.github.io/POLAX/callback.html
+```
+
+---
+
+**Шаг 3** — Подожди 2 минуты пока GitHub Pages обновится, потом открой в браузере (войди под **Mlot_i_Klucz**):
+```
+https://allegro.pl/auth/oauth/authorize?response_type=code&client_id=d64fb7b5c6bf4cc09527fb4eed4a3776&redirect_uri=https://sellerup-biz.github.io/POLAX/callback.html
