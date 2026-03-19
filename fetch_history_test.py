@@ -84,7 +84,9 @@ def get_token(cid, cs, rt):
     r = requests.post("https://allegro.pl/auth/oauth/token", auth=(cid, cs),
                       data={"grant_type":"refresh_token","refresh_token":rt,"redirect_uri":REDIRECT_URI})
     d = r.json()
-    if "access_token" not in d: return None, None
+    if "access_token" not in d:
+        print(f"  ОШИБКА ТОКЕНА: {d}")
+        return None, None
     return d["access_token"], d.get("refresh_token", rt)
 
 def hdrs(t):
@@ -157,6 +159,9 @@ def get_costs_for_day(token, date_key):
 
 # ── ОСНОВНОЙ ЦИКЛ ─────────────────────────────────────────────
 print(f"ТЕСТ: {TEST_SHOP} | Янв+Фев 2026 | {len(TEST_DATES)} дней")
+print(f"ENV: CLIENT_ID_POLAX={'OK' if os.environ.get('CLIENT_ID_POLAX') else 'ОТСУТСТВУЕТ'}")
+print(f"ENV: CLIENT_SECRET_POLAX={'OK' if os.environ.get('CLIENT_SECRET_POLAX') else 'ОТСУТСТВУЕТ'}")
+print(f"ENV: REFRESH_TOKEN_POLAX={'OK (len='+str(len(os.environ.get('REFRESH_TOKEN_POLAX',''')))+')' if os.environ.get('REFRESH_TOKEN_POLAX') else 'ОТСУТСТВУЕТ'}")
 
 gh_key    = get_gh_pk()
 gh_key_id  = gh_key.get("key_id")
