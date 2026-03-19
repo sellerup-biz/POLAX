@@ -1,11 +1,23 @@
 import requests, json, os, base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from nacl import encoding, public
 
 REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
 GH_TOKEN     = os.environ.get("GH_TOKEN", "")
 GH_REPO      = "sellerup-biz/POLAX"
+
+# Польское время UTC+1 (зима) / UTC+2 (лето)
+# Определяем смещение автоматически (упрощённо: март-октябрь = UTC+2, остальное = UTC+1)
+now_utc = datetime.now(timezone.utc)
+month = now_utc.month
+tz_offset = 2 if 3 <= month <= 10 else 1
+polish_now = now_utc + timedelta(hours=tz_offset)
+yesterday_polish = polish_now - timedelta(days=1)
+
+date_from = yesterday_polish.strftime("%Y-%m-%dT00:00:00") + ("+02:00" if tz_offset == 2 else "+01:00")
+date_to   = yesterday_polish.strftime("%Y-%m-%dT23:59:59") + ("+02:00" if tz_offset == 2 else "+01:00")
+date_key  = yesterday_polish.strftime("%Y-%m-%d")
 
 SHOPS = {}
 if os.environ.get("CLIENT_ID_SILA") and os.environ.get("REFRESH_TOKEN_SILA"):
@@ -80,13 +92,15 @@ def get_sales(access_token, date_from, date_to):
             "https://api.allegro.pl/order/checkout-forms",
             headers=headers,
             params={
-                "lineItems.boughtAt.gte": date_from,
-                "lineItems.boughtAt.lte": date_to,
-                "limit": 100, "offset": offset
+                "status":                    "READY_FOR_PROCESSING",
+                "lineItems.boughtAt.gte":    date_from,
+                "lineItems.boughtAt.lte":    date_to,
+                "limit":  100,
+                "offset": offset
             }
         )
         orders = r.json().get("checkoutForms", [])
-        print(f"  Заказов: {len(orders)} (offset={offset})")
+        print(f"  Заказов READY_FOR_PROCESSING: {len(orders)} (offset={offset})")
         for o in orders:
             try:
                 total += float(o["summary"]["totalToPay"]["amount"])
@@ -97,15 +111,10 @@ def get_sales(access_token, date_from, date_to):
         offset += 100
     return round(total, 2)
 
-# Вчерашняя дата
-yesterday = datetime.utcnow() - timedelta(days=1)
-date_from = yesterday.strftime("%Y-%m-%dT00:00:00Z")
-date_to   = yesterday.strftime("%Y-%m-%dT23:59:59Z")
-date_key  = yesterday.strftime("%Y-%m-%d")
+print(f"Дата (польское время): {date_key} | UTC+{tz_offset}")
+print(f"Период: {date_from} → {date_to}")
+print(f"Магазины: {list(SHOPS.keys())}")
 
-print(f"Дата: {date_key} | Магазины: {list(SHOPS.keys())}")
-
-# GitHub public key для шифрования
 gh_key = get_gh_public_key()
 gh_key_id  = gh_key.get("key_id")
 gh_key_val = gh_key.get("key")
@@ -128,17 +137,13 @@ for shop, creds in SHOPS.items():
     token, new_refresh = get_access_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
     if not token:
         continue
-
-    # Сохраняем новый refresh_token в GitHub Secrets
     if new_refresh and gh_key_id and gh_key_val:
         ok = update_gh_secret(creds["secret_name"], new_refresh, gh_key_id, gh_key_val)
-        print(f"  Токен обновлён в Secrets: {'OK' if ok else 'ОШИБКА'}")
-
+        print(f"  Токен обновлён: {'OK' if ok else 'ОШИБКА'}")
     sales = get_sales(token, date_from, date_to)
     existing[shop] = sales
     print(f"  Итого: {sales} zł")
 
-# Пересчёт месяцев
 months_ru = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"]
 monthly = defaultdict(lambda: {"Mlot_i_Klucz": 0, "PolaxEuroGroup": 0, "Sila_Narzedzi": 0})
 month_order = {}
