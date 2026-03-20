@@ -105,10 +105,10 @@ def get_costs(token, year, month):
     tz = get_tz(month)
     df = f"{year}-{month:02d}-01T00:00:00+0{tz}:00"
     dt = f"{year}-{month:02d}-{last_day:02d}T23:59:59+0{tz}:00"
-    # allegro-pl + allegro-business-pl → PLN (суммируем вместе)
-    # allegro-cz → CZK, allegro-hu → HUF, allegro-sk → EUR
+    # PLN: запрос БЕЗ marketplaceId = все PL данные (allegro-pl по умолчанию)
+    # allegro-business-pl НЕ запрашивать отдельно — вернёт те же данные что и allegro-pl!
     MKT_GROUPS = {
-        "PLN": ["allegro-pl", "allegro-business-pl"],
+        "PLN": [None],        # None = без фильтра = allegro-pl (базовый маркетплейс)
         "CZK": ["allegro-cz"],
         "HUF": ["allegro-hu"],
         "EUR": ["allegro-sk"],
@@ -120,10 +120,11 @@ def get_costs(token, year, month):
         for mkt in mkts:
             offset  = 0
             while True:
+                params = {"occurredAt.gte":df,"occurredAt.lte":dt,"limit":100,"offset":offset}
+                if mkt is not None:
+                    params["marketplaceId"] = mkt
                 entries = requests.get("https://api.allegro.pl/billing/billing-entries",
-                                       headers=hdrs(token),
-                                       params={"occurredAt.gte":df,"occurredAt.lte":dt,
-                                               "marketplaceId":mkt,"limit":100,"offset":offset}
+                                       headers=hdrs(token), params=params
                                        ).json().get("billingEntries",[])
                 for e in entries:
                     try:
