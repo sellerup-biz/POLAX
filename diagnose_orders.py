@@ -116,10 +116,17 @@ print("="*65)
 all_orders = fetch_orders(token)
 print(f"  Загружено: {len(all_orders)} заказов")
 
-# Фильтруем CANCELLED
-active = [o for o in all_orders if o.get("status") != "CANCELLED"]
-cancelled = len(all_orders) - len(active)
-print(f"  Активных: {len(active)} | Отменённых: {cancelled}")
+# Фильтруем — только READY_FOR_PROCESSING (оплаченные)
+# FILLED_IN = форма заполнена но оплата не завершена — не считаем
+# BOUGHT = без формы — не считаем
+# CANCELLED = отменённые — не считаем
+by_status = defaultdict(int)
+for o in all_orders:
+    by_status[o.get("status","?")] += 1
+print(f"\n  Статусы: {dict(by_status)}")
+
+active = [o for o in all_orders if o.get("status") == "READY_FOR_PROCESSING"]
+print(f"  Только READY_FOR_PROCESSING: {len(active)}")
 
 # Суммируем по маркетплейсам
 by_mkt       = defaultdict(float)
