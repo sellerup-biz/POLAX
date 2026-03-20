@@ -3,10 +3,16 @@ POLAX — ТЕСТ РАСХОДОВ: Янв / Фев / Мар 2026
 Только чтение данных из API. data.json НЕ изменяется.
 Запуск: test_costs.yml (workflow_dispatch) на GitHub Actions.
 
+Запрашивает биллинг по каждому маркетплейсу отдельно:
+  • allegro-pl        → PLN (без marketplaceId, включает business-pl)
+  • allegro-cz        → CZK (с marketplaceId=allegro-cz)
+  • allegro-hu        → HUF (с marketplaceId=allegro-hu)
+  • allegro-sk        → EUR (с marketplaceId=allegro-sk)
+
 Выводит:
-  • по каждому магазину × каждому месяцу: суммы по категориям расходов
-  • все неизвестные type.id (категория «other») → для пополнения BILLING_MAP
-  • сводную таблицу (все магазины × все месяцы) с итогами
+  • расходы по каждому магазину × месяцу в каждой валюте
+  • неизвестные type.id для пополнения BILLING_MAP
+  • сводную таблицу по всем магазинам
 """
 import requests, os, base64, calendar
 from nacl import encoding, public
@@ -20,6 +26,15 @@ MONTHS_TO_CHECK = [
     (2026, 1, "Янв 2026"),
     (2026, 2, "Фев 2026"),
     (2026, 3, "Мар 2026"),
+]
+
+# PL: без marketplaceId (включает business автоматически)
+# CZ/HU/SK: с marketplaceId → возвращает расходы в локальной валюте
+BILLING_MARKETS = [
+    ("pl",  None,            "PLN"),
+    ("cz",  "allegro-cz",   "CZK"),
+    ("hu",  "allegro-hu",   "HUF"),
+    ("sk",  "allegro-sk",   "EUR"),
 ]
 
 SHOPS = {
@@ -57,6 +72,7 @@ BILLING_MAP = {
     "SB2": "subscription", "ABN": "subscription",
     "RET": "discount", "PS1": "discount",
     "PAD": "IGNORE",
+    "SUM": "IGNORE",   # Podsumowanie miesiąca — всегда 0.00, просто итоговая запись
 }
 
 COST_CATS = ["commission", "delivery", "ads", "subscription", "discount"]
@@ -146,39 +162,42 @@ def get_tz(month):
     return 2 if 3 <= month <= 10 else 1
 
 
-def get_costs_for_month(token, year, month):
+def fetch_billing(token, year, month, marketplace_id=None):
     """
-    Запрашивает /billing/billing-entries БЕЗ marketplaceId.
-    Возвращает:
-      costs     — dict по категориям (PLN)
-      unknowns  — list of {id, name, amount} для неизвестных type.id
-      pad_total — сумма проигнорированных PAD записей
-      raw_count — сколько записей всего получено
+    Запрашивает /billing/billing-entries.
+    marketplace_id=None  → allegro-pl (без фильтра, включает business)
+    marketplace_id=str   → конкретный рынок в его валюте
+    Возвращает (costs, unknowns, pad_total, raw_count).
     """
-    last_day   = calendar.monthrange(year, month)[1]
-    tz         = get_tz(month)
-    date_from  = f"{year}-{month:02d}-01T00:00:00+0{tz}:00"
-    date_to    = f"{year}-{month:02d}-{last_day:02d}T23:59:59+0{tz}:00"
+    last_day  = calendar.monthrange(year, month)[1]
+    tz        = get_tz(month)
+    date_from = f"{year}-{month:02d}-01T00:00:00+0{tz}:00"
+    date_to   = f"{year}-{month:02d}-{last_day:02d}T23:59:59+0{tz}:00"
 
     costs     = {cat: 0.0 for cat in COST_CATS}
-    unknowns  = []         # [{id, name, amount}]
+    unknowns  = []
     pad_total = 0.0
     raw_count = 0
     offset    = 0
 
+    params = {
+        "occurredAt.gte": date_from,
+        "occurredAt.lte": date_to,
+        "limit":          100,
+        "offset":         offset,
+    }
+    if marketplace_id:
+        params["marketplaceId"] = marketplace_id
+
     while True:
+        params["offset"] = offset
         resp = requests.get(
             "https://api.allegro.pl/billing/billing-entries",
             headers=hdrs(token),
-            params={
-                "occurredAt.gte": date_from,
-                "occurredAt.lte": date_to,
-                "limit":          100,
-                "offset":         offset,
-            },
+            params=params,
         )
         if resp.status_code != 200:
-            print(f"      ⚠ Billing HTTP {resp.status_code}: {resp.text[:200]}")
+            print(f"      ⚠ Billing HTTP {resp.status_code} ({marketplace_id or 'pl'}): {resp.text[:200]}")
             break
 
         entries = resp.json().get("billingEntries", [])
@@ -194,7 +213,6 @@ def get_costs_for_month(token, year, month):
                 if cat == "IGNORE":
                     pad_total += abs(amt)
                     continue
-
                 if cat == "other":
                     unknowns.append({"id": tid, "name": tnam, "amount": amt})
                     continue
@@ -210,7 +228,7 @@ def get_costs_for_month(token, year, month):
                     elif cat == "discount":
                         costs["discount"]  += amt
             except Exception as ex:
-                print(f"      ⚠ Ошибка записи: {ex} → {e}")
+                print(f"      ⚠ Ошибка записи: {ex}")
 
         if len(entries) < 100:
             break
@@ -224,157 +242,135 @@ def get_costs_for_month(token, year, month):
     )
 
 
-def fmt(n):
-    return f"{n:>12,.2f}"
+def print_costs(costs, currency, raw_count, pad_total, unknowns, indent="    "):
+    net = sum(costs.values()) - costs["discount"]
+    print(f"{indent}Записей: {raw_count}  |  PAD/SUM ignored: {pad_total:,.2f} {currency}")
+    print(f"{indent}commission:   {costs['commission']:>10,.2f} {currency}")
+    print(f"{indent}delivery:     {costs['delivery']:>10,.2f} {currency}")
+    print(f"{indent}ads:          {costs['ads']:>10,.2f} {currency}")
+    print(f"{indent}subscription: {costs['subscription']:>10,.2f} {currency}")
+    print(f"{indent}discount:     {costs['discount']:>10,.2f} {currency}")
+    print(f"{indent}{'─'*42}")
+    print(f"{indent}НЕТТО:        {net:>10,.2f} {currency}")
+    if unknowns:
+        seen = {}
+        for u in unknowns:
+            k = u["id"]
+            if k not in seen:
+                seen[k] = {"name": u["name"], "count": 0, "total": 0.0}
+            seen[k]["count"] += 1
+            seen[k]["total"] += u["amount"]
+        print(f"{indent}⚠ UNKNOWN type.id:")
+        for tid, info in sorted(seen.items()):
+            print(f"{indent}  {tid:<8} {info['name']:<40} {info['count']} записей  {info['total']:,.2f} {currency}")
 
 
 # ── MAIN ──────────────────────────────────────────────────────
 
 print("=" * 72)
-print("  POLAX — ТЕСТ РАСХОДОВ: Янв / Фев / Мар 2026")
+print("  POLAX — ТЕСТ РАСХОДОВ (мультивалюта): Янв / Фев / Мар 2026")
 print("  data.json НЕ изменяется")
 print("=" * 72)
 
-pubkey      = get_gh_pubkey()
-all_costs   = {}   # all_costs[shop_name][label] = costs dict
-all_unknown = defaultdict(lambda: defaultdict(list))  # [shop][label] = [{id,name,amt}]
+pubkey = get_gh_pubkey()
+
+# all_costs[shop][label][currency_code] = costs dict
+all_costs   = defaultdict(lambda: defaultdict(dict))
+all_unknown = []   # для итогового раздела
 
 for shop_name, shop in SHOPS.items():
-    print(f"\n{'━' * 60}")
+    print(f"\n{'━' * 68}")
     print(f"  МАГАЗИН: {shop_name}")
-    print(f"{'━' * 60}")
+    print(f"{'━' * 68}")
 
     token, new_rt = get_token(shop)
     if not token:
-        print("  ❌ Не удалось получить токен — пропускаем магазин")
+        print("  ❌ Не удалось получить токен — пропускаем")
         continue
     save_token(shop["secret_name"], new_rt, pubkey)
 
-    shop_costs = {}
     for year, month, label in MONTHS_TO_CHECK:
-        print(f"\n  {label}:  ({year}-{month:02d})")
-        costs, unknowns, pad_total, raw_count = get_costs_for_month(token, year, month)
-        shop_costs[label] = costs
-        all_unknown[shop_name][label] = unknowns
+        print(f"\n  ── {label} ──")
 
-        print(f"    Записей из API:  {raw_count}")
-        print(f"    PAD (ignored):  {fmt(pad_total)} PLN")
-        print(f"    ─────────────────────────────────────────")
-        print(f"    commission:     {fmt(costs['commission'])} PLN")
-        print(f"    delivery:       {fmt(costs['delivery'])} PLN")
-        print(f"    ads:            {fmt(costs['ads'])} PLN")
-        print(f"    subscription:   {fmt(costs['subscription'])} PLN")
-        print(f"    discount:       {fmt(costs['discount'])} PLN  (rabaty — уменьшают реальные расходы)")
-        total_costs = sum(costs.values()) - costs["discount"]
-        print(f"    ─────────────────────────────────────────")
-        print(f"    ИТОГО расходов: {fmt(total_costs)} PLN  (без discount)")
-
-        if unknowns:
-            print(f"\n    ⚠ НЕИЗВЕСТНЫЕ type.id ({len(unknowns)} записей) → нужно добавить в BILLING_MAP:")
-            seen = {}
+        for mkt_key, mkt_id, currency in BILLING_MARKETS:
+            costs, unknowns, pad_total, raw_count = fetch_billing(token, year, month, mkt_id)
+            all_costs[shop_name][label][currency] = costs
             for u in unknowns:
-                key = u["id"]
-                if key not in seen:
-                    seen[key] = {"name": u["name"], "count": 0, "total": 0.0}
-                seen[key]["count"] += 1
-                seen[key]["total"] += u["amount"]
-            for tid, info in sorted(seen.items()):
-                print(f"      {tid:<8} {info['name']:<45} {info['count']:>3} записей  {fmt(info['total'])} PLN")
+                all_unknown.append({**u, "shop": shop_name, "month": label, "currency": currency})
 
-    all_costs[shop_name] = shop_costs
+            label_str = f"allegro-{mkt_key}" if mkt_id else "allegro-pl (+ business)"
+            print(f"\n    [{currency}] {label_str}")
+            print_costs(costs, currency, raw_count, pad_total, unknowns)
+
 
 # ── СВОДНАЯ ТАБЛИЦА ───────────────────────────────────────────
 
 print(f"\n\n{'=' * 72}")
-print(f"  СВОДНАЯ ТАБЛИЦА РАСХОДОВ — все магазины × все месяцы (PLN)")
+print(f"  СВОДНАЯ ТАБЛИЦА — все магазины суммированы по месяцам")
 print(f"{'=' * 72}")
-
-COL = 13
 
 for year, month, label in MONTHS_TO_CHECK:
     print(f"\n  {label}")
-    print(f"  {'Магазин':<22} {'commission':>{COL}} {'delivery':>{COL}} {'ads':>{COL}} {'subscr':>{COL}} {'discount':>{COL}}")
-    print(f"  {'─'*22} {'─'*COL} {'─'*COL} {'─'*COL} {'─'*COL} {'─'*COL}")
-
-    totals = {cat: 0.0 for cat in COST_CATS}
-
-    for shop_name in SHOPS:
-        if shop_name not in all_costs or label not in all_costs[shop_name]:
-            print(f"  {shop_name:<22} {'нет данных':>{COL}}")
-            continue
-        c = all_costs[shop_name][label]
-        for cat in COST_CATS:
-            totals[cat] += c[cat]
-        print(f"  {shop_name:<22}"
-              f" {c['commission']:>{COL},.2f}"
-              f" {c['delivery']:>{COL},.2f}"
-              f" {c['ads']:>{COL},.2f}"
-              f" {c['subscription']:>{COL},.2f}"
-              f" {c['discount']:>{COL},.2f}")
-
-    print(f"  {'─'*22} {'─'*COL} {'─'*COL} {'─'*COL} {'─'*COL} {'─'*COL}")
-    print(f"  {'ИТОГО':<22}"
-          f" {totals['commission']:>{COL},.2f}"
-          f" {totals['delivery']:>{COL},.2f}"
-          f" {totals['ads']:>{COL},.2f}"
-          f" {totals['subscription']:>{COL},.2f}"
-          f" {totals['discount']:>{COL},.2f}")
+    for mkt_key, mkt_id, currency in BILLING_MARKETS:
+        totals = {cat: 0.0 for cat in COST_CATS}
+        for shop_name in SHOPS:
+            c = all_costs[shop_name][label].get(currency, {})
+            for cat in COST_CATS:
+                totals[cat] += c.get(cat, 0.0)
+        net = sum(totals.values()) - totals["discount"]
+        print(f"    {currency}:  "
+              f"commission {totals['commission']:>9,.2f}  "
+              f"delivery {totals['delivery']:>9,.2f}  "
+              f"ads {totals['ads']:>9,.2f}  "
+              f"subscr {totals['subscription']:>7,.2f}  "
+              f"discount {totals['discount']:>7,.2f}  "
+              f"→ нетто {net:>9,.2f}")
 
 # ── ИТОГ ЗА 3 МЕСЯЦА ─────────────────────────────────────────
 
 print(f"\n{'─' * 72}")
-print(f"  ИТОГО РАСХОДОВ ЗА ВСЕ 3 МЕСЯЦА (все магазины суммированы)")
+print(f"  ИТОГО ЗА 3 МЕСЯЦА (все магазины + все месяцы)")
 print(f"{'─' * 72}")
 
-grand = {cat: 0.0 for cat in COST_CATS}
-for shop_name in SHOPS:
-    if shop_name not in all_costs:
-        continue
-    shop_total = {cat: 0.0 for cat in COST_CATS}
-    for _, _, label in MONTHS_TO_CHECK:
-        if label not in all_costs[shop_name]:
-            continue
-        for cat in COST_CATS:
-            shop_total[cat] += all_costs[shop_name][label].get(cat, 0.0)
-    for cat in COST_CATS:
-        grand[cat] += shop_total[cat]
-    net = sum(shop_total.values()) - shop_total["discount"]
-    print(f"  {shop_name:<22}  commission {shop_total['commission']:>9,.2f}  "
-          f"delivery {shop_total['delivery']:>9,.2f}  "
-          f"ads {shop_total['ads']:>9,.2f}  "
-          f"subscr {shop_total['subscription']:>7,.2f}  "
-          f"discount {shop_total['discount']:>7,.2f}  → нетто {net:>9,.2f}")
+for mkt_key, mkt_id, currency in BILLING_MARKETS:
+    grand = {cat: 0.0 for cat in COST_CATS}
+    for shop_name in SHOPS:
+        for _, _, label in MONTHS_TO_CHECK:
+            c = all_costs[shop_name][label].get(currency, {})
+            for cat in COST_CATS:
+                grand[cat] += c.get(cat, 0.0)
+    net = sum(grand.values()) - grand["discount"]
+    print(f"  {currency}:  "
+          f"commission {grand['commission']:>9,.2f}  "
+          f"delivery {grand['delivery']:>9,.2f}  "
+          f"ads {grand['ads']:>9,.2f}  "
+          f"subscr {grand['subscription']:>7,.2f}  "
+          f"discount {grand['discount']:>7,.2f}  "
+          f"→ нетто {net:>9,.2f}")
 
-print(f"{'─' * 72}")
-grand_net = sum(grand.values()) - grand["discount"]
-print(f"  {'ВСЕ МАГАЗИНЫ':<22}  commission {grand['commission']:>9,.2f}  "
-      f"delivery {grand['delivery']:>9,.2f}  "
-      f"ads {grand['ads']:>9,.2f}  "
-      f"subscr {grand['subscription']:>7,.2f}  "
-      f"discount {grand['discount']:>7,.2f}  → нетто {grand_net:>9,.2f}")
-
-# ── НЕИЗВЕСТНЫЕ type.id — общий список ───────────────────────
+# ── НЕИЗВЕСТНЫЕ type.id ───────────────────────────────────────
 
 print(f"\n\n{'=' * 72}")
 print(f"  НЕИЗВЕСТНЫЕ type.id (нужно добавить в BILLING_MAP)")
 print(f"{'=' * 72}")
 
-combined_unknown = defaultdict(lambda: {"name": "", "count": 0, "total": 0.0, "shops": set()})
-for shop_name, months_data in all_unknown.items():
-    for label, entries in months_data.items():
-        for u in entries:
-            combined_unknown[u["id"]]["name"]  = u["name"]
-            combined_unknown[u["id"]]["count"] += 1
-            combined_unknown[u["id"]]["total"] += u["amount"]
-            combined_unknown[u["id"]]["shops"].add(shop_name)
+combined = defaultdict(lambda: {"name": "", "count": 0, "total": 0.0,
+                                 "shops": set(), "currencies": set()})
+for u in all_unknown:
+    combined[u["id"]]["name"]       = u["name"]
+    combined[u["id"]]["count"]     += 1
+    combined[u["id"]]["total"]     += u["amount"]
+    combined[u["id"]]["shops"].add(u["shop"])
+    combined[u["id"]]["currencies"].add(u["currency"])
 
-if combined_unknown:
-    print(f"\n  {'type.id':<10} {'Название':<45} {'Кол-во':>7} {'Сумма PLN':>12}  Магазины")
-    print(f"  {'─'*10} {'─'*45} {'─'*7} {'─'*12}  {'─'*20}")
-    for tid, info in sorted(combined_unknown.items()):
+if combined:
+    print(f"\n  {'type.id':<10} {'Название':<42} {'Кол':>5} {'Сумма':>10}  Магазины / Валюты")
+    print(f"  {'─'*10} {'─'*42} {'─'*5} {'─'*10}  {'─'*30}")
+    for tid, info in sorted(combined.items()):
         shops_str = ", ".join(sorted(info["shops"]))
-        print(f"  {tid:<10} {info['name']:<45} {info['count']:>7} {info['total']:>12,.2f}  {shops_str}")
-    print(f"\n  ⚠ Добавь эти type.id в BILLING_MAP в fetch_history.py и fetch.py!")
+        curr_str  = "/".join(sorted(info["currencies"]))
+        print(f"  {tid:<10} {info['name']:<42} {info['count']:>5} {info['total']:>10,.2f}  {shops_str} [{curr_str}]")
+    print(f"\n  ⚠ Добавь эти type.id в BILLING_MAP!")
 else:
     print(f"\n  ✅ Все type.id распознаны — BILLING_MAP полный!")
 
