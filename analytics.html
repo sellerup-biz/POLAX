@@ -145,7 +145,7 @@ function fmt(n){
 function normalizeCountries(c){
   if(!c) return {PL:0,CZ:0,HU:0,SK:0};
   return {
-    PL: c['allegro-pl']||c['PL']||0,
+    PL: (c['allegro-pl']||c['PL']||0) + (c['allegro-business-pl']||0),
     CZ: c['allegro-cz']||c['CZ']||0,
     HU: c['allegro-hu']||c['HU']||0,
     SK: c['allegro-sk']||c['SK']||0

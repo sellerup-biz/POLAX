@@ -5,7 +5,7 @@ from nacl import encoding, public
 REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
 GH_TOKEN = os.environ.get("GH_TOKEN", "")
 GH_REPO  = "sellerup-biz/POLAX"
-MARKETPLACES = {"allegro-pl":"PLN","allegro-cz":"CZK","allegro-hu":"HUF","allegro-sk":"EUR"}
+MARKETPLACES = {"allegro-pl":"PLN","allegro-business-pl":"PLN","allegro-cz":"CZK","allegro-hu":"HUF","allegro-sk":"EUR"}
 
 TEST_SHOP  = "PolaxEuroGroup"
 ALL_SHOPS  = ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]
