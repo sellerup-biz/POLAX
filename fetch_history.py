@@ -1,220 +1,263 @@
-import requests, json, os, base64
-from datetime import datetime, timedelta, timezone
+"""
+POLAX — загрузка истории (все 3 магазина, все месяцы)
+Период задаётся через переменные HISTORY_FROM и HISTORY_TO
+Запускается вручную через history.yml
+"""
+import requests, json, os, base64, calendar
+from datetime import datetime
 from nacl import encoding, public
+from collections import defaultdict
 
 REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
 GH_TOKEN     = os.environ.get("GH_TOKEN", "")
 GH_REPO      = "sellerup-biz/POLAX"
-MARKETPLACES = {"allegro-pl":"PLN","allegro-business-pl":"PLN","allegro-cz":"CZK","allegro-hu":"HUF","allegro-sk":"EUR"}
 
-SHOPS = {}
-for key, name, sname in [("SILA","Sila_Narzedzi","REFRESH_TOKEN_SILA"),
-                          ("POLAX","PolaxEuroGroup","REFRESH_TOKEN_POLAX"),
-                          ("MLOT","Mlot_i_Klucz","REFRESH_TOKEN_MLOT")]:
-    if os.environ.get(f"CLIENT_ID_{key}") and os.environ.get(f"REFRESH_TOKEN_{key}"):
-        SHOPS[name] = {"client_id":     os.environ[f"CLIENT_ID_{key}"],
-                       "client_secret": os.environ[f"CLIENT_SECRET_{key}"],
-                       "refresh_token": os.environ[f"REFRESH_TOKEN_{key}"],
-                       "secret_name":   sname}
+# Период задаётся через env или по умолчанию
+HISTORY_FROM = os.environ.get("HISTORY_FROM", "2025-04-01")
+HISTORY_TO   = os.environ.get("HISTORY_TO",   "2025-08-31")
+
+SHOPS = {
+    "Mlot_i_Klucz":   {"client_id": os.environ.get("CLIENT_ID_MLOT",""),    "client_secret": os.environ.get("CLIENT_SECRET_MLOT",""),    "refresh_token": os.environ.get("REFRESH_TOKEN_MLOT",""),    "secret_name": "REFRESH_TOKEN_MLOT"},
+    "PolaxEuroGroup": {"client_id": os.environ.get("CLIENT_ID_POLAX",""),   "client_secret": os.environ.get("CLIENT_SECRET_POLAX",""),   "refresh_token": os.environ.get("REFRESH_TOKEN_POLAX",""),   "secret_name": "REFRESH_TOKEN_POLAX"},
+    "Sila_Narzedzi":  {"client_id": os.environ.get("CLIENT_ID_SILA",""),    "client_secret": os.environ.get("CLIENT_SECRET_SILA",""),    "refresh_token": os.environ.get("REFRESH_TOKEN_SILA",""),    "secret_name": "REFRESH_TOKEN_SILA"},
+}
 
 BILLING_MAP = {
-    "SUC":"commission","SUJ":"commission","LDS":"commission",
+    "SUC":"commission","SUJ":"commission","LDS":"commission","HUN":"commission",
     "REF":"zwrot_commission",
-    "HB4":"delivery","HB1":"delivery","DPB":"delivery","DXP":"delivery",
-    "HXO":"delivery","HLB":"delivery","ORB":"delivery","DHR":"delivery",
-    "GLS":"delivery","UPS":"delivery",
+    "HB4":"delivery","HB1":"delivery","HB8":"delivery","HB9":"delivery",
+    "DPB":"delivery","DXP":"delivery","HXO":"delivery","HLB":"delivery",
+    "ORB":"delivery","DHR":"delivery","DAP":"delivery","DKP":"delivery","DPP":"delivery",
+    "GLS":"delivery","UPS":"delivery","UPD":"delivery",
+    "DTR":"delivery","DPA":"delivery","ITR":"delivery","HLA":"delivery",
+    "DDP":"delivery","HB3":"delivery","DPS":"delivery","UTR":"delivery",
     "NSP":"ads","DPG":"ads","WYR":"ads","POD":"ads","BOL":"ads","EMF":"ads","CPC":"ads",
+    "FEA":"ads","BRG":"ads","FSF":"ads",
     "SB2":"subscription","ABN":"subscription",
     "RET":"discount","PS1":"discount",
     "PAD":"IGNORE",
 }
 
-def get_billing_cat(tid, tnam, amt):
+def get_billing_cat(tid, tnam):
     if tid in BILLING_MAP: return BILLING_MAP[tid]
     n = tnam.lower()
+    if "kampanii" in n or "kampania" in n: return "ads"
     if any(x in n for x in ["prowizja","lokalna dopłata","opłata transakcyjna"]): return "commission"
     if any(x in n for x in ["dostawa","kurier","inpost","dpd","gls","ups","orlen","poczta",
-                              "przesyłka","fulfillment","one kurier","allegro delivery"]): return "delivery"
+                              "przesyłka","fulfillment","one kurier","allegro delivery",
+                              "packeta","international","dodatkowa za dostawę"]): return "delivery"
     if any(x in n for x in ["kampani","reklam","promowanie","wyróżnienie","pogrubienie",
-                              "podświetlenie","strona działu","pakiet promo","cpc"]): return "ads"
+                              "podświetlenie","strona działu","pakiet promo","cpc","ads"]): return "ads"
     if any(x in n for x in ["abonament","smart"]): return "subscription"
     if any(x in n for x in ["rozliczenie akcji","wyrównanie w programie allegro","rabat"]): return "discount"
     if any(x in n for x in ["zwrot kosztów","zwrot prowizji"]): return "zwrot_commission"
     if "pobranie opłat z wpływów" in n: return "IGNORE"
     return "other"
 
-_rates = {}
-def get_rate(currency, date_str):
-    if currency == "PLN": return 1.0
-    key = f"{currency}_{date_str}"
-    if key in _rates: return _rates[key]
-    for delta in range(7):
-        d = (datetime.strptime(date_str, "%Y-%m-%d") - timedelta(days=delta)).strftime("%Y-%m-%d")
-        try:
-            r = requests.get(f"https://api.nbp.pl/api/exchangerates/rates/a/{currency.lower()}/{d}/?format=json", timeout=5)
-            if r.status_code == 200:
-                rate = float(r.json()["rates"][0]["mid"])
-                _rates[key] = rate
-                return rate
-        except: pass
-    return 1.0
-
-def get_gh_pk():
+def get_gh_pubkey():
     r = requests.get(f"https://api.github.com/repos/{GH_REPO}/actions/secrets/public-key",
-                     headers={"Authorization": f"token {GH_TOKEN}", "Accept": "application/vnd.github+json"})
+                     headers={"Authorization":f"token {GH_TOKEN}","Accept":"application/vnd.github+json"})
     return r.json()
 
-def update_gh_secret(name, val, key_id, key_val):
-    pk  = public.PublicKey(key_val.encode(), encoding.Base64Encoder())
-    enc = base64.b64encode(public.SealedBox(pk).encrypt(val.encode())).decode()
-    r   = requests.put(f"https://api.github.com/repos/{GH_REPO}/actions/secrets/{name}",
-                       headers={"Authorization": f"token {GH_TOKEN}", "Accept": "application/vnd.github+json"},
-                       json={"encrypted_value": enc, "key_id": key_id})
-    return r.status_code in (201, 204)
+def save_token(secret_name, new_rt, pubkey):
+    if not new_rt or not GH_TOKEN: return
+    try:
+        pk  = public.PublicKey(pubkey["key"].encode(), encoding.Base64Encoder())
+        enc = base64.b64encode(public.SealedBox(pk).encrypt(new_rt.encode())).decode()
+        requests.put(f"https://api.github.com/repos/{GH_REPO}/actions/secrets/{secret_name}",
+                     headers={"Authorization":f"token {GH_TOKEN}","Accept":"application/vnd.github+json"},
+                     json={"encrypted_value":enc,"key_id":pubkey["key_id"]})
+        print(f"    Токен {secret_name} сохранён")
+    except Exception as e:
+        print(f"    ⚠ Ошибка токена {secret_name}: {e}")
 
-def get_token(cid, cs, rt):
-    r = requests.post("https://allegro.pl/auth/oauth/token", auth=(cid, cs),
-                      data={"grant_type":"refresh_token","refresh_token":rt,"redirect_uri":REDIRECT_URI})
+def get_token(shop):
+    r = requests.post("https://allegro.pl/auth/oauth/token",
+                      auth=(shop["client_id"], shop["client_secret"]),
+                      data={"grant_type":"refresh_token",
+                            "refresh_token":shop["refresh_token"],
+                            "redirect_uri":REDIRECT_URI})
     d = r.json()
-    if "access_token" not in d: return None, None
-    return d["access_token"], d.get("refresh_token", rt)
+    if "access_token" not in d:
+        print(f"    ОШИБКА: {d}"); return None, None
+    return d["access_token"], d.get("refresh_token","")
 
 def hdrs(t):
-    return {"Authorization": f"Bearer {t}", "Accept": "application/vnd.allegro.public.v1+json"}
+    return {"Authorization":f"Bearer {t}","Accept":"application/vnd.allegro.public.v1+json"}
 
 def get_tz(month): return 2 if 3 <= month <= 10 else 1
 
-def get_sales_for_day(token, date_key):
-    tz = get_tz(int(date_key[5:7]))
-    df = date_key + f"T00:00:00+0{tz}:00"
-    dt = date_key + f"T23:59:59+0{tz}:00"
-    total = 0.0
-    offset = 0
-    while True:
-        ops = requests.get("https://api.allegro.pl/payments/payment-operations", headers=hdrs(token),
-                           params={"group":"INCOME","occurredAt.gte":df,"occurredAt.lte":dt,
-                                   "limit":100,"offset":offset}).json().get("paymentOperations",[])
-        for op in ops:
-            try: total += float(op["value"]["amount"]) * get_rate(op["value"]["currency"], date_key)
-            except: pass
-        if len(ops) < 100: break
-        offset += 100
-    countries = {k: 0.0 for k in MARKETPLACES}
-    for mkt in MARKETPLACES:
+def get_months_in_range(date_from, date_to):
+    """Список месяцев в диапазоне"""
+    months = []
+    df = datetime.strptime(date_from, "%Y-%m-%d")
+    dt = datetime.strptime(date_to,   "%Y-%m-%d")
+    cur = datetime(df.year, df.month, 1)
+    while cur <= dt:
+        months.append((cur.year, cur.month))
+        if cur.month == 12: cur = datetime(cur.year+1, 1, 1)
+        else:               cur = datetime(cur.year, cur.month+1, 1)
+    return months
+
+def get_sales_for_month(token, year, month):
+    last_day = calendar.monthrange(year, month)[1]
+    tz = get_tz(month)
+    df = f"{year}-{month:02d}-01T00:00:00+0{tz}:00"
+    dt = f"{year}-{month:02d}-{last_day:02d}T23:59:59+0{tz}:00"
+    by_mkt = defaultdict(float)
+    for mkt in ["allegro-pl","allegro-business-pl","allegro-cz","allegro-hu","allegro-sk"]:
         offset = 0
         while True:
-            ops = requests.get("https://api.allegro.pl/payments/payment-operations", headers=hdrs(token),
+            ops = requests.get("https://api.allegro.pl/payments/payment-operations",
+                               headers=hdrs(token),
                                params={"group":"INCOME","occurredAt.gte":df,"occurredAt.lte":dt,
-                                       "marketplaceId":mkt,"limit":100,"offset":offset}).json().get("paymentOperations",[])
+                                       "marketplaceId":mkt,"limit":50,"offset":offset}
+                               ).json().get("paymentOperations",[])
             for op in ops:
-                try: countries[mkt] += float(op["value"]["amount"]) * get_rate(op["value"]["currency"], date_key)
+                try: by_mkt[mkt] += float(op["value"]["amount"])
                 except: pass
-            if len(ops) < 100: break
-            offset += 100
-        countries[mkt] = round(countries[mkt], 2)
-    return countries, round(total, 2)
+            if len(ops) < 50: break
+            offset += 50
+    return {
+        "allegro-pl":  round(by_mkt["allegro-pl"] + by_mkt["allegro-business-pl"], 2),
+        "allegro-cz":  round(by_mkt["allegro-cz"], 2),
+        "allegro-hu":  round(by_mkt["allegro-hu"], 2),
+        "allegro-sk":  round(by_mkt["allegro-sk"], 2),
+    }
 
-def get_costs_for_day(token, date_key):
-    tz = get_tz(int(date_key[5:7]))
-    df = date_key + f"T00:00:00+0{tz}:00"
-    dt = date_key + f"T23:59:59+0{tz}:00"
-    costs   = {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0,"other":0.0}
-    unknown = {}
-    offset  = 0
+def get_costs_for_month(token, year, month):
+    last_day = calendar.monthrange(year, month)[1]
+    tz = get_tz(month)
+    df = f"{year}-{month:02d}-01T00:00:00+0{tz}:00"
+    dt = f"{year}-{month:02d}-{last_day:02d}T23:59:59+0{tz}:00"
+    costs = {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0}
+    offset = 0
     while True:
-        entries = requests.get("https://api.allegro.pl/billing/billing-entries", headers=hdrs(token),
+        entries = requests.get("https://api.allegro.pl/billing/billing-entries",
+                               headers=hdrs(token),
                                params={"occurredAt.gte":df,"occurredAt.lte":dt,
-                                       "limit":100,"offset":offset}).json().get("billingEntries",[])
+                                       "limit":100,"offset":offset}
+                               ).json().get("billingEntries",[])
         for e in entries:
             try:
-                amt  = float(e["value"]["amount"])
-                tid  = e["type"]["id"]
-                tnam = e["type"]["name"]
-                cat  = get_billing_cat(tid, tnam, amt)
+                amt = float(e["value"]["amount"])
+                cat = get_billing_cat(e["type"]["id"], e["type"]["name"])
                 if cat == "IGNORE": continue
                 if amt < 0:
                     if cat in costs: costs[cat] += abs(amt)
-                    if cat == "other": unknown[tid] = tnam
                 elif amt > 0:
                     if cat == "zwrot_commission": costs["commission"] = max(0, costs["commission"] - amt)
-                    elif cat == "delivery":       costs["delivery"]   = max(0, costs["delivery"]   - amt)
+                    elif cat == "delivery":       costs["delivery"]   = max(0, costs["delivery"] - amt)
                     elif cat == "discount":       costs["discount"]   += amt
-                    elif cat not in ("IGNORE",):  unknown[f"+{tid}"] = f"+{tnam}"
             except: pass
         if len(entries) < 100: break
         offset += 100
-    if unknown:
-        print(f"  ⚠ НОВЫЕ ТИПЫ [{date_key}]: {unknown}")
-    return {k: round(v, 2) for k, v in costs.items()}
+    return {k: round(v,2) for k,v in costs.items()}
 
-# ── ДИАПАЗОН ДАТ ──────────────────────────────────────────────
-now_utc   = datetime.now(timezone.utc)
-tz_off    = get_tz(now_utc.month)
-yesterday = (now_utc + timedelta(hours=tz_off) - timedelta(days=1)).replace(tzinfo=None)
-start     = datetime(2026, 1, 1)
-all_dates = []
-d = start
-while d <= yesterday:
-    all_dates.append(d.strftime("%Y-%m-%d"))
-    d += timedelta(days=1)
+def load_data():
+    try:
+        with open("data.json") as f: return json.load(f)
+    except:
+        return {"days":[],"months":[]}
 
-print(f"Дат: {len(all_dates)} | Магазины: {list(SHOPS.keys())}")
+def save_data(data):
+    with open("data.json","w") as f:
+        json.dump(data, f, ensure_ascii=False, separators=(",",":"))
 
-gh_key    = get_gh_pk()
-gh_key_id  = gh_key.get("key_id")
-gh_key_val = gh_key.get("key")
+def update_months(data):
+    months_map = defaultdict(lambda:{
+        "Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
+        "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0},
+        "costs":{"commission":0,"delivery":0,"ads":0,"subscription":0,"discount":0}
+    })
+    for day in data["days"]:
+        raw_mk = day["date"][:7]
+        y,mo = int(raw_mk[:4]), int(raw_mk[5:7])
+        mk = MONTH_RU[mo] + " " + str(y)
+        for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]:
+            months_map[mk][shop] = round(months_map[mk][shop] + day.get(shop,0), 2)
+        for c in ["allegro-pl","allegro-cz","allegro-hu","allegro-sk"]:
+            months_map[mk]["countries"][c] = round(
+                months_map[mk]["countries"][c] + day.get("countries",{}).get(c,0), 2)
+        for cat in ["commission","delivery","ads","subscription","discount"]:
+            months_map[mk]["costs"][cat] = round(
+                months_map[mk]["costs"][cat] + day.get("costs",{}).get(cat,0), 2)
+    data["months"] = [{"month":k,**v} for k,v in sorted(months_map.items())]
 
-tokens = {}
-for shop, creds in SHOPS.items():
-    t, nr = get_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
-    if t:
-        tokens[shop] = t
-        if nr and gh_key_id and gh_key_val:
-            print(f"  {shop} токен: {'OK' if update_gh_secret(creds['secret_name'], nr, gh_key_id, gh_key_val) else 'ERR'}")
+# ── MAIN ─────────────────────────────────────────────────────
+print(f"История: {HISTORY_FROM} → {HISTORY_TO}")
+months = get_months_in_range(HISTORY_FROM, HISTORY_TO)
+print(f"Месяцев: {len(months)}")
 
-days_data = {date: {"date":date,"Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
-                    "countries":{k:0 for k in MARKETPLACES},
-                    "costs":{"commission":0,"delivery":0,"ads":0,"subscription":0,"discount":0,"other":0}}
-             for date in all_dates}
+data    = load_data()
+pubkey  = get_gh_pubkey()
 
-for shop, token in tokens.items():
-    print(f"\n=== {shop} ===")
-    for date_key in all_dates:
-        countries, total = get_sales_for_day(token, date_key)
-        costs            = get_costs_for_day(token, date_key)
-        days_data[date_key][shop] = total
-        for k in countries: days_data[date_key]["countries"][k] = round(days_data[date_key]["countries"][k] + countries[k], 2)
-        for k in costs:     days_data[date_key]["costs"][k]     = round(days_data[date_key]["costs"][k] + costs[k], 2)
-        tc = sum(v for k,v in costs.items() if k != "discount")
-        if total > 0 or tc > 0:
-            print(f"  {date_key}: продажи={total:.2f} | Obowiązkowe={costs['commission']:.2f} Dostawa={costs['delivery']:.2f} Reklama={costs['ads']:.2f} Abonament={costs['subscription']:.2f} Rabaty=+{costs['discount']:.2f}")
+# Собираем данные по каждому магазину по месяцам
+# Структура: month_data[month_key][shop] = {sales_by_country, costs}
+month_data = defaultdict(lambda:{
+    "Mlot_i_Klucz":   {"sales":{},"total":0},
+    "PolaxEuroGroup": {"sales":{},"total":0,"costs":{}},
+    "Sila_Narzedzi":  {"sales":{},"total":0},
+})
 
-days_list = [days_data[d] for d in sorted(days_data)]
+for shop_name, shop in SHOPS.items():
+    print(f"\n{'='*50}")
+    print(f"  {shop_name}")
+    print(f"{'='*50}")
+    token, new_rt = get_token(shop)
+    if not token: continue
+    save_token(shop["secret_name"], new_rt, pubkey)
 
-months_ru = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"]
-monthly   = {}
-for day in days_list:
-    mk  = day["date"][:7]
-    dt  = datetime.strptime(mk, "%Y-%m")
-    lbl = f"{months_ru[dt.month-1]} {dt.year}"
-    if lbl not in monthly:
-        monthly[lbl] = {"month":lbl,"_o":mk,"Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
-                        "countries":{k:0.0 for k in MARKETPLACES},
-                        "costs":{"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0,"other":0.0}}
-    m = monthly[lbl]
-    for s in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]: m[s] = round(m[s] + day.get(s, 0), 2)
-    for k in MARKETPLACES: m["countries"][k] = round(m["countries"][k] + day.get("countries",{}).get(k, 0), 2)
-    for k in ["commission","delivery","ads","subscription","discount","other"]:
-        m["costs"][k] = round(m["costs"][k] + day.get("costs",{}).get(k, 0), 2)
+    for year, month in months:
+        mk = MONTH_RU[month] + " " + str(year)
+        print(f"  {mk}...", end=" ", flush=True)
+        sales = get_sales_for_month(token, year, month)
+        total = sum(sales.values())
+        month_data[mk][shop_name]["sales"]  = sales
+        month_data[mk][shop_name]["total"]  = total
+        print(f"продажи={total:.2f}", end=" ")
 
-months_list = sorted([{k:v for k,v in m.items() if k != "_o"} for m in monthly.values()],
-                     key=lambda x: monthly[x["month"]]["_o"])
-result = {"days": days_list, "months": months_list}
-with open("data.json", "w") as f: json.dump(result, f, indent=2, ensure_ascii=False)
+        if shop_name == "PolaxEuroGroup":
+            costs = get_costs_for_month(token, year, month)
+            month_data[mk][shop_name]["costs"] = costs
+            print(f"расходы OK", end="")
+        print()
 
-print(f"\n{'='*60}")
-for m in months_list:
-    sales = sum(m[s] for s in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"])
-    c = m["costs"]
-    print(f"{m['month']}: продажи={sales:.2f} | Obowiązkowe={c['commission']:.2f} Dostawa={c['delivery']:.2f} Reklama={c['ads']:.2f} Abonament={c['subscription']:.2f} Rabaty=+{c['discount']:.2f}" +
-          (f" ⚠Other={c['other']:.2f}" if c["other"] > 0 else ""))
+# Конвертируем в дни (по одному фиктивному дню на месяц = 1-е число)
+# Убираем старые данные за период и добавляем новые
+date_set = {f"{y}-{m:02d}" for y,m in months}
+
+# Удаляем существующие дни за период
+data["days"] = [d for d in data["days"]
+                if d["date"][:7] not in date_set]
+
+# Добавляем новые дни
+for mk in sorted(month_data.keys()):
+    d  = month_data[mk]
+    pl = d["PolaxEuroGroup"]
+    ml = d["Mlot_i_Klucz"]
+    si = d["Sila_Narzedzi"]
+
+    # Суммируем продажи по странам по всем магазинам
+    countries = {"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0}
+    for shop_d in [pl, ml, si]:
+        for mkt, val in shop_d.get("sales",{}).items():
+            if mkt in countries:
+                countries[mkt] = round(countries[mkt] + val, 2)
+
+    day_entry = {
+        "date":          f"{year:04d}-{month:02d}-01",
+        "Mlot_i_Klucz":  round(ml["total"], 2),
+        "PolaxEuroGroup":round(pl["total"], 2),
+        "Sila_Narzedzi": round(si["total"], 2),
+        "countries":     countries,
+        "costs":         pl.get("costs", {"commission":0,"delivery":0,"ads":0,"subscription":0,"discount":0}),
+    }
+    data["days"].append(day_entry)
+
+data["days"].sort(key=lambda x: x["date"])
+update_months(data)
+save_data(data)
+print(f"\n✅ Готово! Месяцев сохранено: {len(months)}")
+print(f"   Всего дней в data.json: {len(data['days'])}")
+print(f"   Всего месяцев в data.json: {len(data['months'])}")
