@@ -133,40 +133,47 @@ by_mkt       = defaultdict(float)
 by_mkt_del   = defaultdict(float)
 by_mkt_cur   = {}
 by_mkt_cnt   = defaultdict(int)
+by_mkt_paid  = defaultdict(float)
 
 for o in active:
     mkt = o.get("marketplace",{}).get("id","НЕТ")
     summary  = o.get("summary",{})
     delivery = o.get("delivery",{})
+    payment  = o.get("payment",{})
     total    = float(summary.get("totalToPay",{}).get("amount",0))
+    paid     = float(payment.get("paidAmount",{}).get("amount",0)) if payment else 0
     cur      = summary.get("totalToPay",{}).get("currency","PLN")
     deli     = float(delivery.get("cost",{}).get("amount",0)) if delivery else 0
     by_mkt[mkt]     += total
     by_mkt_del[mkt] += deli
     by_mkt_cur[mkt]  = cur
     by_mkt_cnt[mkt] += 1
+    by_mkt_paid[mkt] += paid
 
-print(f"\n  {'Маркетплейс':<25} {'Кол':>5} {'Итого':>12} {'Доставка':>10} {'Товар':>12} {'Валюта':>6}")
-print(f"  {'─'*25} {'─'*5} {'─'*12} {'─'*10} {'─'*12} {'─'*6}")
+print(f"\n  {'Маркетплейс':<25} {'Кол':>5} {'totalToPay':>12} {'paidAmount':>12} {'Доставка':>10} {'Валюта':>6}")
+print(f"  {'─'*25} {'─'*5} {'─'*12} {'─'*12} {'─'*10} {'─'*6}")
 for mkt in sorted(by_mkt):
     t = by_mkt[mkt]
+    p = by_mkt_paid[mkt]
     d = by_mkt_del[mkt]
     c = by_mkt_cur.get(mkt,"?")
     n = by_mkt_cnt[mkt]
-    print(f"  {mkt:<25} {n:>5} {t:>12.2f} {d:>10.2f} {t-d:>12.2f} {c:>6}")
+    print(f"  {mkt:<25} {n:>5} {t:>12.2f} {p:>12.2f} {d:>10.2f} {c:>6}")
 
 # ── 3. Сравнение с эталоном ───────────────────────────────────
 print(f"\n{'='*65}")
 print("3. Сравнение с эталоном Allegro UI")
 print("="*65)
-print(f"  {'Маркетплейс':<25} {'ИТОГО':>12} {'ЭТАЛОН':>12} {'РАЗНИЦА':>10}")
-print(f"  {'─'*25} {'─'*12} {'─'*12} {'─'*10}")
+print(f"  {'Маркетплейс':<25} {'totalToPay':>12} {'paidAmount':>12} {'ЭТАЛОН':>12}")
+print(f"  {'─'*25} {'─'*12} {'─'*12} {'─'*12}")
 
 pl_total = by_mkt.get("allegro-pl",0) + by_mkt.get("allegro-business-pl",0)
-print(f"  allegro-pl + business: {pl_total:>9.2f}  эталон: 33998.72  разница: {pl_total-33998.72:+.2f}")
+pl_paid  = by_mkt_paid.get("allegro-pl",0) + by_mkt_paid.get("allegro-business-pl",0)
+print(f"  allegro-pl + business: {pl_total:>9.2f}  {pl_paid:>9.2f}  эталон: 33998.72  diff_total:{pl_total-33998.72:+.2f}  diff_paid:{pl_paid-33998.72:+.2f}")
 
 for mkt in ["allegro-cz","allegro-hu","allegro-sk"]:
     t   = by_mkt.get(mkt,0)
+    p   = by_mkt_paid.get(mkt,0)
     ref = ETALON.get(mkt)
     if ref:
-        print(f"  {mkt:<25} {t:>12.2f} {ref:>12.2f} {t-ref:>+10.2f}")
+        print(f"  {mkt:<25} {t:>12.2f} {p:>12.2f} {ref:>12.2f}  diff:{t-ref:+.2f}")
