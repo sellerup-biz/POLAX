@@ -161,20 +161,14 @@ def get_costs_for_day(token, date_key):
 print(f"ТЕСТ: {TEST_SHOP} | Янв+Фев 2026 | {len(TEST_DATES)} дней")
 rt_val = os.environ.get("REFRESH_TOKEN_POLAX", "")
 print(f"ENV: CLIENT_ID_POLAX={'OK' if os.environ.get('CLIENT_ID_POLAX') else 'ОТСУТСТВУЕТ'}")
-print(f"ENV: CLIENT_SECRET_POLAX={'OK' if os.environ.get('CLIENT_SECRET_POLAX') else 'ОТСУТСТВУЕТ'}")
 print(f"ENV: REFRESH_TOKEN_POLAX={'OK len=' + str(len(rt_val)) if rt_val else 'ОТСУТСТВУЕТ'}")
-
-gh_key    = get_gh_pk()
-gh_key_id  = gh_key.get("key_id")
-gh_key_val = gh_key.get("key")
 
 tokens = {}
 for shop, creds in SHOPS.items():
     t, nr = get_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
     if t:
         tokens[shop] = t
-        if nr and gh_key_id and gh_key_val:
-            print(f"  Токен {shop}: {'OK' if update_gh_secret(creds['secret_name'], nr, gh_key_id, gh_key_val) else 'ERR'}")
+        print(f"  Токен {shop}: OK")
 
 days_data = {date: {"date":date,"Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
                     "countries":{k:0 for k in MARKETPLACES},
