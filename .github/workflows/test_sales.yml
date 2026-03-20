@@ -1,0 +1,35 @@
+name: Test Sales (read-only)
+
+on:
+  workflow_dispatch:
+
+# data.json не изменяется — contents:read достаточно
+permissions:
+  contents: read
+
+jobs:
+  test-sales:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests PyNaCl
+
+      - name: Run sales test
+        run: python test_sales.py
+        env:
+          CLIENT_ID_MLOT:      ${{ secrets.CLIENT_ID_MLOT }}
+          CLIENT_SECRET_MLOT:  ${{ secrets.CLIENT_SECRET_MLOT }}
+          REFRESH_TOKEN_MLOT:  ${{ secrets.REFRESH_TOKEN_MLOT }}
+          CLIENT_ID_POLAX:     ${{ secrets.CLIENT_ID_POLAX }}
+          CLIENT_SECRET_POLAX: ${{ secrets.CLIENT_SECRET_POLAX }}
+          REFRESH_TOKEN_POLAX: ${{ secrets.REFRESH_TOKEN_POLAX }}
+          CLIENT_ID_SILA:      ${{ secrets.CLIENT_ID_SILA }}
+          CLIENT_SECRET_SILA:  ${{ secrets.CLIENT_SECRET_SILA }}
+          REFRESH_TOKEN_SILA:  ${{ secrets.REFRESH_TOKEN_SILA }}
+          GH_TOKEN:            ${{ secrets.GH_TOKEN }}
