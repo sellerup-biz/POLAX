@@ -141,7 +141,7 @@ for o in active:
     delivery = o.get("delivery",{})
     payment  = o.get("payment",{})
     total    = float(summary.get("totalToPay",{}).get("amount",0))
-    paid     = float((payment or {}).get("paidAmount",{}).get("amount",0) or 0)
+    paid     = float(((payment or {}).get("paidAmount") or {}).get("amount",0) or 0)
     cur      = summary.get("totalToPay",{}).get("currency","PLN")
     deli     = float(delivery.get("cost",{}).get("amount",0)) if delivery else 0
     by_mkt[mkt]     += total
