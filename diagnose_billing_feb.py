@@ -102,11 +102,10 @@ print(f"Записей: PL={len(result['allegro-pl']['entries'])} CZ={len(result
 print(f"\n{'='*60}")
 print("ДЕТАЛИ PS1 и RET записей за февраль (PL):")
 print(f"{'='*60}")
-token2 = get_token()
 offset = 0
 while True:
     entries = requests.get("https://api.allegro.pl/billing/billing-entries",
-                           headers={"Authorization":f"Bearer {token2}","Accept":"application/vnd.allegro.public.v1+json"},
+                           headers={"Authorization":f"Bearer {token}","Accept":"application/vnd.allegro.public.v1+json"},
                            params={"occurredAt.gte":"2026-02-01T00:00:00+01:00",
                                    "occurredAt.lte":"2026-02-28T23:59:59+01:00",
                                    "marketplaceId":"allegro-pl","limit":100,"offset":offset}
