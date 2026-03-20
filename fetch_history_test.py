@@ -1,25 +1,17 @@
 """
-Тест PolaxEuroGroup — Январь + Февраль 2026
-Продажи: GET /order/checkout-forms (READY_FOR_PROCESSING, totalToPay)
-Расходы: GET /billing/billing-entries (по каждому маркетплейсу)
-allegro-business-pl → объединяется с allegro-pl
+Тест PolaxEuroGroup — Апрель-Август 2025
+Продажи: payments/payment-operations (INCOME, локальная валюта)
+Расходы: billing/billing-entries (по каждому маркетплейсу)
+Эталон: из CSV файлов Allegro UI
 """
-import requests, json, os, base64
-from datetime import datetime
+import requests, os, base64
 from nacl import encoding, public
 from collections import defaultdict
+import calendar
 
 REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
 GH_TOKEN     = os.environ.get("GH_TOKEN","")
 GH_REPO      = "sellerup-biz/POLAX"
-ALL_SHOPS    = ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]
-
-MARKETPLACES_BILLING = {
-    "allegro-pl":  "PLN",
-    "allegro-cz":  "CZK",
-    "allegro-hu":  "HUF",
-    "allegro-sk":  "EUR",
-}
 
 BILLING_MAP = {
     "SUC":"commission","SUJ":"commission","LDS":"commission","HUN":"commission",
@@ -27,7 +19,8 @@ BILLING_MAP = {
     "HB4":"delivery","HB1":"delivery","HB8":"delivery","HB9":"delivery",
     "DPB":"delivery","DXP":"delivery","HXO":"delivery","HLB":"delivery",
     "ORB":"delivery","DHR":"delivery","DAP":"delivery","DKP":"delivery","DPP":"delivery",
-    "GLS":"delivery","UPS":"delivery",
+    "GLS":"delivery","UPS":"delivery","UPD":"delivery",
+    "DTR":"delivery","DPA":"delivery","ITR":"delivery","HLA":"delivery",
     "NSP":"ads","DPG":"ads","WYR":"ads","POD":"ads","BOL":"ads","EMF":"ads","CPC":"ads",
     "SB2":"subscription","ABN":"subscription",
     "RET":"discount","PS1":"discount",
@@ -40,9 +33,9 @@ def get_billing_cat(tid, tnam):
     if any(x in n for x in ["prowizja","lokalna dopłata","opłata transakcyjna"]): return "commission"
     if any(x in n for x in ["dostawa","kurier","inpost","dpd","gls","ups","orlen","poczta",
                               "przesyłka","fulfillment","one kurier","allegro delivery",
-                              "packeta","international"]): return "delivery"
+                              "packeta","international","dodatkowa za dostawę"]): return "delivery"
     if any(x in n for x in ["kampani","reklam","promowanie","wyróżnienie","pogrubienie",
-                              "podświetlenie","strona działu","pakiet promo","cpc"]): return "ads"
+                              "podświetlenie","strona działu","pakiet promo","cpc","ads"]): return "ads"
     if any(x in n for x in ["abonament","smart"]): return "subscription"
     if any(x in n for x in ["rozliczenie akcji","wyrównanie w programie allegro","rabat"]): return "discount"
     if any(x in n for x in ["zwrot kosztów","zwrot prowizji"]): return "zwrot_commission"
@@ -79,58 +72,40 @@ def hdrs(t):
 
 def get_tz(month): return 2 if 3 <= month <= 10 else 1
 
-# ── ПРОДАЖИ через заказы (READY_FOR_PROCESSING) ──────────────
-def get_sales_for_month(token, year, month):
-    """Продажи по заказам в локальной валюте каждого маркетплейса"""
-    import calendar
-    last_day = calendar.monthrange(year, month)[1]
-    date_from = f"{year}-{month:02d}-01T00:00:00.000Z"
-    date_to   = f"{year}-{month:02d}-{last_day:02d}T23:59:59.999Z"
-
-    orders = []
-    offset = 0
-    while True:
-        params = {"lineItems.boughtAt.gte":date_from,"lineItems.boughtAt.lte":date_to,
-                  "limit":100,"offset":offset}
-        data = requests.get("https://api.allegro.pl/order/checkout-forms",
-                            headers=hdrs(token), params=params).json()
-        if "checkoutForms" not in data:
-            print(f"  Ошибка orders: {data}"); break
-        batch = data.get("checkoutForms",[])
-        orders.extend(batch)
-        if len(batch) < 100: break
-        offset += 100
-
-    # Только оплаченные заказы
-    active = [o for o in orders if o.get("status") == "READY_FOR_PROCESSING"]
-
-    # Суммируем по маркетплейсам в локальной валюте
-    by_mkt = defaultdict(float)
-    for o in active:
-        mkt   = o.get("marketplace",{}).get("id","НЕТ")
-        total = float(((o.get("summary") or {}).get("totalToPay") or {}).get("amount",0) or 0)
-        by_mkt[mkt] += total
-
-    # Объединяем PL + business-PL → PL
-    pl_total = round(by_mkt.get("allegro-pl",0) + by_mkt.get("allegro-business-pl",0), 2)
-    return {
-        "allegro-pl":  pl_total,
-        "allegro-cz":  round(by_mkt.get("allegro-cz",0), 2),
-        "allegro-hu":  round(by_mkt.get("allegro-hu",0), 2),
-        "allegro-sk":  round(by_mkt.get("allegro-sk",0), 2),
-    }
-
-# ── РАСХОДЫ через billing по маркетплейсу ────────────────────
-def get_costs_for_month(token, year, month):
-    """Расходы в локальной валюте каждого маркетплейса"""
-    import calendar
+def get_sales(token, year, month):
     last_day = calendar.monthrange(year, month)[1]
     tz = get_tz(month)
     df = f"{year}-{month:02d}-01T00:00:00+0{tz}:00"
     dt = f"{year}-{month:02d}-{last_day:02d}T23:59:59+0{tz}:00"
+    by_mkt = defaultdict(float)
+    for mkt in ["allegro-pl","allegro-business-pl","allegro-cz","allegro-hu","allegro-sk"]:
+        offset = 0
+        while True:
+            ops = requests.get("https://api.allegro.pl/payments/payment-operations",
+                               headers=hdrs(token),
+                               params={"group":"INCOME","occurredAt.gte":df,"occurredAt.lte":dt,
+                                       "marketplaceId":mkt,"limit":50,"offset":offset}
+                               ).json().get("paymentOperations",[])
+            for op in ops:
+                try: by_mkt[mkt] += float(op["value"]["amount"])
+                except: pass
+            if len(ops) < 50: break
+            offset += 50
+    return {
+        "PLN": round(by_mkt["allegro-pl"] + by_mkt["allegro-business-pl"], 2),
+        "CZK": round(by_mkt["allegro-cz"], 2),
+        "HUF": round(by_mkt["allegro-hu"], 2),
+        "EUR": round(by_mkt["allegro-sk"], 2),
+    }
 
+def get_costs(token, year, month):
+    last_day = calendar.monthrange(year, month)[1]
+    tz = get_tz(month)
+    df = f"{year}-{month:02d}-01T00:00:00+0{tz}:00"
+    dt = f"{year}-{month:02d}-{last_day:02d}T23:59:59+0{tz}:00"
+    MKT_CUR = {"allegro-pl":"PLN","allegro-cz":"CZK","allegro-hu":"HUF","allegro-sk":"EUR"}
     result = {}
-    for mkt in MARKETPLACES_BILLING:
+    for mkt, cur in MKT_CUR.items():
         costs   = {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0,"other":0.0}
         unknown = {}
         offset  = 0
@@ -158,86 +133,116 @@ def get_costs_for_month(token, year, month):
             if len(entries) < 100: break
             offset += 100
         if unknown:
-            print(f"  ⚠ НОВЫЕ ТИПЫ [{mkt}]: {unknown}")
-        result[mkt] = {k: round(v,2) for k,v in costs.items()}
+            print(f"    ⚠ [{mkt}] НОВЫЕ ТИПЫ: {unknown}")
+        result[cur] = {k: round(v,2) for k,v in costs.items()}
     return result
 
-# ── ЭТАЛОН из скриншотов ──────────────────────────────────────
+# ── ЭТАЛОН из CSV ─────────────────────────────────────────────
 ETALON = {
-    "2026-01": {
-        "allegro-pl": {"cur":"PLN","sales":33998.72,"commission":-4727.83,"delivery":-1793.56,"ads":-8968.75,"subscription":-199.00,"discount":46.54},
-        "allegro-cz": {"cur":"CZK","sales":1613.00, "commission":-253.44, "delivery":-454.98, "ads":0,       "subscription":0,     "discount":0},
-        "allegro-hu": {"cur":"HUF","sales":3790.00, "commission":-662.79, "delivery":-2570.00,"ads":0,       "subscription":0,     "discount":0},
-        "allegro-sk": {"cur":"EUR","sales":93.36,   "commission":-11.66,  "delivery":-9.26,   "ads":0,       "subscription":0,     "discount":0},
+    "2025-04": {
+        "PLN": {"sales":47514.95,"commission":6169.66,"delivery":3002.50,"ads":10413.17,"subscription":398.00,"discount":442.12},
+        "CZK": {"sales":29700.00,"commission":3593.98,"delivery":3821.48,"ads":6431.20, "subscription":0,    "discount":0},
+        "EUR": {"sales":402.61,  "commission":50.22,  "delivery":78.25,  "ads":123.93,  "subscription":0,    "discount":0},
+        "HUF": {"sales":0,       "commission":0,      "delivery":0,      "ads":0,       "subscription":0,    "discount":0},
     },
-    "2026-02": {
-        "allegro-pl": {"cur":"PLN","sales":20285.89,"commission":-3491.13,"delivery":-1180.09,"ads":-2790.42,"subscription":-199.00,"discount":116.94},
-        "allegro-cz": {"cur":"CZK","sales":11186.00,"commission":-1667.61,"delivery":-2700.81,"ads":0,       "subscription":0,     "discount":8.00},
-        "allegro-hu": {"cur":"HUF","sales":132115.00,"commission":-23508.13,"delivery":-14220.00,"ads":0,    "subscription":0,     "discount":0},
-        "allegro-sk": {"cur":"EUR","sales":253.63,  "commission":-33.69,  "delivery":-39.41,  "ads":0,       "subscription":0,     "discount":0},
+    "2025-05": {
+        "PLN": {"sales":39980.06,"commission":5452.55,"delivery":2496.76,"ads":5929.95,"subscription":398.00,"discount":743.02},
+        "CZK": {"sales":28506.00,"commission":3507.39,"delivery":4191.42,"ads":3609.84,"subscription":0,    "discount":0},
+        "EUR": {"sales":160.81,  "commission":21.04,  "delivery":26.52,  "ads":42.35,  "subscription":0,    "discount":0},
+        "HUF": {"sales":0,       "commission":0,      "delivery":0,      "ads":0,      "subscription":0,    "discount":0},
+    },
+    "2025-06": {
+        "PLN": {"sales":45202.92,"commission":5961.35,"delivery":3155.08,"ads":5573.19,"subscription":398.00,"discount":674.64},
+        "CZK": {"sales":23922.00,"commission":2822.41,"delivery":4329.88,"ads":2670.38,"subscription":0,    "discount":0},
+        "EUR": {"sales":273.46,  "commission":31.55,  "delivery":35.73,  "ads":21.21,  "subscription":0,    "discount":0},
+        "HUF": {"sales":14800.00,"commission":1638.40,"delivery":1840.00,"ads":0,       "subscription":0,    "discount":0},
+    },
+    "2025-07": {
+        "PLN": {"sales":45126.79,"commission":6268.51,"delivery":4088.90,"ads":6727.35,"subscription":398.00,"discount":365.04},
+        "CZK": {"sales":23529.00,"commission":3099.01,"delivery":6001.45,"ads":2997.75,"subscription":0,    "discount":0},
+        "EUR": {"sales":212.90,  "commission":27.24,  "delivery":42.30,  "ads":19.62,  "subscription":0,    "discount":0},
+        "HUF": {"sales":11415.00,"commission":1863.49,"delivery":690.00, "ads":0,       "subscription":0,    "discount":0},
+    },
+    "2025-08": {
+        "PLN": {"sales":39887.85,"commission":5385.71,"delivery":2946.40,"ads":7788.46,"subscription":398.00,"discount":985.46},
+        "CZK": {"sales":16559.00,"commission":2000.68,"delivery":7524.65,"ads":2862.00,"subscription":0,    "discount":0},
+        "EUR": {"sales":240.57,  "commission":33.82,  "delivery":71.93,  "ads":25.04,  "subscription":0,    "discount":0},
+        "HUF": {"sales":0,       "commission":0,      "delivery":0,      "ads":0,       "subscription":0,    "discount":0},
     },
 }
 
-MKT_LABEL = {"allegro-pl":"🇵🇱 PL","allegro-cz":"🇨🇿 CZ","allegro-hu":"🇭🇺 HU","allegro-sk":"🇸🇰 SK"}
+MKT_LABEL = {"PLN":"🇵🇱 PL","CZK":"🇨🇿 CZ","EUR":"🇸🇰 SK","HUF":"🇭🇺 HU"}
+MONTHS_RU = {4:"Апр",5:"Май",6:"Июн",7:"Июл",8:"Авг"}
+PERIODS = [(2025,m) for m in range(4,9)]
 
-def ok(our, ref):
-    if ref == 0 and our == 0: return "OK"
-    if ref == 0: return "—"
-    return "OK" if abs(our - abs(ref)) < 2 else "ОШИБКА"
+def check(our, ref, tolerance=3):
+    if ref == 0 and our == 0: return "—"
+    if ref == 0: return f"NEW:{our:.2f}"
+    diff = our - ref
+    return f"OK {diff:+.2f}" if abs(diff) <= tolerance else f"❌ {diff:+.2f}"
 
 # ── ОСНОВНОЙ ЦИКЛ ─────────────────────────────────────────────
-print(f"ТЕСТ: PolaxEuroGroup | Январь + Февраль 2026")
+print(f"ТЕСТ: PolaxEuroGroup | Апрель–Август 2025")
 token = get_token()
 print(f"Токен: OK\n")
 
-for year, month in [(2026,1),(2026,2)]:
+# Собираем данные
+all_sales = {}
+all_costs = {}
+for year, month in PERIODS:
+    mk = f"{year}-{month:02d}"
+    print(f"  Загружаю {MONTHS_RU[month]} {year}...")
+    all_sales[mk] = get_sales(token, year, month)
+    all_costs[mk] = get_costs(token, year, month)
+
+# ── ТАБЛИЦА ПРОДАЖ ────────────────────────────────────────────
+print(f"\n{'='*90}")
+print("  ПРОДАЖИ (payments/payment-operations INCOME) в локальной валюте")
+print(f"{'='*90}")
+print(f"  {'':5} {'':5} {'НАШИ':>12} {'ЭТАЛОН':>12} {'СТАТУС':>12}")
+print(f"  {'─'*5} {'─'*5} {'─'*12} {'─'*12} {'─'*15}")
+
+for year, month in PERIODS:
     mk  = f"{year}-{month:02d}"
-    lbl = ["","Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"][month]
-    print(f"\n{'='*70}")
-    print(f"  {lbl} {year} — PolaxEuroGroup")
-    print(f"{'='*70}")
+    lbl = MONTHS_RU[month]
+    s   = all_sales[mk]
+    et  = ETALON.get(mk,{})
+    print(f"\n  {lbl} {year}:")
+    for cur in ["PLN","CZK","EUR","HUF"]:
+        our = s.get(cur,0)
+        ref = et.get(cur,{}).get("sales",0)
+        if our == 0 and ref == 0: continue
+        st  = check(our, ref)
+        print(f"    {MKT_LABEL[cur]:<10} {our:>12.2f} {ref:>12.2f}  {st}")
 
-    print(f"\n  Загружаю продажи...")
-    sales = get_sales_for_month(token, year, month)
-    print(f"  Загружаю расходы...")
-    costs = get_costs_for_month(token, year, month)
+# ── ТАБЛИЦА РАСХОДОВ ──────────────────────────────────────────
+print(f"\n{'='*90}")
+print("  РАСХОДЫ (billing/billing-entries) в локальной валюте")
+print(f"{'='*90}")
 
-    et = ETALON.get(mk, {})
+CATS = [("commission","Obowiązkowe"),("delivery","Dostawa"),
+        ("ads","Reklama"),("subscription","Abonament"),("discount","Rabaty")]
 
-    for mkt in ["allegro-pl","allegro-cz","allegro-hu","allegro-sk"]:
-        cur = MARKETPLACES_BILLING[mkt]
-        e   = et.get(mkt, {})
-        s   = sales.get(mkt, 0)
-        c   = costs.get(mkt, {})
-
-        print(f"\n  {MKT_LABEL[mkt]} ({cur})")
-        print(f"  {'─'*60}")
-
-        # Продажи
-        if e:
-            ref_s = e["sales"]
-            diff  = s - ref_s
-            status = "OK" if abs(diff) < 2 else "ОШИБКА"
-            print(f"  {'Wartość sprzedaży':<22} {s:>12.2f}  эталон:{ref_s:>10.2f}  разница:{diff:>+8.2f}  {status}")
-        else:
-            print(f"  {'Wartość sprzedaży':<22} {s:>12.2f}")
-
-        # Расходы
-        for cat in ["commission","delivery","ads","subscription","discount"]:
-            our = c.get(cat, 0)
-            if our == 0 and (not e or e.get(cat,0) == 0): continue
+for year, month in PERIODS:
+    mk  = f"{year}-{month:02d}"
+    lbl = MONTHS_RU[month]
+    c   = all_costs[mk]
+    et  = ETALON.get(mk,{})
+    print(f"\n  {lbl} {year}:")
+    print(f"    {'Страна':<10} {'Категория':<20} {'НАШИ':>10} {'ЭТАЛОН':>10} {'СТАТУС':>12}")
+    print(f"    {'─'*10} {'─'*20} {'─'*10} {'─'*10} {'─'*15}")
+    for cur in ["PLN","CZK","EUR","HUF"]:
+        costs = c.get(cur,{})
+        etalon_c = et.get(cur,{})
+        for cat, name in CATS:
+            our = costs.get(cat,0)
+            ref = etalon_c.get(cat,0)
+            if our == 0 and ref == 0: continue
             sign = "+" if cat == "discount" else "-"
-            names = {"commission":"Obowiązkowe","delivery":"Dostawa","ads":"Reklama i prom.",
-                     "subscription":"Abonament","discount":"Rabaty od Allegro"}
-            if e:
-                ref_c = e.get(cat, 0)
-                diff  = our - abs(ref_c)
-                status = ok(our, ref_c)
-                print(f"  {names[cat]:<22} {sign}{our:>11.2f}  эталон:{ref_c:>+10.2f}  разница:{diff:>+8.2f}  {status}")
-            else:
-                print(f"  {names[cat]:<22} {sign}{our:>11.2f}")
-        if c.get("other",0) > 0:
-            print(f"  ⚠ other:               -{c['other']:.2f}  ← добавить в BILLING_MAP!")
+            st   = check(our, ref)
+            print(f"    {MKT_LABEL.get(cur,'?'):<10} {name:<20} {sign}{our:>9.2f} {sign}{ref:>9.2f}  {st}")
+        if costs.get("other",0) > 0:
+            print(f"    {MKT_LABEL.get(cur,'?'):<10} ⚠ OTHER              -{costs['other']:>9.2f}  ← добавить в BILLING_MAP!")
 
-print(f"\n{'='*70}")
+print(f"\n{'='*90}")
 print("ГОТОВО!")
