@@ -86,7 +86,7 @@ for op in ops_all:
         by_group_type[key] = {"total_pln":0,"cnt":0,"cur":cur,"mkts":set()}
     by_group_type[key]["total_pln"] += amt
     by_group_type[key]["cnt"] += 1
-    by_group_type[key]["mkts"].add(mkt)
+    by_group_type[key]["mkts"].add(mkt or "НЕТ")
 for key in sorted(by_group_type, key=lambda x:-abs(by_group_type[x]["total_pln"])):
     v = by_group_type[key]
     mkts = ",".join(sorted(v["mkts"]))
