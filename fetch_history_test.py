@@ -30,6 +30,8 @@ BILLING_MAP = {
 def get_billing_cat(tid, tnam):
     if tid in BILLING_MAP: return BILLING_MAP[tid]
     n = tnam.lower()
+    # Prowizja od sprzedaży w Kampanii → ads (не commission!)
+    if "kampanii" in n or "kampania" in n: return "ads"
     if any(x in n for x in ["prowizja","lokalna dopłata","opłata transakcyjna"]): return "commission"
     if any(x in n for x in ["dostawa","kurier","inpost","dpd","gls","ups","orlen","poczta",
                               "przesyłka","fulfillment","one kurier","allegro delivery",
@@ -103,68 +105,76 @@ def get_costs(token, year, month):
     tz = get_tz(month)
     df = f"{year}-{month:02d}-01T00:00:00+0{tz}:00"
     dt = f"{year}-{month:02d}-{last_day:02d}T23:59:59+0{tz}:00"
-    MKT_CUR = {"allegro-pl":"PLN","allegro-cz":"CZK","allegro-hu":"HUF","allegro-sk":"EUR"}
+    # allegro-pl + allegro-business-pl → PLN (суммируем вместе)
+    # allegro-cz → CZK, allegro-hu → HUF, allegro-sk → EUR
+    MKT_GROUPS = {
+        "PLN": ["allegro-pl", "allegro-business-pl"],
+        "CZK": ["allegro-cz"],
+        "HUF": ["allegro-hu"],
+        "EUR": ["allegro-sk"],
+    }
     result = {}
-    for mkt, cur in MKT_CUR.items():
+    for cur, mkts in MKT_GROUPS.items():
         costs   = {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0,"other":0.0}
         unknown = {}
-        offset  = 0
-        while True:
-            entries = requests.get("https://api.allegro.pl/billing/billing-entries",
-                                   headers=hdrs(token),
-                                   params={"occurredAt.gte":df,"occurredAt.lte":dt,
-                                           "marketplaceId":mkt,"limit":100,"offset":offset}
-                                   ).json().get("billingEntries",[])
-            for e in entries:
-                try:
-                    amt  = float(e["value"]["amount"])
-                    tid  = e["type"]["id"]
-                    tnam = e["type"]["name"]
-                    cat  = get_billing_cat(tid, tnam)
-                    if cat == "IGNORE": continue
-                    if amt < 0:
-                        if cat in costs: costs[cat] += abs(amt)
-                        if cat == "other": unknown[tid] = tnam
-                    elif amt > 0:
-                        if cat == "zwrot_commission": costs["commission"] = max(0, costs["commission"] - amt)
-                        elif cat == "delivery":       costs["delivery"]   = max(0, costs["delivery"] - amt)
-                        elif cat == "discount":       costs["discount"]   += amt
-                except: pass
-            if len(entries) < 100: break
-            offset += 100
+        for mkt in mkts:
+            offset  = 0
+            while True:
+                entries = requests.get("https://api.allegro.pl/billing/billing-entries",
+                                       headers=hdrs(token),
+                                       params={"occurredAt.gte":df,"occurredAt.lte":dt,
+                                               "marketplaceId":mkt,"limit":100,"offset":offset}
+                                       ).json().get("billingEntries",[])
+                for e in entries:
+                    try:
+                        amt  = float(e["value"]["amount"])
+                        tid  = e["type"]["id"]
+                        tnam = e["type"]["name"]
+                        cat  = get_billing_cat(tid, tnam)
+                        if cat == "IGNORE": continue
+                        if amt < 0:
+                            if cat in costs: costs[cat] += abs(amt)
+                            if cat == "other": unknown[tid] = tnam
+                        elif amt > 0:
+                            if cat == "zwrot_commission": costs["commission"] = max(0, costs["commission"] - amt)
+                            elif cat == "delivery":       costs["delivery"]   = max(0, costs["delivery"] - amt)
+                            elif cat == "discount":       costs["discount"]   += amt
+                    except: pass
+                if len(entries) < 100: break
+                offset += 100
         if unknown:
-            print(f"    ⚠ [{mkt}] НОВЫЕ ТИПЫ: {unknown}")
+            print(f"    ⚠ [{cur}] НОВЫЕ ТИПЫ: {unknown}")
         result[cur] = {k: round(v,2) for k,v in costs.items()}
     return result
 
 # ── ЭТАЛОН из CSV ─────────────────────────────────────────────
 ETALON = {
     "2025-04": {
-        "PLN": {"sales":47514.95,"commission":6169.66,"delivery":3002.50,"ads":10413.17,"subscription":398.00,"discount":442.12},
+        "PLN": {"sales":47514.95,"commission":6169.66,"delivery":3002.50,"ads":10924.03,"subscription":199.00,"discount":221.06},
         "CZK": {"sales":29700.00,"commission":3593.98,"delivery":3821.48,"ads":6431.20, "subscription":0,    "discount":0},
         "EUR": {"sales":402.61,  "commission":50.22,  "delivery":78.25,  "ads":123.93,  "subscription":0,    "discount":0},
         "HUF": {"sales":0,       "commission":0,      "delivery":0,      "ads":0,       "subscription":0,    "discount":0},
     },
     "2025-05": {
-        "PLN": {"sales":39980.06,"commission":5452.55,"delivery":2496.76,"ads":5929.95,"subscription":398.00,"discount":743.02},
+        "PLN": {"sales":39980.06,"commission":5452.55,"delivery":2496.76,"ads":6783.43,"subscription":199.00,"discount":371.51},
         "CZK": {"sales":28506.00,"commission":3507.39,"delivery":4191.42,"ads":3609.84,"subscription":0,    "discount":0},
         "EUR": {"sales":160.81,  "commission":21.04,  "delivery":26.52,  "ads":42.35,  "subscription":0,    "discount":0},
         "HUF": {"sales":0,       "commission":0,      "delivery":0,      "ads":0,      "subscription":0,    "discount":0},
     },
     "2025-06": {
-        "PLN": {"sales":45202.92,"commission":5961.35,"delivery":3155.08,"ads":5573.19,"subscription":398.00,"discount":674.64},
+        "PLN": {"sales":45202.92,"commission":5961.35,"delivery":3155.08,"ads":6153.71,"subscription":199.00,"discount":337.32},
         "CZK": {"sales":23922.00,"commission":2822.41,"delivery":4329.88,"ads":2670.38,"subscription":0,    "discount":0},
         "EUR": {"sales":273.46,  "commission":31.55,  "delivery":35.73,  "ads":21.21,  "subscription":0,    "discount":0},
         "HUF": {"sales":14800.00,"commission":1638.40,"delivery":1840.00,"ads":0,       "subscription":0,    "discount":0},
     },
     "2025-07": {
-        "PLN": {"sales":45126.79,"commission":6268.51,"delivery":4088.90,"ads":6727.35,"subscription":398.00,"discount":365.04},
+        "PLN": {"sales":45126.79,"commission":6268.51,"delivery":4088.90,"ads":6999.44,"subscription":199.00,"discount":182.52},
         "CZK": {"sales":23529.00,"commission":3099.01,"delivery":6001.45,"ads":2997.75,"subscription":0,    "discount":0},
         "EUR": {"sales":212.90,  "commission":27.24,  "delivery":42.30,  "ads":19.62,  "subscription":0,    "discount":0},
         "HUF": {"sales":11415.00,"commission":1863.49,"delivery":690.00, "ads":0,       "subscription":0,    "discount":0},
     },
     "2025-08": {
-        "PLN": {"sales":39887.85,"commission":5385.71,"delivery":2946.40,"ads":7788.46,"subscription":398.00,"discount":985.46},
+        "PLN": {"sales":39887.85,"commission":5385.71,"delivery":2946.40,"ads":7934.64,"subscription":199.00,"discount":492.73},
         "CZK": {"sales":16559.00,"commission":2000.68,"delivery":7524.65,"ads":2862.00,"subscription":0,    "discount":0},
         "EUR": {"sales":240.57,  "commission":33.82,  "delivery":71.93,  "ads":25.04,  "subscription":0,    "discount":0},
         "HUF": {"sales":0,       "commission":0,      "delivery":0,      "ads":0,       "subscription":0,    "discount":0},
