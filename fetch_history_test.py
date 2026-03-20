@@ -21,7 +21,14 @@ BILLING_MAP = {
     "ORB":"delivery","DHR":"delivery","DAP":"delivery","DKP":"delivery","DPP":"delivery",
     "GLS":"delivery","UPS":"delivery","UPD":"delivery",
     "DTR":"delivery","DPA":"delivery","ITR":"delivery","HLA":"delivery",
+    "DDP":"delivery",  # Opłata za dostawę DPD One Allegro Delivery
+    "HB3":"delivery",  # Opłata za dostawę UPS
+    "DPS":"delivery",  # Opłata za dostawę UPS Allegro Delivery
+    "UTR":"delivery",  # Opłata dodatkowa za dostawę UPS
     "NSP":"ads","DPG":"ads","WYR":"ads","POD":"ads","BOL":"ads","EMF":"ads","CPC":"ads",
+    "FEA":"ads",       # Opłata za wyróżnienie
+    "BRG":"ads",       # Prowizja od sprzedaży w Kampanii
+    "FSF":"ads",       # Prowizja od sprzedaży oferty wyróżnionej
     "SB2":"subscription","ABN":"subscription",
     "RET":"discount","PS1":"discount",
     "PAD":"IGNORE",
