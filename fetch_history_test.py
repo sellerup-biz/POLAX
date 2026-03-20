@@ -1,30 +1,29 @@
-import requests, json, os, base64
-from datetime import datetime, timedelta, timezone
-from nacl import encoding, public
+import requests, json, os
+from datetime import datetime, timedelta
 
-REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
-GH_TOKEN = os.environ.get("GH_TOKEN", "")
-GH_REPO  = "sellerup-biz/POLAX"
-MARKETPLACES = {"allegro-pl":"PLN","allegro-business-pl":"PLN","allegro-cz":"CZK","allegro-hu":"HUF","allegro-sk":"EUR"}
+REDIRECT_URI  = "https://sellerup-biz.github.io/POLAX/callback.html"
+GH_TOKEN      = os.environ.get("GH_TOKEN", "")
+GH_REPO       = "sellerup-biz/POLAX"
 
 TEST_SHOP  = "PolaxEuroGroup"
-ALL_SHOPS  = ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]
+ALL_SHOPS  = ["Mlot_i_Klucz", "PolaxEuroGroup", "Sila_Narzedzi"]
+
+# Январь + Февраль
 TEST_DATES = []
 for month in [1, 2]:
-    days_in = 31 if month == 1 else 28
-    for day in range(1, days_in + 1):
+    for day in range(1, (32 if month == 1 else 29)):
         TEST_DATES.append(f"2026-{month:02d}-{day:02d}")
 
-SHOPS = {}
-if os.environ.get("CLIENT_ID_POLAX") and os.environ.get("REFRESH_TOKEN_POLAX"):
-    SHOPS[TEST_SHOP] = {
-        "client_id":     os.environ["CLIENT_ID_POLAX"],
-        "client_secret": os.environ["CLIENT_SECRET_POLAX"],
-        "refresh_token": os.environ["REFRESH_TOKEN_POLAX"],
-        "secret_name":   "REFRESH_TOKEN_POLAX"
-    }
+# Страны: marketplace → (валюта, display)
+COUNTRIES = {
+    "allegro-pl":          ("PLN", "PL (польша)"),
+    "allegro-business-pl": ("PLN", "PL biznes"),
+    "allegro-cz":          ("CZK", "CZ (чехия)"),
+    "allegro-hu":          ("HUF", "HU (венгрия)"),
+    "allegro-sk":          ("EUR", "SK (словакия)"),
+}
 
-# ── МАППИНГ по type.id ────────────────────────────────────────
+# Маппинг billing
 BILLING_MAP = {
     "SUC":"commission","SUJ":"commission","LDS":"commission",
     "REF":"zwrot_commission",
@@ -51,90 +50,54 @@ def get_billing_cat(tid, tnam):
     if "pobranie opłat z wpływów" in n: return "IGNORE"
     return "other"
 
-_rates = {}
-def get_rate(currency, date_str):
-    if currency == "PLN": return 1.0
-    key = f"{currency}_{date_str}"
-    if key in _rates: return _rates[key]
-    for delta in range(7):
-        d = (datetime.strptime(date_str, "%Y-%m-%d") - timedelta(days=delta)).strftime("%Y-%m-%d")
-        try:
-            r = requests.get(f"https://api.nbp.pl/api/exchangerates/rates/a/{currency.lower()}/{d}/?format=json", timeout=5)
-            if r.status_code == 200:
-                rate = float(r.json()["rates"][0]["mid"])
-                _rates[key] = rate
-                return rate
-        except: pass
-    return 1.0
-
-def get_gh_pk():
-    r = requests.get(f"https://api.github.com/repos/{GH_REPO}/actions/secrets/public-key",
-                     headers={"Authorization": f"token {GH_TOKEN}", "Accept": "application/vnd.github+json"})
-    return r.json()
-
-def update_gh_secret(name, val, key_id, key_val):
-    pk  = public.PublicKey(key_val.encode(), encoding.Base64Encoder())
-    enc = base64.b64encode(public.SealedBox(pk).encrypt(val.encode())).decode()
-    r   = requests.put(f"https://api.github.com/repos/{GH_REPO}/actions/secrets/{name}",
-                       headers={"Authorization": f"token {GH_TOKEN}", "Accept": "application/vnd.github+json"},
-                       json={"encrypted_value": enc, "key_id": key_id})
-    return r.status_code in (201, 204)
-
-def get_token(cid, cs, rt):
-    r = requests.post("https://allegro.pl/auth/oauth/token", auth=(cid, cs),
-                      data={"grant_type":"refresh_token","refresh_token":rt,"redirect_uri":REDIRECT_URI})
-    d = r.json()
-    if "access_token" not in d:
-        print(f"  ОШИБКА ТОКЕНА: {d}")
-        return None, None
-    return d["access_token"], d.get("refresh_token", rt)
+def get_tz(month): return 2 if 3 <= month <= 10 else 1
 
 def hdrs(t):
     return {"Authorization": f"Bearer {t}", "Accept": "application/vnd.allegro.public.v1+json"}
 
-def get_tz(month): return 2 if 3 <= month <= 10 else 1
+def get_token():
+    cid = os.environ["CLIENT_ID_POLAX"]
+    cs  = os.environ["CLIENT_SECRET_POLAX"]
+    rt  = os.environ["REFRESH_TOKEN_POLAX"]
+    r = requests.post("https://allegro.pl/auth/oauth/token", auth=(cid, cs),
+                      data={"grant_type":"refresh_token","refresh_token":rt,"redirect_uri":REDIRECT_URI})
+    d = r.json()
+    if "access_token" not in d:
+        print(f"ОШИБКА ТОКЕНА: {d}")
+        exit(1)
+    print(f"Токен {TEST_SHOP}: OK")
+    return d["access_token"]
 
-def get_sales_for_day(token, date_key):
-    tz = get_tz(int(date_key[5:7]))
-    df = date_key + f"T00:00:00+0{tz}:00"
-    dt = date_key + f"T23:59:59+0{tz}:00"
+# ── ПРОДАЖИ по стране в ЛОКАЛЬНОЙ валюте ─────────────────────
+def get_sales_local(token, df, dt, marketplace):
+    """Возвращает сумму в локальной валюте страны"""
     total = 0.0
     offset = 0
     while True:
-        ops = requests.get("https://api.allegro.pl/payments/payment-operations", headers=hdrs(token),
+        ops = requests.get("https://api.allegro.pl/payments/payment-operations",
+                           headers=hdrs(token),
                            params={"group":"INCOME","occurredAt.gte":df,"occurredAt.lte":dt,
-                                   "limit":100,"offset":offset}).json().get("paymentOperations",[])
+                                   "marketplaceId":marketplace,"limit":100,"offset":offset}
+                           ).json().get("paymentOperations", [])
         for op in ops:
-            try: total += float(op["value"]["amount"]) * get_rate(op["value"]["currency"], date_key)
+            try: total += float(op["value"]["amount"])
             except: pass
         if len(ops) < 100: break
         offset += 100
-    countries = {k: 0.0 for k in MARKETPLACES}
-    for mkt in MARKETPLACES:
-        offset = 0
-        while True:
-            ops = requests.get("https://api.allegro.pl/payments/payment-operations", headers=hdrs(token),
-                               params={"group":"INCOME","occurredAt.gte":df,"occurredAt.lte":dt,
-                                       "marketplaceId":mkt,"limit":100,"offset":offset}).json().get("paymentOperations",[])
-            for op in ops:
-                try: countries[mkt] += float(op["value"]["amount"]) * get_rate(op["value"]["currency"], date_key)
-                except: pass
-            if len(ops) < 100: break
-            offset += 100
-        countries[mkt] = round(countries[mkt], 2)
-    return countries, round(total, 2)
+    return round(total, 2)
 
-def get_costs_for_day(token, date_key):
-    tz = get_tz(int(date_key[5:7]))
-    df = date_key + f"T00:00:00+0{tz}:00"
-    dt = date_key + f"T23:59:59+0{tz}:00"
+# ── РАСХОДЫ по стране в ЛОКАЛЬНОЙ валюте ─────────────────────
+def get_costs_local(token, df, dt, marketplace):
+    """Расходы через billing-entries с фильтром marketplaceId"""
     costs   = {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0,"other":0.0}
     unknown = {}
     offset  = 0
     while True:
-        entries = requests.get("https://api.allegro.pl/billing/billing-entries", headers=hdrs(token),
+        entries = requests.get("https://api.allegro.pl/billing/billing-entries",
+                               headers=hdrs(token),
                                params={"occurredAt.gte":df,"occurredAt.lte":dt,
-                                       "limit":100,"offset":offset}).json().get("billingEntries",[])
+                                       "marketplaceId":marketplace,"limit":100,"offset":offset}
+                               ).json().get("billingEntries", [])
         for e in entries:
             try:
                 amt  = float(e["value"]["amount"])
@@ -147,116 +110,166 @@ def get_costs_for_day(token, date_key):
                     if cat == "other": unknown[tid] = tnam
                 elif amt > 0:
                     if cat == "zwrot_commission": costs["commission"] = max(0, costs["commission"] - amt)
-                    elif cat == "delivery":       costs["delivery"]   = max(0, costs["delivery"]   - amt)
+                    elif cat == "delivery":       costs["delivery"]   = max(0, costs["delivery"] - amt)
                     elif cat == "discount":       costs["discount"]   += amt
-                    else: unknown[f"+{tid}"] = f"+{tnam}"
+                    else: unknown[f"+{tid}"] = tnam
             except: pass
         if len(entries) < 100: break
         offset += 100
     if unknown:
-        print(f"  ⚠ НОВЫЕ ТИПЫ [{date_key}]: {unknown}")
+        print(f"    ⚠ НОВЫЕ ТИПЫ ({marketplace}): {unknown}")
     return {k: round(v, 2) for k, v in costs.items()}
 
-# ── ОСНОВНОЙ ЦИКЛ ─────────────────────────────────────────────
-print(f"ТЕСТ: {TEST_SHOP} | Янв+Фев 2026 | {len(TEST_DATES)} дней")
-rt_val = os.environ.get("REFRESH_TOKEN_POLAX", "")
-print(f"ENV: CLIENT_ID_POLAX={'OK' if os.environ.get('CLIENT_ID_POLAX') else 'ОТСУТСТВУЕТ'}")
-print(f"ENV: REFRESH_TOKEN_POLAX={'OK len=' + str(len(rt_val)) if rt_val else 'ОТСУТСТВУЕТ'}")
-
-tokens = {}
-for shop, creds in SHOPS.items():
-    t, nr = get_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
-    if t:
-        tokens[shop] = t
-        print(f"  Токен {shop}: OK")
-
-days_data = {date: {"date":date,"Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
-                    "countries":{k:0 for k in MARKETPLACES},
-                    "costs":{"commission":0,"delivery":0,"ads":0,"subscription":0,"discount":0,"other":0}}
-             for date in TEST_DATES}
-
-for shop, token in tokens.items():
-    print(f"\n=== {shop} ===")
-    for date_key in TEST_DATES:
-        countries, total = get_sales_for_day(token, date_key)
-        costs            = get_costs_for_day(token, date_key)
-        days_data[date_key][shop] = total
-        for k in countries: days_data[date_key]["countries"][k] = round(days_data[date_key]["countries"][k] + countries[k], 2)
-        for k in costs:     days_data[date_key]["costs"][k]     = round(days_data[date_key]["costs"][k] + costs[k], 2)
-        tc = sum(v for k,v in costs.items() if k != "discount")
-        if total > 0 or tc > 0:
-            print(f"  {date_key}: продажи={total:.2f} | Obowiązk={costs['commission']:.2f} Dost={costs['delivery']:.2f} Rekl={costs['ads']:.2f} Abon={costs['subscription']:.2f} Rab=+{costs['discount']:.2f}")
-
-days_list = [days_data[d] for d in sorted(days_data)]
-
-months_ru = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"]
-monthly   = {}
-for day in days_list:
-    mk  = day["date"][:7]
-    dt  = datetime.strptime(mk, "%Y-%m")
-    lbl = f"{months_ru[dt.month-1]} {dt.year}"
-    if lbl not in monthly:
-        monthly[lbl] = {"month":lbl,"_o":mk,"Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
-                        "countries":{k:0.0 for k in MARKETPLACES},
-                        "costs":{"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0,"other":0.0}}
-    m = monthly[lbl]
-    for s in ALL_SHOPS: m[s] = round(m[s] + day.get(s, 0), 2)
-    for k in MARKETPLACES: m["countries"][k] = round(m["countries"][k] + day.get("countries",{}).get(k,0), 2)
-    for k in ["commission","delivery","ads","subscription","discount","other"]:
-        m["costs"][k] = round(m["costs"][k] + day.get("costs",{}).get(k,0), 2)
-
-months_list = sorted([{k:v for k,v in m.items() if k!="_o"} for m in monthly.values()],
-                     key=lambda x: monthly[x["month"]]["_o"])
-
-result = {"days": days_list, "months": months_list}
-with open("data.json", "w") as f:
-    json.dump(result, f, indent=2, ensure_ascii=False)
-
-# ── ИТОГ ──────────────────────────────────────────────────────
-ETALON_JAN = {
-    "costs": {"commission":4727.83,"delivery":1793.56,"ads":8968.75,"subscription":199.00,"discount":46.54},
-    "countries_local": {"allegro-pl":33998.72,"allegro-cz":1613.00,"allegro-hu":3790.00,"allegro-sk":93.36},
-    "countries_cur":   {"allegro-pl":"PLN",    "allegro-cz":"CZK",  "allegro-hu":"HUF",  "allegro-sk":"EUR"},
+# ── ЭТАЛОН из скриншотов Allegro ─────────────────────────────
+ETALON = {
+    "2026-01": {
+        "allegro-pl": {
+            "cur": "PLN",
+            "sales":        33998.72,
+            "commission":   -4727.83,
+            "delivery":     -1793.56,
+            "ads":          -8968.75,
+            "subscription": -199.00,
+            "discount":     +46.54,
+        },
+        "allegro-cz": {
+            "cur": "CZK",
+            "sales":        1613.00,
+            "commission":   -253.44,
+            "delivery":     -454.98,
+            "ads":          0.00,
+            "subscription": 0.00,
+            "discount":     0.00,
+        },
+        "allegro-hu": {
+            "cur": "HUF",
+            "sales":        3790.00,
+            "commission":   -662.79,
+            "delivery":     -2570.00,
+            "ads":          0.00,
+            "subscription": 0.00,
+            "discount":     0.00,
+        },
+        "allegro-sk": {
+            "cur": "EUR",
+            "sales":        93.36,
+            "commission":   -11.66,
+            "delivery":     -9.26,
+            "ads":          0.00,
+            "subscription": 0.00,
+            "discount":     0.00,
+        },
+    }
 }
 
-print(f"\n{'='*70}")
-for m in months_list:
-    c     = m["costs"]
-    sales = m[TEST_SHOP]
-    ctr   = m["countries"]
-    is_jan = m["month"] == "Янв 2026"
-    print(f"\n  {m['month']} — {TEST_SHOP}")
-    print(f"  {'─'*66}")
-    print(f"  Продажи итого:    {sales:>10.2f} PLN")
-    print(f"  {'─'*66}")
+# ── ОСНОВНОЙ ЦИКЛ ─────────────────────────────────────────────
+print(f"ТЕСТ: {TEST_SHOP} | Янв+Фев 2026 | {len(TEST_DATES)} дней\n")
+token = get_token()
 
-    # Страны в PLN
-    print(f"  {'СТРАНЫ (PLN)':}")
-    print(f"  {'Страна':<14} {'НАШИ PLN':>12} {'ALLEGRO лок.':>14} {'Валюта':>6}")
-    for mkt, flag in [("allegro-pl","PL"),("allegro-cz","CZ"),("allegro-hu","HU"),("allegro-sk","SK")]:
-        our_pln = ctr.get(mkt, 0)
-        if is_jan:
-            ref_local = ETALON_JAN["countries_local"][mkt]
-            ref_cur   = ETALON_JAN["countries_cur"][mkt]
-            print(f"  {flag:<14} {our_pln:>12.2f} {ref_local:>14.2f} {ref_cur:>6}")
+# Накапливаем данные по месяцам
+months_ru = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"]
+monthly = {}
+
+for date_key in TEST_DATES:
+    mk  = date_key[:7]
+    lbl = f"{months_ru[int(mk[5:7])-1]} {mk[:4]}"
+    tz  = get_tz(int(date_key[5:7]))
+    df  = date_key + f"T00:00:00+0{tz}:00"
+    dt  = date_key + f"T23:59:59+0{tz}:00"
+
+    if lbl not in monthly:
+        monthly[lbl] = {"_mk": mk}
+        for mkt in COUNTRIES:
+            monthly[lbl][mkt] = {"sales": 0.0,
+                                  "commission":0.0,"delivery":0.0,"ads":0.0,
+                                  "subscription":0.0,"discount":0.0,"other":0.0}
+
+    for mkt in COUNTRIES:
+        sales = get_sales_local(token, df, dt, mkt)
+        costs = get_costs_local(token, df, dt, mkt)
+        monthly[lbl][mkt]["sales"] += sales
+        for k in costs:
+            monthly[lbl][mkt][k] += costs[k]
+
+    print(f"  {date_key} OK")
+
+# ── ОТЧЁТ ─────────────────────────────────────────────────────
+COST_NAMES = {
+    "commission":   "Obowiązkowe",
+    "delivery":     "Dostawa",
+    "ads":          "Reklama i promowanie",
+    "subscription": "Abonament",
+    "discount":     "Rabaty od Allegro",
+}
+COST_SIGN = {"commission":"-","delivery":"-","ads":"-","subscription":"-","discount":"+"}
+
+def pct(val, base):
+    if base == 0: return "—"
+    return f"{abs(val)/base*100:.1f}%"
+
+def ok(our, ref):
+    if ref == 0 and our == 0: return "OK"
+    if ref == 0: return "—"
+    diff = abs(our - abs(ref))
+    return "OK" if diff < 2 else ("~OK" if diff < 20 else "ОШИБКА")
+
+print(f"\n{'='*80}")
+print(f"  СРАВНЕНИЕ С ЭТАЛОНОМ ALLEGRO — {TEST_SHOP}")
+print(f"{'='*80}")
+
+for lbl, mdata in monthly.items():
+    mk = mdata["_mk"]
+    et = ETALON.get(mk)
+    print(f"\n  {'─'*76}")
+    print(f"  {lbl}")
+    print(f"  {'─'*76}")
+
+    # Объединяем PL + business-PL
+    pl_sales = round(mdata["allegro-pl"]["sales"] + mdata["allegro-business-pl"]["sales"], 2)
+    pl_costs = {}
+    for k in ["commission","delivery","ads","subscription","discount","other"]:
+        pl_costs[k] = round(mdata["allegro-pl"][k] + mdata["allegro-business-pl"][k], 2)
+
+    display_data = {
+        "allegro-pl":  {"label":"PL (PLN)", "cur":"PLN", "sales":pl_sales, **pl_costs},
+        "allegro-cz":  {"label":"CZ (CZK)", "cur":"CZK", **{k:round(mdata["allegro-cz"][k],2) for k in ["sales","commission","delivery","ads","subscription","discount","other"]}},
+        "allegro-hu":  {"label":"HU (HUF)", "cur":"HUF", **{k:round(mdata["allegro-hu"][k],2) for k in ["sales","commission","delivery","ads","subscription","discount","other"]}},
+        "allegro-sk":  {"label":"SK (EUR)", "cur":"EUR", **{k:round(mdata["allegro-sk"][k],2) for k in ["sales","commission","delivery","ads","subscription","discount","other"]}},
+    }
+
+    for mkt, d in display_data.items():
+        cur   = d["cur"]
+        label = d["label"]
+        e     = et.get(mkt) if et else None
+
+        print(f"\n  ┌─ {label} {'─'*(60-len(label))}")
+
+        # Продажи
+        our_s = d["sales"]
+        if e:
+            ref_s = e["sales"]
+            diff  = our_s - ref_s
+            status = ok(our_s, ref_s)
+            print(f"  │  Wartość sprzedaży  {our_s:>12.2f} {cur}  │  эталон: {ref_s:>10.2f}  │  разница: {diff:>+8.2f}  {status}")
         else:
-            print(f"  {flag:<14} {our_pln:>12.2f}")
+            print(f"  │  Wartość sprzedaży  {our_s:>12.2f} {cur}")
 
-    print(f"  {'─'*66}")
+        # Расходы
+        for cat in ["commission","delivery","ads","subscription","discount"]:
+            our_c = d[cat]
+            sign  = COST_SIGN[cat]
+            name  = COST_NAMES[cat]
+            if e:
+                ref_c = e[cat]  # уже со знаком
+                diff  = our_c - abs(ref_c)
+                status = ok(our_c, ref_c)
+                print(f"  │  {name:<22} {sign}{our_c:>10.2f} {cur}  │  эталон: {ref_c:>+10.2f}  │  разница: {diff:>+8.2f}  {status}")
+            else:
+                if our_c != 0:
+                    print(f"  │  {name:<22} {sign}{our_c:>10.2f} {cur}")
+        if d.get("other", 0) > 0:
+            print(f"  │  ⚠ OTHER              -{d['other']:>10.2f} {cur}  ← добавить в BILLING_MAP!")
+        print(f"  └{'─'*63}")
 
-    # Расходы
-    print(f"  {'РАСХОДЫ':}")
-    print(f"  {'Категория':<28} {'НАШИ':>10} {'ЭТАЛОН(Янв)':>12} {'РАЗНИЦА':>10}")
-    for cat in ["commission","delivery","ads","subscription","discount"]:
-        our = c[cat]
-        sign = "+" if cat == "discount" else "-"
-        if is_jan:
-            ref  = ETALON_JAN["costs"][cat]
-            diff = our - ref
-            ok   = "OK" if abs(diff) < 2 else "ОШИБКА"
-            print(f"  {cat:<28} {sign}{our:>9.2f} {sign}{ref:>11.2f} {diff:>+10.2f}  {ok}")
-        else:
-            print(f"  {cat:<28} {sign}{our:>9.2f}")
-    if c["other"] > 0:
-        print(f"  {'⚠ other':<28} -{c['other']:>9.2f}  ← ДОБАВИТЬ В BILLING_MAP!")
-print(f"\n{'='*70}")
+print(f"\n{'='*80}")
+print("Готово!")
