@@ -81,6 +81,18 @@ print("="*65)
 all_orders = fetch_orders(token)
 print(f"   Заказов: {len(all_orders)}")
 
+# Смотрим структуру первого заказа
+if all_orders:
+    o = all_orders[0]
+    print(f"\n   Структура первого заказа (ключи верхнего уровня):")
+    for k, v in o.items():
+        if isinstance(v, dict):
+            print(f"     {k}: {dict(list(v.items())[:3])}")
+        elif isinstance(v, list):
+            print(f"     {k}: [{len(v)} items]")
+        else:
+            print(f"     {k}: {repr(v)[:80]}")
+
 # Суммируем по marketplace и валюте
 from collections import defaultdict
 by_mkt = defaultdict(float)
