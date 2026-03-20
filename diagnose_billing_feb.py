@@ -1,6 +1,6 @@
 """
 Загружает billing за январь 2026 по всем 4 странам отдельно.
-Сохраняет в billing_all_jan.json для анализа.
+Сохраняет в billing_all_feb.json для анализа.
 Эталон (из скриншотов):
   PL: Obowiązkowe=-4727.83 Dostawa=-1793.56 Reklama=-8968.75 Abonament=-199.00 Rabaty=+46.54
   CZ: Obowiązkowe=-253.44  Dostawa=-454.98
@@ -41,7 +41,7 @@ def get_token():
                             "redirect_uri":REDIRECT_URI})
     d = r.json()
     if "access_token" not in d: print(f"ОШИБКА: {d}"); exit(1)
-    save_token(d.get("refresh_token",""))
+    # Диагностический скрипт — токен НЕ ротируем
     return d["access_token"]
 
 def hdrs(t):
@@ -91,9 +91,9 @@ for mkt in MARKETPLACES:
         print(f"  [{tid:<4}] {v['name']:<45} {neg:>12} {pos:>10} {v['cur']:>6}")
 
 # Сохраняем сырые данные
-with open("billing_all_jan.json","w") as f:
+with open("billing_all_feb.json","w") as f:
     # Сохраняем только by_type для компактности
     summary = {mkt: result[mkt]["by_type"] for mkt in MARKETPLACES}
     json.dump(summary, f, indent=2, ensure_ascii=False)
-print(f"\n\nСохранено в billing_all_jan.json")
+print(f"\n\nСохранено в billing_all_feb.json")
 print(f"Записей: PL={len(result['allegro-pl']['entries'])} CZ={len(result['allegro-cz']['entries'])} HU={len(result['allegro-hu']['entries'])} SK={len(result['allegro-sk']['entries'])}")
