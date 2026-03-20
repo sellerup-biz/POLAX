@@ -51,19 +51,22 @@ def fetch_orders(token, marketplace=None):
     offset = 0
     while True:
         params = {
-            "lineItems.boughtAt.gte": DATE_FROM,
-            "lineItems.boughtAt.lte": DATE_TO,
+            "boughtAt.gte": DATE_FROM,
+            "boughtAt.lte": DATE_TO,
             "limit": 100,
             "offset": offset,
-            "status": "READY_FOR_PROCESSING,PROCESSING,SENT,DELIVERED,CANCELLED",
         }
         if marketplace:
-            params["marketplaceId"] = marketplace
+            params["marketplace.id"] = marketplace
         r = requests.get("https://api.allegro.pl/order/checkout-forms",
                          headers=hdrs(token), params=params)
         data = r.json()
+        if "checkoutForms" not in data:
+            print(f"  ОШИБКА API: {data}")
+            break
         batch = data.get("checkoutForms", [])
         orders.extend(batch)
+        print(f"  {marketplace or 'ALL'}: загружено {len(orders)} (offset={offset})")
         if len(batch) < 100: break
         offset += 100
     return orders
