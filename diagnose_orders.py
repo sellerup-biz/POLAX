@@ -1,21 +1,30 @@
 """
-Проверяем сумму заказов за январь через orders API.
-Если совпадает с 33998.72 — значит Allegro UI считает по заказам.
+Диагностика заказов PolaxEuroGroup за январь 2026.
+Документация: GET /order/checkout-forms
+Параметры даты: lineItems.boughtAt.gte / lineItems.boughtAt.lte
+Параметр маркетплейса: marketplace.id
+Поле в ответе: marketplace.id, summary.totalToPay, delivery.cost
 """
 import requests, json, os, base64
+from datetime import datetime
 from nacl import encoding, public
+from collections import defaultdict
 
 REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
 GH_TOKEN     = os.environ.get("GH_TOKEN","")
 GH_REPO      = "sellerup-biz/POLAX"
 
-DATE_FROM = "2026-01-01T00:00:00+01:00"
-DATE_TO   = "2026-01-31T23:59:59+01:00"
+# UTC формат — без timezone offset
+DATE_FROM = "2026-01-01T00:00:00.000Z"
+DATE_TO   = "2026-01-31T23:59:59.999Z"
 
-ETALON_PL  = 33998.72
-ETALON_CZ  = 1613.00
-ETALON_HU  = 3790.00
-ETALON_SK  = 93.36
+ETALON = {
+    "allegro-pl":           33998.72,
+    "allegro-business-pl":  None,
+    "allegro-cz":           1613.00,
+    "allegro-hu":           3790.00,
+    "allegro-sk":           93.36,
+}
 
 def save_token(new_rt):
     if not new_rt or not GH_TOKEN: return
@@ -45,122 +54,112 @@ def get_token():
 def hdrs(t):
     return {"Authorization":f"Bearer {t}","Accept":"application/vnd.allegro.public.v1+json"}
 
-def fetch_orders(token, marketplace=None):
-    """Забирает все заказы за период"""
+def fetch_orders(token):
+    """Забирает все заказы с фильтром по дате"""
     orders = []
     offset = 0
     while True:
         params = {
-            "boughtAt.gte": DATE_FROM,
-            "boughtAt.lte": DATE_TO,
+            "lineItems.boughtAt.gte": DATE_FROM,
+            "lineItems.boughtAt.lte": DATE_TO,
             "limit": 100,
             "offset": offset,
         }
-        if marketplace:
-            params["marketplace.id"] = marketplace
-        r = requests.get("https://api.allegro.pl/order/checkout-forms",
-                         headers=hdrs(token), params=params)
+        r    = requests.get("https://api.allegro.pl/order/checkout-forms",
+                            headers=hdrs(token), params=params)
         data = r.json()
         if "checkoutForms" not in data:
-            print(f"  ОШИБКА API: {data}")
+            print(f"  ОШИБКА: {data}")
             break
         batch = data.get("checkoutForms", [])
+        total = data.get("totalCount", "?")
         orders.extend(batch)
-        print(f"  {marketplace or 'ALL'}: загружено {len(orders)} (offset={offset})")
+        if offset == 0:
+            print(f"  totalCount из API: {total}")
         if len(batch) < 100: break
         offset += 100
+        if offset > 10000:
+            print("  ⚠ Достигнут лимит offset=10000")
+            break
     return orders
 
 token = get_token()
 print(f"Токен: OK | {DATE_FROM[:10]} → {DATE_TO[:10]}\n")
 
-# ── 1. Все заказы без фильтра ─────────────────────────────────
+# ── 1. Структура первого заказа ───────────────────────────────
 print("="*65)
-print("1. Все заказы за январь (без фильтра marketplace)")
+print("1. Структура первого заказа (для отладки)")
 print("="*65)
-all_orders = fetch_orders(token)
-print(f"   Заказов: {len(all_orders)}")
+params = {"lineItems.boughtAt.gte": DATE_FROM, "lineItems.boughtAt.lte": DATE_TO, "limit": 1}
+r = requests.get("https://api.allegro.pl/order/checkout-forms", headers=hdrs(token), params=params)
+data = r.json()
+total = data.get("totalCount","?")
+print(f"  totalCount (январь): {total}")
+if data.get("checkoutForms"):
+    o = data["checkoutForms"][0]
+    print(f"  marketplace: {o.get('marketplace')}")
+    print(f"  status: {o.get('status')}")
+    print(f"  summary.totalToPay: {o.get('summary',{}).get('totalToPay')}")
+    print(f"  delivery.cost: {o.get('delivery',{}).get('cost')}")
+    li = o.get("lineItems",[])
+    if li:
+        print(f"  lineItems[0].boughtAt: {li[0].get('boughtAt')}")
+        print(f"  lineItems[0].price: {li[0].get('price')}")
+    print(f"\n  Полный JSON первого заказа:")
+    print(json.dumps(o, indent=2, ensure_ascii=False)[:2000])
 
-# Смотрим структуру первого заказа
-if all_orders:
-    o = all_orders[0]
-    print(f"\n   Структура первого заказа (ключи верхнего уровня):")
-    for k, v in o.items():
-        if isinstance(v, dict):
-            print(f"     {k}: {dict(list(v.items())[:3])}")
-        elif isinstance(v, list):
-            print(f"     {k}: [{len(v)} items]")
-        else:
-            print(f"     {k}: {repr(v)[:80]}")
-
-# Суммируем по marketplace и валюте
-from collections import defaultdict
-by_mkt = defaultdict(float)
-by_mkt_delivery = defaultdict(float)
-by_mkt_items = defaultdict(float)
-by_mkt_cur = {}
-status_counts = defaultdict(int)
-
-for o in all_orders:
-    mkt = o.get("marketplaceId", "НЕТ")
-    status = o.get("status","?")
-    status_counts[status] += 1
-    # Итого по заказу
-    summary = o.get("summary", {})
-    total_amt   = float(summary.get("totalToPay",{}).get("amount", 0))
-    total_cur   = summary.get("totalToPay",{}).get("currency","PLN")
-    # Доставка
-    delivery    = o.get("delivery", {})
-    del_amt     = float(delivery.get("cost",{}).get("amount", 0) if delivery else 0)
-    # Товары
-    items_total = total_amt - del_amt
-    by_mkt[mkt]          += total_amt
-    by_mkt_delivery[mkt] += del_amt
-    by_mkt_items[mkt]    += items_total
-    by_mkt_cur[mkt]       = total_cur
-
-print(f"\n   Статусы заказов: {dict(status_counts)}")
-print(f"\n   {'Маркетплейс':<25} {'Итого заказов':>15} {'в т.ч. доставка':>17} {'только товар':>14} {'Валюта':>6}")
-print(f"   {'─'*25} {'─'*15} {'─'*17} {'─'*14} {'─'*6}")
-for mkt in sorted(by_mkt):
-    print(f"   {mkt:<25} {by_mkt[mkt]:>15.2f} {by_mkt_delivery[mkt]:>17.2f} {by_mkt_items[mkt]:>14.2f} {by_mkt_cur.get(mkt,'?'):>6}")
-
-# ── 2. Только НЕОТМЕНЁННЫЕ заказы ─────────────────────────────
+# ── 2. Все заказы за январь ───────────────────────────────────
 print(f"\n{'='*65}")
-print("2. Только НЕ отменённые заказы (без CANCELLED)")
+print("2. Суммы заказов за январь по маркетплейсам")
 print("="*65)
-active_orders = [o for o in all_orders if o.get("status") != "CANCELLED"]
-print(f"   Заказов: {len(active_orders)}")
 
-by_mkt2 = defaultdict(float)
-by_mkt2_del = defaultdict(float)
-for o in active_orders:
-    mkt = o.get("marketplaceId","НЕТ")
+all_orders = fetch_orders(token)
+print(f"  Загружено: {len(all_orders)} заказов")
+
+# Фильтруем CANCELLED
+active = [o for o in all_orders if o.get("status") != "CANCELLED"]
+cancelled = len(all_orders) - len(active)
+print(f"  Активных: {len(active)} | Отменённых: {cancelled}")
+
+# Суммируем по маркетплейсам
+by_mkt       = defaultdict(float)
+by_mkt_del   = defaultdict(float)
+by_mkt_cur   = {}
+by_mkt_cnt   = defaultdict(int)
+
+for o in active:
+    mkt = o.get("marketplace",{}).get("id","НЕТ")
     summary  = o.get("summary",{})
     delivery = o.get("delivery",{})
     total    = float(summary.get("totalToPay",{}).get("amount",0))
-    deli     = float(delivery.get("cost",{}).get("amount",0) if delivery else 0)
-    by_mkt2[mkt]     += total
-    by_mkt2_del[mkt] += deli
+    cur      = summary.get("totalToPay",{}).get("currency","PLN")
+    deli     = float(delivery.get("cost",{}).get("amount",0)) if delivery else 0
+    by_mkt[mkt]     += total
+    by_mkt_del[mkt] += deli
+    by_mkt_cur[mkt]  = cur
+    by_mkt_cnt[mkt] += 1
 
-print(f"\n   {'Маркетплейс':<25} {'Итого':>12} {'Доставка':>10} {'Товар':>12} {'Эталон UI':>12} {'Разница':>10}")
-print(f"   {'─'*25} {'─'*12} {'─'*10} {'─'*12} {'─'*12} {'─'*10}")
+print(f"\n  {'Маркетплейс':<25} {'Кол':>5} {'Итого':>12} {'Доставка':>10} {'Товар':>12} {'Валюта':>6}")
+print(f"  {'─'*25} {'─'*5} {'─'*12} {'─'*10} {'─'*12} {'─'*6}")
+for mkt in sorted(by_mkt):
+    t = by_mkt[mkt]
+    d = by_mkt_del[mkt]
+    c = by_mkt_cur.get(mkt,"?")
+    n = by_mkt_cnt[mkt]
+    print(f"  {mkt:<25} {n:>5} {t:>12.2f} {d:>10.2f} {t-d:>12.2f} {c:>6}")
 
-ETALON = {"allegro-pl":33998.72,"allegro-cz":1613.00,"allegro-hu":3790.00,"allegro-sk":93.36}
-pl_total = by_mkt2.get("allegro-pl",0) + by_mkt2.get("allegro-business-pl",0)
-pl_del   = by_mkt2_del.get("allegro-pl",0) + by_mkt2_del.get("allegro-business-pl",0)
+# ── 3. Сравнение с эталоном ───────────────────────────────────
+print(f"\n{'='*65}")
+print("3. Сравнение с эталоном Allegro UI")
+print("="*65)
+print(f"  {'Маркетплейс':<25} {'ИТОГО':>12} {'ЭТАЛОН':>12} {'РАЗНИЦА':>10}")
+print(f"  {'─'*25} {'─'*12} {'─'*12} {'─'*10}")
 
-for mkt in ["allegro-pl","allegro-business-pl","allegro-cz","allegro-hu","allegro-sk"]:
-    t = by_mkt2.get(mkt,0)
-    d = by_mkt2_del.get(mkt,0)
+pl_total = by_mkt.get("allegro-pl",0) + by_mkt.get("allegro-business-pl",0)
+print(f"  allegro-pl + business: {pl_total:>9.2f}  эталон: 33998.72  разница: {pl_total-33998.72:+.2f}")
+
+for mkt in ["allegro-cz","allegro-hu","allegro-sk"]:
+    t   = by_mkt.get(mkt,0)
     ref = ETALON.get(mkt)
     if ref:
-        diff = t - ref
-        ok = "✅" if abs(diff) < 1 else "❌"
-        print(f"   {mkt:<25} {t:>12.2f} {d:>10.2f} {t-d:>12.2f} {ref:>12.2f} {diff:>+10.2f} {ok}")
-    else:
-        print(f"   {mkt:<25} {t:>12.2f} {d:>10.2f} {t-d:>12.2f} {'—':>12}")
-
-print(f"\n   PL+business итого: {pl_total:.2f}")
-print(f"   Эталон UI:         33998.72")
-print(f"   Разница:           {pl_total-33998.72:+.2f}")
+        print(f"  {mkt:<25} {t:>12.2f} {ref:>12.2f} {t-ref:>+10.2f}")
