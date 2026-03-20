@@ -105,7 +105,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 <div style="background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
     <div>
-      <div style="font-size:14px;font-weight:700;color:#1a1a1a">Продажи по дням</div>
+      <div style="font-size:14px;font-weight:700;color:#1a1a1a">Продажи по дням · последние 30 дней</div>
       <div style="font-size:11px;color:#999;margin-top:2px">данные из Allegro · обновляется каждую ночь автоматически</div>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -422,7 +422,11 @@ function renderMonthly(months){
 fetch('data.json')
   .then(function(r){return r.json();})
   .then(function(d){
-    if(d.days && d.days.length>0) renderDaily(d.days);
+    if(d.days && d.days.length>0){
+      var cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+      var recent=d.days.filter(function(day){return new Date(day.date)>=cutoff;});
+      if(recent.length>0) renderDaily(recent);
+    }
     if(d.months && d.months.length>0){
       renderMonthly(d.months);
       renderGoal(d.months);
