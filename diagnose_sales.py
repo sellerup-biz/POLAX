@@ -1,15 +1,30 @@
 """
-Диагностика продаж — ищем где теряются транзакции.
-Сравниваем разные периоды запросов для PolaxEuroGroup.
-Эталон Allegro UI: 33998.72 PLN только по Польше за январь.
+Диагностика продаж PolaxEuroGroup — январь 2026.
+Цель: найти почему наш итог 33421 < Allegro PL 33998.
 """
 import requests, os
 from datetime import datetime, timedelta
 
-REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
+REDIRECT_URI  = "https://sellerup-biz.github.io/POLAX/callback.html"
 CLIENT_ID     = os.environ["CLIENT_ID_POLAX"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET_POLAX"]
 REFRESH_TOKEN = os.environ["REFRESH_TOKEN_POLAX"]
+
+_rates = {}
+def get_rate(currency, date_str):
+    if currency == "PLN": return 1.0
+    key = f"{currency}_{date_str}"
+    if key in _rates: return _rates[key]
+    for delta in range(7):
+        d = (datetime.strptime(date_str, "%Y-%m-%d") - timedelta(days=delta)).strftime("%Y-%m-%d")
+        try:
+            r = requests.get(f"https://api.nbp.pl/api/exchangerates/rates/a/{currency.lower()}/{d}/?format=json", timeout=5)
+            if r.status_code == 200:
+                rate = float(r.json()["rates"][0]["mid"])
+                _rates[key] = rate
+                return rate
+        except: pass
+    return 1.0
 
 def get_token():
     r = requests.post("https://allegro.pl/auth/oauth/token",
@@ -22,90 +37,76 @@ def get_token():
 def hdrs(t):
     return {"Authorization": f"Bearer {t}", "Accept": "application/vnd.allegro.public.v1+json"}
 
-def get_income(token, df, dt, marketplace=None):
-    """Суммирует все INCOME операции за период"""
-    total = 0.0
+def fetch_all(token, df, dt, marketplace=None, group="INCOME"):
+    """Забирает все операции, конвертирует в PLN"""
+    total_pln = 0.0
     by_currency = {}
+    by_mkt      = {}
+    by_type     = {}
     count = 0
     offset = 0
-    params = {"group":"INCOME","occurredAt.gte":df,"occurredAt.lte":dt,"limit":100,"offset":offset}
-    if marketplace:
-        params["marketplaceId"] = marketplace
+    params = {"occurredAt.gte":df,"occurredAt.lte":dt,"limit":100}
+    if group:      params["group"]         = group
+    if marketplace: params["marketplaceId"] = marketplace
     while True:
         params["offset"] = offset
-        r = requests.get("https://api.allegro.pl/payments/payment-operations",
-                         headers=hdrs(token), params=params)
-        ops = r.json().get("paymentOperations", [])
+        ops = requests.get("https://api.allegro.pl/payments/payment-operations",
+                           headers=hdrs(token), params=params).json().get("paymentOperations",[])
         for op in ops:
             try:
-                amt = float(op["value"]["amount"])
-                cur = op["value"]["currency"]
-                by_currency[cur] = by_currency.get(cur, 0) + amt
-                total += amt  # без конвертации — только PLN сначала
+                amt  = float(op["value"]["amount"])
+                cur  = op["value"]["currency"]
+                mkt  = op.get("marketplaceId","НЕТ")
+                typ  = op.get("type","?")
+                grp  = op.get("group","?")
+                date = op.get("occurredAt","")[:10]
+                rate = get_rate(cur, date if date else "2026-01-15")
+                pln  = amt * rate
+                total_pln += pln
+                by_currency[cur]     = by_currency.get(cur, 0.0)     + amt
+                by_mkt[mkt]          = by_mkt.get(mkt, 0.0)          + pln
+                by_type[f"{grp}/{typ}"] = by_type.get(f"{grp}/{typ}", 0.0) + pln
                 count += 1
             except: pass
         if len(ops) < 100: break
         offset += 100
-    return total, by_currency, count
+    return total_pln, by_currency, by_mkt, by_type, count
 
 token = get_token()
-print("Токен: OK\n")
-print(f"ЭТАЛОН Allegro UI: 33998.72 PLN (только PL, период 31дек→30янв)")
+print("Токен: OK")
+print(f"\nЭТАЛОН Allegro UI (январь, только PL): 33 998.72 PLN")
 print(f"{'='*70}")
 
-# Тестируем разные периоды
-periods = [
-    ("Allegro период: 31дек→30янв UTC+1", "2025-12-31T00:00:00+01:00", "2026-01-30T23:59:59+01:00"),
-    ("Январь UTC+1:   01янв→31янв",        "2026-01-01T00:00:00+01:00", "2026-01-31T23:59:59+01:00"),
-    ("Январь UTC:     01янв→31янв",        "2026-01-01T00:00:00Z",      "2026-01-31T23:59:59Z"),
-    ("Шире:           31дек→31янв UTC+1",  "2025-12-31T00:00:00+01:00", "2026-01-31T23:59:59+01:00"),
-]
+# 1. Наш текущий период (1-31 января UTC+1)
+df1 = "2026-01-01T00:00:00+01:00"
+dt1 = "2026-01-31T23:59:59+01:00"
+total, by_cur, by_mkt, by_type, cnt = fetch_all(token, df1, dt1)
+print(f"\n1. Январь 1-31 UTC+1 | group=INCOME | {cnt} операций | ИТОГО: {total:.2f} PLN")
+print(f"   По валютам (оригинал): {by_cur}")
+print(f"   По marketplaceId (PLN): {by_mkt}")
+print(f"   По типам (PLN): {by_type}")
 
-for label, df, dt in periods:
-    # Без фильтра marketplace
-    total_all, by_cur, cnt = get_income(token, df, dt)
-    # Только PL
-    total_pl, by_cur_pl, cnt_pl = get_income(token, df, dt, "allegro-pl")
-    
-    print(f"\n{label}")
-    print(f"  Без фильтра: {total_all:.2f} PLN ({cnt} операций) | валюты: {by_cur}")
-    print(f"  Только PL:   {total_pl:.2f} PLN ({cnt_pl} операций)")
-    diff = total_pl - 33998.72
-    print(f"  Разница с эталоном PL: {diff:+.2f}")
+# 2. Allegro период (31 дек - 30 янв UTC+1)
+df2 = "2025-12-31T00:00:00+01:00"
+dt2 = "2026-01-30T23:59:59+01:00"
+total2, by_cur2, by_mkt2, by_type2, cnt2 = fetch_all(token, df2, dt2)
+print(f"\n2. Allegro период 31дек-30янв UTC+1 | {cnt2} операций | ИТОГО: {total2:.2f} PLN")
+print(f"   По marketplaceId (PLN): {by_mkt2}")
 
-# Дополнительно — проверяем 31 декабря отдельно
+# 3. Без фильтра group (все операции)
+total3, by_cur3, by_mkt3, by_type3, cnt3 = fetch_all(token, df1, dt1, group=None)
+print(f"\n3. Январь 1-31 UTC+1 | БЕЗ фильтра group | {cnt3} операций | ИТОГО: {total3:.2f} PLN")
+print(f"   По типам (PLN): {by_type3}")
+
+# 4. Только PL — что реально приходит
+total4, by_cur4, by_mkt4, by_type4, cnt4 = fetch_all(token, df1, dt1, marketplace="allegro-pl")
+print(f"\n4. Январь 1-31 UTC+1 | только allegro-pl | {cnt4} операций | ИТОГО: {total4:.2f} PLN")
+diff = total4 - 33998.72
+print(f"   Разница с эталоном: {diff:+.2f} PLN")
+
 print(f"\n{'='*70}")
-print("31 декабря 2025 (отдельно):")
-t31, c31, n31 = get_income(token, "2025-12-31T00:00:00+01:00", "2025-12-31T23:59:59+01:00")
-print(f"  Всего: {t31:.2f} PLN ({n31} операций) | {c31}")
-
-# 1 января
-print("1 января 2026:")
-t1, c1, n1 = get_income(token, "2026-01-01T00:00:00+01:00", "2026-01-01T23:59:59+01:00")
-print(f"  Всего: {t1:.2f} PLN ({n1} операций) | {c1}")
-
-# Также проверяем тип операций — может есть не CONTRIBUTION
-print(f"\n{'='*70}")
-print("Типы операций за январь (без фильтра group=INCOME):")
-offset = 0
-types_count = {}
-types_total = {}
-while True:
-    r = requests.get("https://api.allegro.pl/payments/payment-operations",
-                     headers=hdrs(token),
-                     params={"occurredAt.gte":"2026-01-01T00:00:00+01:00",
-                             "occurredAt.lte":"2026-01-31T23:59:59+01:00",
-                             "limit":100,"offset":offset})
-    ops = r.json().get("paymentOperations", [])
-    for op in ops:
-        t = op.get("type","?")
-        g = op.get("group","?")
-        key = f"{g}/{t}"
-        types_count[key] = types_count.get(key, 0) + 1
-        try: types_total[key] = types_total.get(key, 0.0) + float(op["value"]["amount"])
-        except: pass
-    if len(ops) < 100: break
-    offset += 100
-
-for key in sorted(types_total, key=lambda x: -abs(types_total[x])):
-    print(f"  {key:<30} {types_total[key]:>12.2f} PLN  ({types_count[key]} шт)")
+print(f"ВЫВОД:")
+print(f"  Наш итого ALL:  {total:.2f} PLN")
+print(f"  Наш итого PL:   {total4:.2f} PLN")
+print(f"  Эталон PL:      33998.72 PLN")
+print(f"  Разница PL:     {total4-33998.72:+.2f} PLN")
