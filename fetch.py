@@ -1,13 +1,16 @@
 """
-POLAX — ежедневный сбор данных (все 3 магазина, вчерашний день)
+POLAX — ежедневный сбор данных (все 3 магазина)
 Запускается каждую ночь в 03:00 UTC через fetch.yml
 
-Что исправлено vs предыдущей версии:
-  • total = PLN + CZK×курс + HUF×курс + EUR×курс (не сырое суммирование валют)
-  • расходы собираются для ВСЕХ трёх магазинов
-  • биллинг запрашивается по всем маркетплейсам (PL/CZ/HU/SK)
-  • CZK/HUF/EUR расходы конвертируются в PLN по текущему курсу НБП
-  • SUM добавлен в BILLING_MAP как IGNORE
+За один запуск собирает:
+  1. Вчера  — полные данные (complete)
+  2. Сегодня — накопленные данные с начала дня (partial: true)
+
+Сегодняшняя partial-запись при следующем запуске автоматически
+перезаписывается полными вчерашними данными.
+
+Это позволяет goal-блоку и analytics.html показывать
+растущий текущий месяц в течение дня.
 """
 import requests, json, os, base64, calendar
 from datetime import datetime, timedelta, timezone
@@ -56,7 +59,7 @@ BILLING_MAP = {
     "SB2":"subscription","ABN":"subscription",
     "RET":"discount","PS1":"discount",
     "PAD":"IGNORE",
-    "SUM":"IGNORE",  # Podsumowanie miesiąca — итоговая строка, всегда 0.00
+    "SUM":"IGNORE",
 }
 
 COST_CATS = ["commission","delivery","ads","subscription","discount"]
@@ -66,25 +69,17 @@ def get_billing_cat(tid, tnam):
     if tid in BILLING_MAP:
         return BILLING_MAP[tid]
     n = tnam.lower()
-    if "kampanii" in n or "kampania" in n:
-        return "ads"
-    if any(x in n for x in ["prowizja","lokalna dopłata","opłata transakcyjna"]):
-        return "commission"
+    if "kampanii" in n or "kampania" in n: return "ads"
+    if any(x in n for x in ["prowizja","lokalna dopłata","opłata transakcyjna"]): return "commission"
     if any(x in n for x in ["dostawa","kurier","inpost","dpd","gls","ups","orlen","poczta",
                               "przesyłka","fulfillment","one kurier","allegro delivery",
-                              "packeta","international","dodatkowa za dostawę"]):
-        return "delivery"
+                              "packeta","international","dodatkowa za dostawę"]): return "delivery"
     if any(x in n for x in ["kampani","reklam","promowanie","wyróżnienie","pogrubienie",
-                              "podświetlenie","strona działu","pakiet promo","cpc","ads"]):
-        return "ads"
-    if any(x in n for x in ["abonament","smart"]):
-        return "subscription"
-    if any(x in n for x in ["rozliczenie akcji","wyrównanie w programie allegro","rabat"]):
-        return "discount"
-    if any(x in n for x in ["zwrot kosztów","zwrot prowizji"]):
-        return "zwrot_commission"
-    if "pobranie opłat z wpływów" in n:
-        return "IGNORE"
+                              "podświetlenie","strona działu","pakiet promo","cpc","ads"]): return "ads"
+    if any(x in n for x in ["abonament","smart"]): return "subscription"
+    if any(x in n for x in ["rozliczenie akcji","wyrównanie w programie allegro","rabat"]): return "discount"
+    if any(x in n for x in ["zwrot kosztów","zwrot prowizji"]): return "zwrot_commission"
+    if "pobranie opłat z wpływów" in n: return "IGNORE"
     return "other"
 
 
@@ -98,8 +93,7 @@ def get_gh_pubkey():
 
 
 def save_token(secret_name, new_rt, pubkey):
-    if not new_rt or not GH_TOKEN:
-        return
+    if not new_rt or not GH_TOKEN: return
     try:
         pk  = public.PublicKey(pubkey["key"].encode(), encoding.Base64Encoder())
         enc = base64.b64encode(public.SealedBox(pk).encrypt(new_rt.encode())).decode()
@@ -140,11 +134,6 @@ def get_tz(month):
 # ── НБП КУРСЫ ─────────────────────────────────────────────────
 
 def get_nbp_rates():
-    """
-    Текущие курсы НБП (таблица А).
-    Возвращает {"CZK": float, "HUF": float, "EUR": float}.
-    При ошибке — нули (расходы в иностранных валютах не будут конвертированы).
-    """
     rates = {"CZK": 0.0, "HUF": 0.0, "EUR": 0.0}
     try:
         resp = requests.get(
@@ -165,14 +154,6 @@ def get_nbp_rates():
 # ── ПРОДАЖИ ───────────────────────────────────────────────────
 
 def get_sales_for_day(token, date_str):
-    """
-    Продажи за один день по всем маркетплейсам.
-    Возвращает:
-      allegro-pl = PLN (включает allegro-business-pl)
-      allegro-cz = CZK (нативная)
-      allegro-hu = HUF (нативная)
-      allegro-sk = EUR (нативная)
-    """
     dt     = datetime.strptime(date_str, "%Y-%m-%d")
     tz     = get_tz(dt.month)
     d_from = f"{date_str}T00:00:00+0{tz}:00"
@@ -192,12 +173,9 @@ def get_sales_for_day(token, date_str):
                 break
             ops = resp.json().get("paymentOperations",[])
             for op in ops:
-                try:
-                    by_mkt[mkt] += float(op["value"]["amount"])
-                except Exception:
-                    pass
-            if len(ops) < 50:
-                break
+                try: by_mkt[mkt] += float(op["value"]["amount"])
+                except Exception: pass
+            if len(ops) < 50: break
             offset += 50
 
     return {
@@ -211,16 +189,10 @@ def get_sales_for_day(token, date_str):
 # ── РАСХОДЫ ───────────────────────────────────────────────────
 
 def get_billing_for_day(token, date_str, marketplace_id=None):
-    """
-    Расходы за один день в нативной валюте маркетплейса.
-    marketplace_id=None  → allegro-pl (PLN, включает business-pl автоматически)
-    marketplace_id=str   → конкретный рынок (CZK/HUF/EUR)
-    """
     dt     = datetime.strptime(date_str, "%Y-%m-%d")
     tz     = get_tz(dt.month)
     d_from = f"{date_str}T00:00:00+0{tz}:00"
     d_to   = f"{date_str}T23:59:59+0{tz}:00"
-
     costs  = {cat: 0.0 for cat in COST_CATS}
     offset = 0
     params = {"occurredAt.gte":d_from,"occurredAt.lte":d_to,"limit":100}
@@ -231,50 +203,103 @@ def get_billing_for_day(token, date_str, marketplace_id=None):
         params["offset"] = offset
         resp = requests.get(
             "https://api.allegro.pl/billing/billing-entries",
-            headers=hdrs(token),
-            params=params)
+            headers=hdrs(token), params=params)
         if resp.status_code != 200:
             print(f"    ⚠ billing {marketplace_id or 'pl'}: HTTP {resp.status_code}")
             break
-
         entries = resp.json().get("billingEntries",[])
         for e in entries:
             try:
                 amt  = float(e["value"]["amount"])
                 cat  = get_billing_cat(e["type"]["id"], e["type"]["name"])
-                if cat == "IGNORE":
-                    continue
+                if cat == "IGNORE": continue
                 if cat == "other":
                     print(f"    ⚠ UNKNOWN: {e['type']['id']} '{e['type']['name']}' {amt:.2f}")
                     continue
                 if amt < 0:
-                    if cat in costs:
-                        costs[cat] += abs(amt)
+                    if cat in costs: costs[cat] += abs(amt)
                 elif amt > 0:
-                    if cat == "zwrot_commission":
-                        costs["commission"] = max(0.0, costs["commission"] - amt)
-                    elif cat == "delivery":
-                        costs["delivery"]   = max(0.0, costs["delivery"] - amt)
-                    elif cat == "discount":
-                        costs["discount"]  += amt
-            except Exception:
-                pass
-
-        if len(entries) < 100:
-            break
+                    if cat == "zwrot_commission": costs["commission"] = max(0.0, costs["commission"]-amt)
+                    elif cat == "delivery":       costs["delivery"]   = max(0.0, costs["delivery"]-amt)
+                    elif cat == "discount":       costs["discount"]  += amt
+            except Exception: pass
+        if len(entries) < 100: break
         offset += 100
 
     return {k: round(v, 2) for k, v in costs.items()}
+
+
+# ── СБОР ДАННЫХ ЗА ОДИН ДЕНЬ ─────────────────────────────────
+
+def collect_day(access_tokens, date_str, nbp, partial=False):
+    """
+    Собирает продажи и расходы за date_str по всем магазинам.
+    access_tokens: {shop_name: token} — переиспользуем без ротации.
+    Возвращает готовую запись для data.days.
+    """
+    entry = {
+        "date":          date_str,
+        "Mlot_i_Klucz":  0.0,
+        "PolaxEuroGroup":0.0,
+        "Sila_Narzedzi": 0.0,
+        "countries":     {"allegro-pl":0.0,"allegro-cz":0.0,"allegro-hu":0.0,"allegro-sk":0.0},
+        "costs":         {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
+    }
+    if partial:
+        entry["partial"] = True
+
+    for shop_name, token in access_tokens.items():
+        if not token:
+            continue
+        print(f"    {shop_name}...", end=" ", flush=True)
+
+        # Продажи
+        sales = get_sales_for_day(token, date_str)
+        for mkt in ["allegro-pl","allegro-cz","allegro-hu","allegro-sk"]:
+            entry["countries"][mkt] = round(entry["countries"][mkt] + sales.get(mkt, 0.0), 2)
+
+        czk_pln = round(sales["allegro-cz"] * nbp["CZK"], 2)
+        huf_pln = round(sales["allegro-hu"] * nbp["HUF"], 2)
+        eur_pln = round(sales["allegro-sk"] * nbp["EUR"], 2)
+        total   = round(sales["allegro-pl"] + czk_pln + huf_pln + eur_pln, 2)
+        entry[shop_name] = round(entry[shop_name] + total, 2)
+
+        # Расходы (все маркетплейсы → PLN)
+        costs_pln = {cat: 0.0 for cat in COST_CATS}
+        c_pl = get_billing_for_day(token, date_str, None)
+        for cat in COST_CATS: costs_pln[cat] += c_pl.get(cat, 0.0)
+
+        if nbp["CZK"] > 0:
+            c_cz = get_billing_for_day(token, date_str, "allegro-cz")
+            for cat in COST_CATS: costs_pln[cat] += c_cz.get(cat, 0.0) * nbp["CZK"]
+
+        if nbp["HUF"] > 0:
+            c_hu = get_billing_for_day(token, date_str, "allegro-hu")
+            for cat in COST_CATS: costs_pln[cat] += c_hu.get(cat, 0.0) * nbp["HUF"]
+
+        if nbp["EUR"] > 0:
+            c_sk = get_billing_for_day(token, date_str, "allegro-sk")
+            for cat in COST_CATS: costs_pln[cat] += c_sk.get(cat, 0.0) * nbp["EUR"]
+
+        for cat in COST_CATS:
+            entry["costs"][cat] = round(entry["costs"][cat] + costs_pln.get(cat, 0.0), 2)
+
+        total_costs = sum(v for k,v in costs_pln.items() if k != "discount")
+        print(f"PLN={total:,.2f}  costs={total_costs:,.2f}")
+
+    # Финальное округление
+    for mkt in entry["countries"]: entry["countries"][mkt] = round(entry["countries"][mkt], 2)
+    for cat in entry["costs"]:     entry["costs"][cat]     = round(entry["costs"][cat], 2)
+    for s in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]: entry[s] = round(entry[s], 2)
+    return entry
 
 
 # ── DATA.JSON ─────────────────────────────────────────────────
 
 def load_data():
     try:
-        with open("data.json") as f:
-            return json.load(f)
-    except Exception:
-        return {"days":[],"months":[]}
+        with open("data.json") as f: return json.load(f)
+    except Exception: return {"days":[],"months":[]}
 
 
 def save_data(data):
@@ -283,7 +308,6 @@ def save_data(data):
 
 
 def update_months(data):
-    """Пересчитываем месячные агрегаты из дневных записей."""
     months_map = defaultdict(lambda:{
         "Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
         "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0},
@@ -301,7 +325,6 @@ def update_months(data):
         for cat in COST_CATS:
             months_map[mk]["costs"][cat] = round(
                 months_map[mk]["costs"][cat] + day.get("costs",{}).get(cat, 0), 2)
-
     MONTH_RU_REV = {v:k for k,v in MONTH_RU.items()}
     data["months"] = [
         {"month":k,**v}
@@ -314,105 +337,80 @@ def update_months(data):
 
 # ── MAIN ──────────────────────────────────────────────────────
 
-yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
-print(f"Дата: {yesterday}")
+now       = datetime.now(timezone.utc)
+yesterday = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+today_str = now.strftime("%Y-%m-%d")
 
-data = load_data()
-existing_dates = {d["date"] for d in data["days"]}
+print(f"Вчера:   {yesterday}")
+print(f"Сегодня: {today_str}")
 
-if yesterday in existing_dates:
-    print(f"  {yesterday} уже есть в data.json — пропускаем")
-else:
-    # Получаем курсы НБП один раз перед обходом магазинов
-    print("\n── НБП курсы ────────────────────────────────────────────")
-    nbp = get_nbp_rates()
+data        = load_data()
+existing    = {d["date"]: d for d in data["days"]}
 
-    pubkey = get_gh_pubkey()
+# Нужно ли собирать вчера?
+# Пропускаем только если вчера уже есть как ПОЛНАЯ (не partial) запись
+collect_yesterday = not (
+    yesterday in existing and not existing[yesterday].get("partial", False)
+)
 
-    # Инициализируем запись дня
-    day_entry = {
-        "date":          yesterday,
-        "Mlot_i_Klucz":  0.0,
-        "PolaxEuroGroup":0.0,
-        "Sila_Narzedzi": 0.0,
-        "countries":     {"allegro-pl":0.0,"allegro-cz":0.0,"allegro-hu":0.0,"allegro-sk":0.0},
-        "costs":         {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
-    }
+if not collect_yesterday:
+    print(f"\n{yesterday} уже есть (полный) — пропускаем вчера")
 
-    for shop_name, shop in SHOPS.items():
-        print(f"\n  {shop_name}...")
+print("\n── НБП курсы ────────────────────────────────────────────")
+nbp    = get_nbp_rates()
+pubkey = get_gh_pubkey()
 
-        token, new_rt = get_token(shop)
-        if not token:
-            continue
-        # ОБЯЗАТЕЛЬНО сохраняем токен сразу после получения
-        save_token(shop["secret_name"], new_rt, pubkey)
+# ── ШАГ 1: Получаем токены (один раз на все операции) ─────────
+print("\n── Авторизация ──────────────────────────────────────────")
+access_tokens = {}  # {shop_name: access_token}
 
-        # ── Продажи ──────────────────────────────────────────
-        sales = get_sales_for_day(token, yesterday)
+for shop_name, shop in SHOPS.items():
+    token, new_rt = get_token(shop)
+    if not token:
+        print(f"  ❌ {shop_name}: токен не получен")
+        continue
+    save_token(shop["secret_name"], new_rt, pubkey)
+    access_tokens[shop_name] = token
 
-        # Нативные суммы → аккумулируем в countries
-        for mkt in ["allegro-pl","allegro-cz","allegro-hu","allegro-sk"]:
-            day_entry["countries"][mkt] = round(
-                day_entry["countries"][mkt] + sales.get(mkt, 0.0), 2)
+# ── ШАГ 2: Вчера (complete) ────────────────────────────────────
+if collect_yesterday and access_tokens:
+    print(f"\n── Вчера: {yesterday} ───────────────────────────────────")
+    if yesterday in existing and existing[yesterday].get("partial", False):
+        print(f"  Была partial-запись — перезаписываем")
+    # Удаляем существующую запись за вчера (если была partial)
+    data["days"] = [d for d in data["days"] if d["date"] != yesterday]
 
-        # total магазина = все рынки в PLN-эквиваленте
-        czk_pln = round(sales["allegro-cz"] * nbp["CZK"], 2)
-        huf_pln = round(sales["allegro-hu"] * nbp["HUF"], 2)
-        eur_pln = round(sales["allegro-sk"] * nbp["EUR"], 2)
-        total   = round(sales["allegro-pl"] + czk_pln + huf_pln + eur_pln, 2)
-        day_entry[shop_name] = round(day_entry[shop_name] + total, 2)
+    yest_entry = collect_day(access_tokens, yesterday, nbp, partial=False)
+    data["days"].append(yest_entry)
 
-        print(f"    Продажи → PLN {sales['allegro-pl']:,.2f}  "
-              f"CZK→{czk_pln:,.2f}  HUF→{huf_pln:,.2f}  EUR→{eur_pln:,.2f}  "
-              f"│ Итого: {total:,.2f}")
+    total_yest = yest_entry["Mlot_i_Klucz"]+yest_entry["PolaxEuroGroup"]+yest_entry["Sila_Narzedzi"]
+    print(f"  ✅ {yesterday}: {total_yest:,.2f} PLN")
 
-        # ── Расходы (все маркетплейсы → PLN) ────────────────
-        costs_pln = {cat: 0.0 for cat in COST_CATS}
+# ── ШАГ 3: Сегодня (partial) ─────────────────────────────────
+# Переиспользуем те же access_tokens — ротация уже прошла на шаге 1
+if access_tokens:
+    print(f"\n── Сегодня: {today_str} (partial) ───────────────────────")
+    # Всегда перезаписываем сегодняшнюю partial-запись свежими данными
+    data["days"] = [d for d in data["days"] if d["date"] != today_str]
 
-        # PL (без marketplaceId, включает business-pl)
-        c_pl = get_billing_for_day(token, yesterday, None)
-        for cat in COST_CATS:
-            costs_pln[cat] += c_pl.get(cat, 0.0)
+    today_entry = collect_day(access_tokens, today_str, nbp, partial=True)
+    data["days"].append(today_entry)
 
-        # CZ → PLN
-        if nbp["CZK"] > 0:
-            c_cz = get_billing_for_day(token, yesterday, "allegro-cz")
-            for cat in COST_CATS:
-                costs_pln[cat] += c_cz.get(cat, 0.0) * nbp["CZK"]
+    total_today = today_entry["Mlot_i_Klucz"]+today_entry["PolaxEuroGroup"]+today_entry["Sila_Narzedzi"]
+    print(f"  ✅ {today_str}: {total_today:,.2f} PLN (неполный день)")
 
-        # HU → PLN
-        if nbp["HUF"] > 0:
-            c_hu = get_billing_for_day(token, yesterday, "allegro-hu")
-            for cat in COST_CATS:
-                costs_pln[cat] += c_hu.get(cat, 0.0) * nbp["HUF"]
+# ── СОХРАНЯЕМ ─────────────────────────────────────────────────
+data["days"].sort(key=lambda x: x["date"])
+update_months(data)
+save_data(data)
 
-        # SK → PLN
-        if nbp["EUR"] > 0:
-            c_sk = get_billing_for_day(token, yesterday, "allegro-sk")
-            for cat in COST_CATS:
-                costs_pln[cat] += c_sk.get(cat, 0.0) * nbp["EUR"]
+cur_month_key = MONTH_RU[now.month] + " " + str(now.year)
+cur_month = next((m for m in data["months"] if m["month"] == cur_month_key), None)
+if cur_month:
+    cur_total = (cur_month.get("Mlot_i_Klucz",0)
+                +cur_month.get("PolaxEuroGroup",0)
+                +cur_month.get("Sila_Narzedzi",0))
+    print(f"\n📊 {cur_month_key} — текущий итог: {cur_total:,.2f} PLN  "
+          f"(цель 200 000, выполнено {cur_total/200000*100:.1f}%)")
 
-        # Аккумулируем расходы всех магазинов
-        for cat in COST_CATS:
-            day_entry["costs"][cat] = round(
-                day_entry["costs"][cat] + costs_pln.get(cat, 0.0), 2)
-
-        total_costs = sum(v for k,v in costs_pln.items() if k != "discount")
-        print(f"    Расходы PLN: {total_costs:,.2f} (PL+CZ+HU+SK → PLN)")
-
-    # Округляем итоги
-    for mkt in day_entry["countries"]:
-        day_entry["countries"][mkt] = round(day_entry["countries"][mkt], 2)
-    for cat in day_entry["costs"]:
-        day_entry["costs"][cat] = round(day_entry["costs"][cat], 2)
-    for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]:
-        day_entry[shop] = round(day_entry[shop], 2)
-
-    data["days"].append(day_entry)
-    data["days"].sort(key=lambda x: x["date"])
-    update_months(data)
-    save_data(data)
-
-    total_all = day_entry["Mlot_i_Klucz"] + day_entry["PolaxEuroGroup"] + day_entry["Sila_Narzedzi"]
-    print(f"\n✅ {yesterday} сохранён  │  Все магазины: {total_all:,.2f} PLN")
+print(f"\n✅ Готово. Дней в data.json: {len(data['days'])}")

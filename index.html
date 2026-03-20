@@ -391,12 +391,42 @@ function mkTable(rows,labelKey,elId,fmt){
 }
 
 function renderDaily(days){
+  var todayStr = new Date().toISOString().slice(0,10);
+  // Для сегодняшнего дня (partial) — пунктирная рамка и пониженная прозрачность
+  var datasets = SHOPS.map(function(s,i){
+    return{
+      label:s,
+      data:days.map(function(d){return d[s]||0;}),
+      backgroundColor:days.map(function(d){return d.date===todayStr?BG[i].replace('0.18','0.09'):BG[i];}),
+      borderColor:days.map(function(d){return d.date===todayStr?COLORS[i]+'88':COLORS[i];}),
+      borderWidth:2,
+      borderRadius:4,
+      borderDash:[]
+    };
+  });
   new Chart(document.getElementById('salesChart').getContext('2d'),{
     type:'bar',
-    data:{labels:days.map(function(d){return d.date;}),
-      datasets:SHOPS.map(function(s,i){return{label:s,data:days.map(function(d){return d[s]||0;}),backgroundColor:BG[i],borderColor:COLORS[i],borderWidth:2,borderRadius:4};})},
-    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toFixed(2)+' zł';}}}},
-      scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999'}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999',callback:function(v){return v+' zł';}}}}}
+    data:{
+      labels:days.map(function(d){
+        return d.date===todayStr ? d.date+' ▸' : d.date;
+      }),
+      datasets:datasets
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(c){
+          var day=days[c.dataIndex];
+          var suffix=day&&day.partial?' (неполный день)':'';
+          return' '+c.dataset.label+': '+c.parsed.y.toFixed(2)+' zł'+suffix;
+        }}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999',callback:function(v){return v+' zł';}}}
+      }
+    }
   });
 }
 

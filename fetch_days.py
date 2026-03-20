@@ -281,10 +281,11 @@ yesterday = today - timedelta(days=1)
 # Собираем с 1-го числа текущего месяца до вчера включительно
 month_start = date(today.year, today.month, 1)
 
-# Строим список дат
+# Строим список дат (включая сегодня — будет помечен как partial)
+today_str     = today.strftime("%Y-%m-%d")
 dates_to_collect = []
 cur = month_start
-while cur <= yesterday:
+while cur <= today:
     dates_to_collect.append(cur.strftime("%Y-%m-%d"))
     cur += timedelta(days=1)
 
@@ -396,14 +397,18 @@ for date_str in sorted(dates_to_collect):
             costs_total[cat] += shop_d["costs_pln"].get(cat, 0.0)
     costs_total = {k: round(v, 2) for k, v in costs_total.items()}
 
-    new_day_records.append({
+    record = {
         "date":          date_str,
         "Mlot_i_Klucz":  round(ml["total"], 2),
         "PolaxEuroGroup":round(pl["total"], 2),
         "Sila_Narzedzi": round(si["total"], 2),
         "countries":     countries,
         "costs":         costs_total,
-    })
+    }
+    # Сегодняшняя запись неполная — данные накапливаются в течение дня
+    if date_str == today_str:
+        record["partial"] = True
+    new_day_records.append(record)
 
 data["days"].extend(new_day_records)
 data["days"].sort(key=lambda x: x["date"])
