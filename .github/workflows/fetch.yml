@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
       - name: Python setup
         uses: actions/setup-python@v5
         with:
@@ -38,4 +40,5 @@ jobs:
           git config user.name "POLAX Bot"
           git add data.json
           git commit -m "Sales $(date +%Y-%m-%d)" || echo "No changes"
+          git pull --rebase origin main
           git push
