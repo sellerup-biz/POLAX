@@ -97,3 +97,28 @@ with open("billing_all_feb.json","w") as f:
     json.dump(summary, f, indent=2, ensure_ascii=False)
 print(f"\n\nСохранено в billing_all_feb.json")
 print(f"Записей: PL={len(result['allegro-pl']['entries'])} CZ={len(result['allegro-cz']['entries'])} HU={len(result['allegro-hu']['entries'])} SK={len(result['allegro-sk']['entries'])}")
+
+# ── ДЕТАЛИ PS1 и RET записей ──────────────────────────────────
+print(f"\n{'='*60}")
+print("ДЕТАЛИ PS1 и RET записей за февраль (PL):")
+print(f"{'='*60}")
+token2 = get_token()
+offset = 0
+while True:
+    entries = requests.get("https://api.allegro.pl/billing/billing-entries",
+                           headers={"Authorization":f"Bearer {token2}","Accept":"application/vnd.allegro.public.v1+json"},
+                           params={"occurredAt.gte":"2026-02-01T00:00:00+01:00",
+                                   "occurredAt.lte":"2026-02-28T23:59:59+01:00",
+                                   "marketplaceId":"allegro-pl","limit":100,"offset":offset}
+                           ).json().get("billingEntries",[])
+    for e in entries:
+        tid = e["type"]["id"].strip()
+        if tid in ["PS1","RET","REF"]:
+            amt  = e["value"]["amount"]
+            cur  = e["value"]["currency"]
+            date = e.get("occurredAt","")[:10]
+            offer = (e.get("offer") or {}).get("id","—")
+            order = (e.get("order") or {}).get("id","—")
+            print(f"  [{tid}] {date}  {amt:>10} {cur}  offer:{offer}  order:{order}")
+    if len(entries) < 100: break
+    offset += 100
