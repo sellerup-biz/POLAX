@@ -13,8 +13,11 @@ GH_TOKEN     = os.environ.get("GH_TOKEN", "")
 GH_REPO      = "sellerup-biz/POLAX"
 
 # Период задаётся через env или по умолчанию
-HISTORY_FROM = os.environ.get("HISTORY_FROM", "2025-04-01")
-HISTORY_TO   = os.environ.get("HISTORY_TO",   "2025-08-31")
+HISTORY_FROM = os.environ.get("HISTORY_FROM", "2026-01-01")
+HISTORY_TO   = os.environ.get("HISTORY_TO",   "2026-02-28")
+
+MONTH_RU = {1:"Янв",2:"Фев",3:"Мар",4:"Апр",5:"Май",6:"Июн",
+            7:"Июл",8:"Авг",9:"Сен",10:"Окт",11:"Ноя",12:"Дек"}
 
 SHOPS = {
     "Mlot_i_Klucz":   {"client_id": os.environ.get("CLIENT_ID_MLOT",""),    "client_secret": os.environ.get("CLIENT_SECRET_MLOT",""),    "refresh_token": os.environ.get("REFRESH_TOKEN_MLOT",""),    "secret_name": "REFRESH_TOKEN_MLOT"},
