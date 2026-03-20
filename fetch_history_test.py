@@ -219,26 +219,47 @@ with open("data.json", "w") as f:
     json.dump(result, f, indent=2, ensure_ascii=False)
 
 # ── ИТОГ ──────────────────────────────────────────────────────
-ETALON_JAN = {"commission":4727.83,"delivery":1793.56,"ads":8968.75,"subscription":199.00,"discount":46.54}
+ETALON_JAN = {
+    "costs": {"commission":4727.83,"delivery":1793.56,"ads":8968.75,"subscription":199.00,"discount":46.54},
+    "countries_local": {"allegro-pl":33998.72,"allegro-cz":1613.00,"allegro-hu":3790.00,"allegro-sk":93.36},
+    "countries_cur":   {"allegro-pl":"PLN",    "allegro-cz":"CZK",  "allegro-hu":"HUF",  "allegro-sk":"EUR"},
+}
 
 print(f"\n{'='*70}")
 for m in months_list:
     c     = m["costs"]
     sales = m[TEST_SHOP]
     ctr   = m["countries"]
+    is_jan = m["month"] == "Янв 2026"
     print(f"\n  {m['month']} — {TEST_SHOP}")
     print(f"  {'─'*66}")
     print(f"  Продажи итого:    {sales:>10.2f} PLN")
-    print(f"  PL:{ctr['allegro-pl']:>10.2f} CZ:{ctr['allegro-cz']:>10.2f} HU:{ctr['allegro-hu']:>10.2f} SK:{ctr['allegro-sk']:>10.2f} (PLN)")
     print(f"  {'─'*66}")
+
+    # Страны в PLN
+    print(f"  {'СТРАНЫ (PLN)':}")
+    print(f"  {'Страна':<14} {'НАШИ PLN':>12} {'ALLEGRO лок.':>14} {'Валюта':>6}")
+    for mkt, flag in [("allegro-pl","PL"),("allegro-cz","CZ"),("allegro-hu","HU"),("allegro-sk","SK")]:
+        our_pln = ctr.get(mkt, 0)
+        if is_jan:
+            ref_local = ETALON_JAN["countries_local"][mkt]
+            ref_cur   = ETALON_JAN["countries_cur"][mkt]
+            print(f"  {flag:<14} {our_pln:>12.2f} {ref_local:>14.2f} {ref_cur:>6}")
+        else:
+            print(f"  {flag:<14} {our_pln:>12.2f}")
+
+    print(f"  {'─'*66}")
+
+    # Расходы
+    print(f"  {'РАСХОДЫ':}")
     print(f"  {'Категория':<28} {'НАШИ':>10} {'ЭТАЛОН(Янв)':>12} {'РАЗНИЦА':>10}")
     for cat in ["commission","delivery","ads","subscription","discount"]:
         our = c[cat]
-        ref = ETALON_JAN.get(cat, 0) if m["month"] == "Янв 2026" else None
         sign = "+" if cat == "discount" else "-"
-        if ref is not None:
+        if is_jan:
+            ref  = ETALON_JAN["costs"][cat]
             diff = our - ref
-            ok = "OK" if abs(diff) < 2 else "ОШИБКА"
+            ok   = "OK" if abs(diff) < 2 else "ОШИБКА"
             print(f"  {cat:<28} {sign}{our:>9.2f} {sign}{ref:>11.2f} {diff:>+10.2f}  {ok}")
         else:
             print(f"  {cat:<28} {sign}{our:>9.2f}")
