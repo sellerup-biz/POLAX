@@ -228,6 +228,7 @@ function renderCountriesBreakdown(){
 // ── SUMMARY BLOCK ─────────────────────────────────────────────
 function renderSummaryBlock(){
   var m = DATA.months[activeMonth];
+  var c = m.costs||{};
   var sales = SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);
   var costs = (c.commission||0)+(c.delivery||0)+(c.ads||0)+(c.subscription||0);
   var profit = sales - costs;
