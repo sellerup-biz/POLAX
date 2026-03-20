@@ -26,12 +26,37 @@ def get_rate(currency, date_str):
         except: pass
     return 1.0
 
+def save_token(new_rt):
+    import base64
+    from nacl import encoding, public
+    gh_token = os.environ.get("GH_TOKEN","")
+    if not gh_token or not new_rt: return
+    r = __import__("requests").get(f"https://api.github.com/repos/sellerup-biz/POLAX/actions/secrets/public-key",headers={"Authorization":f"token {gh_token}","Accept":"application/vnd.github+json"})
+    key=r.json()
+    pk=public.PublicKey(key["key"].encode(),encoding.Base64Encoder())
+    enc=base64.b64encode(public.SealedBox(pk).encrypt(new_rt.encode())).decode()
+    __import__("requests").put(f"https://api.github.com/repos/sellerup-biz/POLAX/actions/secrets/REFRESH_TOKEN_POLAX",headers={"Authorization":f"token {gh_token}","Accept":"application/vnd.github+json"},json={"encrypted_value":enc,"key_id":key["key_id"]})
+
 def get_token():
     r = requests.post("https://allegro.pl/auth/oauth/token",
                       auth=(CLIENT_ID, CLIENT_SECRET),
                       data={"grant_type":"refresh_token","refresh_token":REFRESH_TOKEN,"redirect_uri":REDIRECT_URI})
     d = r.json()
     if "access_token" not in d: print(f"ОШИБКА: {d}"); exit(1)
+    # Сохраняем новый refresh_token
+    new_rt = d.get("refresh_token", "")
+    if new_rt:
+        try:
+            import base64
+            from nacl import encoding, public
+            gh = os.environ.get("GH_TOKEN","")
+            if gh:
+                kr = __import__("requests").get("https://api.github.com/repos/sellerup-biz/POLAX/actions/secrets/public-key",headers={"Authorization":f"token {gh}","Accept":"application/vnd.github+json"}).json()
+                pk = public.PublicKey(kr["key"].encode(), encoding.Base64Encoder())
+                enc = base64.b64encode(public.SealedBox(pk).encrypt(new_rt.encode())).decode()
+                __import__("requests").put("https://api.github.com/repos/sellerup-biz/POLAX/actions/secrets/REFRESH_TOKEN_POLAX",headers={"Authorization":f"token {gh}","Accept":"application/vnd.github+json"},json={"encrypted_value":enc,"key_id":kr["key_id"]})
+                print("  Токен сохранён в Secrets")
+        except: pass
     return d["access_token"]
 
 def hdrs(t):

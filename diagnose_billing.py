@@ -18,6 +18,17 @@ REFRESH_TOKEN = os.environ["REFRESH_TOKEN_POLAX"]
 DATE_FROM = "2026-01-01T00:00:00+01:00"
 DATE_TO   = "2026-01-31T23:59:59+01:00"
 
+def save_token(new_rt):
+    import base64
+    from nacl import encoding, public
+    gh_token = os.environ.get("GH_TOKEN","")
+    if not gh_token or not new_rt: return
+    r = __import__("requests").get(f"https://api.github.com/repos/sellerup-biz/POLAX/actions/secrets/public-key",headers={"Authorization":f"token {gh_token}","Accept":"application/vnd.github+json"})
+    key=r.json()
+    pk=public.PublicKey(key["key"].encode(),encoding.Base64Encoder())
+    enc=base64.b64encode(public.SealedBox(pk).encrypt(new_rt.encode())).decode()
+    __import__("requests").put(f"https://api.github.com/repos/sellerup-biz/POLAX/actions/secrets/REFRESH_TOKEN_POLAX",headers={"Authorization":f"token {gh_token}","Accept":"application/vnd.github+json"},json={"encrypted_value":enc,"key_id":key["key_id"]})
+
 def get_token():
     r = requests.post("https://allegro.pl/auth/oauth/token",
                       auth=(CLIENT_ID, CLIENT_SECRET),

@@ -1,5 +1,6 @@
-import requests, json, os
+import requests, json, os, base64
 from datetime import datetime, timedelta
+from nacl import encoding, public
 
 REDIRECT_URI  = "https://sellerup-biz.github.io/POLAX/callback.html"
 GH_TOKEN      = os.environ.get("GH_TOKEN", "")
@@ -55,6 +56,16 @@ def get_tz(month): return 2 if 3 <= month <= 10 else 1
 def hdrs(t):
     return {"Authorization": f"Bearer {t}", "Accept": "application/vnd.allegro.public.v1+json"}
 
+def update_gh_secret(name, val):
+    r = requests.get(f"https://api.github.com/repos/{GH_REPO}/actions/secrets/public-key",
+                     headers={"Authorization": f"token {GH_TOKEN}", "Accept": "application/vnd.github+json"})
+    key = r.json()
+    pk  = public.PublicKey(key["key"].encode(), encoding.Base64Encoder())
+    enc = base64.b64encode(public.SealedBox(pk).encrypt(val.encode())).decode()
+    requests.put(f"https://api.github.com/repos/{GH_REPO}/actions/secrets/{name}",
+                 headers={"Authorization": f"token {GH_TOKEN}", "Accept": "application/vnd.github+json"},
+                 json={"encrypted_value": enc, "key_id": key["key_id"]})
+
 def get_token():
     cid = os.environ["CLIENT_ID_POLAX"]
     cs  = os.environ["CLIENT_SECRET_POLAX"]
@@ -65,7 +76,11 @@ def get_token():
     if "access_token" not in d:
         print(f"ОШИБКА ТОКЕНА: {d}")
         exit(1)
-    print(f"Токен {TEST_SHOP}: OK")
+    # Сохраняем НОВЫЙ refresh_token сразу!
+    new_rt = d.get("refresh_token", rt)
+    if new_rt and GH_TOKEN:
+        update_gh_secret("REFRESH_TOKEN_POLAX", new_rt)
+    print(f"Токен {TEST_SHOP}: OK (сохранён)")
     return d["access_token"]
 
 # ── ПРОДАЖИ по стране в ЛОКАЛЬНОЙ валюте ─────────────────────
