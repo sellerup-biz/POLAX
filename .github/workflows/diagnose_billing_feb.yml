@@ -26,7 +26,7 @@ jobs:
       - run: |
           git config user.name "github-actions"
           git config user.email "bot@polax"
-          git add billing_all_feb.json || true
-          git commit -m "Billing diagnostic Feb 2026" || echo "No changes"
+          git add billing_all_feb.json
+          git diff --staged --quiet || git commit -m "Billing diagnostic Feb 2026"
           git pull --rebase origin main
           git push
