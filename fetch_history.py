@@ -14,7 +14,7 @@ GH_REPO      = "sellerup-biz/POLAX"
 
 # Период задаётся через env или по умолчанию
 HISTORY_FROM = os.environ.get("HISTORY_FROM", "2026-01-01")
-HISTORY_TO   = os.environ.get("HISTORY_TO",   "2026-02-28")
+HISTORY_TO   = os.environ.get("HISTORY_TO",   "2026-03-20")
 
 MONTH_RU = {1:"Янв",2:"Фев",3:"Мар",4:"Апр",5:"Май",6:"Июн",
             7:"Июл",8:"Авг",9:"Сен",10:"Окт",11:"Ноя",12:"Дек"}
@@ -234,12 +234,19 @@ date_set = {f"{y}-{m:02d}" for y,m in months}
 data["days"] = [d for d in data["days"]
                 if d["date"][:7] not in date_set]
 
+# Обратная карта: "Янв 2026" -> (2026, 1)
+MONTH_RU_REV = {v:k for k,v in MONTH_RU.items()}
+
 # Добавляем новые дни
-for mk in sorted(month_data.keys()):
+for mk in sorted(month_data.keys(), key=lambda x: (int(x[-4:]), MONTH_RU_REV[x[:3]])):
     d  = month_data[mk]
     pl = d["PolaxEuroGroup"]
     ml = d["Mlot_i_Klucz"]
     si = d["Sila_Narzedzi"]
+
+    # Восстанавливаем год и месяц из ключа "Янв 2026"
+    mk_year  = int(mk[-4:])
+    mk_month = MONTH_RU_REV[mk[:3]]
 
     # Суммируем продажи по странам по всем магазинам
     countries = {"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0}
@@ -249,7 +256,7 @@ for mk in sorted(month_data.keys()):
                 countries[mkt] = round(countries[mkt] + val, 2)
 
     day_entry = {
-        "date":          f"{year:04d}-{month:02d}-01",
+        "date":          f"{mk_year:04d}-{mk_month:02d}-01",
         "Mlot_i_Klucz":  round(ml["total"], 2),
         "PolaxEuroGroup":round(pl["total"], 2),
         "Sila_Narzedzi": round(si["total"], 2),
