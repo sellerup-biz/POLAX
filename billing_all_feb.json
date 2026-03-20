@@ -1,0 +1,318 @@
+{
+  "allegro-pl": {
+    "PAD": {
+      "name": "Pobranie opłat z wpływów",
+      "neg": 0.0,
+      "pos": 7539.069999999998,
+      "cur": "PLN",
+      "cnt": 277
+    },
+    "HLB": {
+      "name": "Opłata za dostawę DHL Allegro Delivery",
+      "neg": 161.87999999999997,
+      "pos": 1.89,
+      "cur": "PLN",
+      "cnt": 23
+    },
+    "HB4": {
+      "name": "Opłata za dostawę InPost",
+      "neg": 367.1899999999996,
+      "pos": 25.74,
+      "cur": "PLN",
+      "cnt": 100
+    },
+    "SUC": {
+      "name": "Prowizja od sprzedaży",
+      "neg": 3913.039999999991,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 941
+    },
+    "HB1": {
+      "name": "Opłata za dostawę DPD",
+      "neg": 56.20000000000001,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 10
+    },
+    "NSP": {
+      "name": "Opłata za kampanię Ads",
+      "neg": 2521.3199999999997,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 24
+    },
+    "REF": {
+      "name": "Zwrot kosztów",
+      "neg": 0.0,
+      "pos": 419.7699999999999,
+      "cur": "PLN",
+      "cnt": 38
+    },
+    "ORB": {
+      "name": "Opłata za dostawę ORLEN Paczka Allegro Delivery",
+      "neg": 153.4499999999999,
+      "pos": 1.89,
+      "cur": "PLN",
+      "cnt": 26
+    },
+    "DPB": {
+      "name": "Opłata za dostawę DPD Allegro Delivery",
+      "neg": 165.65999999999997,
+      "pos": 1.89,
+      "cur": "PLN",
+      "cnt": 25
+    },
+    "DXP": {
+      "name": "Opłata za dostawę One Kurier Allegro Delivery",
+      "neg": 125.87,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 23
+    },
+    "HXO": {
+      "name": "Opłata za dostawę One Kurier Allegro Delivery",
+      "neg": 106.78000000000002,
+      "pos": 10.89,
+      "cur": "PLN",
+      "cnt": 13
+    },
+    "DPG": {
+      "name": "Opłata za promowanie na stronie działu",
+      "neg": 269.1,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 9
+    },
+    "DTR": {
+      "name": "Opłata dodatkowa za dostawę DPD",
+      "neg": 44.91000000000001,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 9
+    },
+    "ITR": {
+      "name": "Opłata dodatkowa za dostawę InPost",
+      "neg": 14.01,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 3
+    },
+    "RET": {
+      "name": "Rozliczenie akcji promocyjnej",
+      "neg": 0.0,
+      "pos": 116.9,
+      "cur": "PLN",
+      "cnt": 1
+    },
+    "DPA": {
+      "name": "Opłata dodatkowa za dostawę DPD Allegro Delivery",
+      "neg": 24.950000000000003,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 5
+    },
+    "HLA": {
+      "name": "Opłata dodatkowa za dostawę DHL Allegro Delivery",
+      "neg": 1.49,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 1
+    },
+    "DHR": {
+      "name": "Opłata dodatkowa za dostawę DHL",
+      "neg": 0.0,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 1
+    },
+    "PS1": {
+      "name": "Wyrównanie w programie Allegro Ceny",
+      "neg": 0.0,
+      "pos": 2.18,
+      "cur": "PLN",
+      "cnt": 2
+    },
+    "SB2": {
+      "name": "Abonament profesjonalny",
+      "neg": 199.0,
+      "pos": 0.0,
+      "cur": "PLN",
+      "cnt": 1
+    }
+  },
+  "allegro-cz": {
+    "PAD": {
+      "name": "Pobranie opłat z wpływów",
+      "neg": 0.0,
+      "pos": 4360.419999999999,
+      "cur": "CZK",
+      "cnt": 46
+    },
+    "DAP": {
+      "name": "Opłata za dostawę Allegro International APM",
+      "neg": 517.47,
+      "pos": 0.0,
+      "cur": "CZK",
+      "cnt": 12
+    },
+    "SUC": {
+      "name": "Prowizja od sprzedaży",
+      "neg": 1670.0700000000002,
+      "pos": 0.0,
+      "cur": "CZK",
+      "cnt": 125
+    },
+    "PS1": {
+      "name": "Wyrównanie w programie Allegro Ceny",
+      "neg": 0.0,
+      "pos": 8.0,
+      "cur": "CZK",
+      "cnt": 2
+    },
+    "DKP": {
+      "name": "Opłata za dostawę Allegro International Courier",
+      "neg": 219.96999999999997,
+      "pos": 0.0,
+      "cur": "CZK",
+      "cnt": 4
+    },
+    "HB9": {
+      "name": "Opłata za dostawę Packeta",
+      "neg": 136.09,
+      "pos": 0.0,
+      "cur": "CZK",
+      "cnt": 3
+    },
+    "DPP": {
+      "name": "Opłata za dostawę Allegro International PUDO",
+      "neg": 18.09,
+      "pos": 0.0,
+      "cur": "CZK",
+      "cnt": 1
+    },
+    "DHR": {
+      "name": "Opłata dodatkowa za dostawę DHL",
+      "neg": 1598.0,
+      "pos": 0.0,
+      "cur": "CZK",
+      "cnt": 3
+    },
+    "REF": {
+      "name": "Zwrot kosztów",
+      "neg": 0.0,
+      "pos": 2.46,
+      "cur": "CZK",
+      "cnt": 1
+    },
+    "HB8": {
+      "name": "Opłata za dostawę DHL",
+      "neg": 152.19,
+      "pos": 0.0,
+      "cur": "CZK",
+      "cnt": 2
+    },
+    "HB1": {
+      "name": "Opłata za dostawę DPD",
+      "neg": 59.0,
+      "pos": 0.0,
+      "cur": "CZK",
+      "cnt": 1
+    }
+  },
+  "allegro-hu": {
+    "PAD": {
+      "name": "Pobranie opłat z wpływów",
+      "neg": 0.0,
+      "pos": 37728.130000000005,
+      "cur": "HUF",
+      "cnt": 44
+    },
+    "HUN": {
+      "name": "Lokalna dopłata od sprzedaży detalicznej",
+      "neg": 5853.529999999999,
+      "pos": 0.0,
+      "cur": "HUF",
+      "cnt": 99
+    },
+    "SUC": {
+      "name": "Prowizja od sprzedaży",
+      "neg": 17654.6,
+      "pos": 0.0,
+      "cur": "HUF",
+      "cnt": 99
+    },
+    "HB8": {
+      "name": "Opłata za dostawę DHL",
+      "neg": 1670.0,
+      "pos": 0.0,
+      "cur": "HUF",
+      "cnt": 3
+    },
+    "HB9": {
+      "name": "Opłata za dostawę Packeta",
+      "neg": 10180.0,
+      "pos": 0.0,
+      "cur": "HUF",
+      "cnt": 16
+    },
+    "HB1": {
+      "name": "Opłata za dostawę DPD",
+      "neg": 2370.0,
+      "pos": 0.0,
+      "cur": "HUF",
+      "cnt": 3
+    }
+  },
+  "allegro-sk": {
+    "HB9": {
+      "name": "Opłata za dostawę Packeta",
+      "neg": 22.27,
+      "pos": 0.0,
+      "cur": "EUR",
+      "cnt": 13
+    },
+    "PAD": {
+      "name": "Pobranie opłat z wpływów",
+      "neg": 0.0,
+      "pos": 72.31000000000002,
+      "cur": "EUR",
+      "cnt": 35
+    },
+    "SUC": {
+      "name": "Prowizja od sprzedaży",
+      "neg": 37.27,
+      "pos": 0.0,
+      "cur": "EUR",
+      "cnt": 62
+    },
+    "DHR": {
+      "name": "Opłata dodatkowa za dostawę DHL",
+      "neg": 0.0,
+      "pos": 0.0,
+      "cur": "EUR",
+      "cnt": 1
+    },
+    "HB8": {
+      "name": "Opłata za dostawę DHL",
+      "neg": 5.880000000000001,
+      "pos": 0.0,
+      "cur": "EUR",
+      "cnt": 2
+    },
+    "REF": {
+      "name": "Zwrot kosztów",
+      "neg": 0.0,
+      "pos": 3.5800000000000005,
+      "cur": "EUR",
+      "cnt": 4
+    },
+    "HB1": {
+      "name": "Opłata za dostawę DPD",
+      "neg": 11.260000000000002,
+      "pos": 0.0,
+      "cur": "EUR",
+      "cnt": 4
+    }
+  }
+}
