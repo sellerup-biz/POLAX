@@ -1,0 +1,20 @@
+name: Debug EAN
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - run: python debug_ean.py
+        env:
+          CLIENT_ID_POLAX:     ${{ secrets.CLIENT_ID_POLAX }}
+          CLIENT_SECRET_POLAX: ${{ secrets.CLIENT_SECRET_POLAX }}
+          REFRESH_TOKEN_POLAX: ${{ secrets.REFRESH_TOKEN_POLAX }}
+          GH_TOKEN:            ${{ secrets.GH_TOKEN }}
