@@ -197,7 +197,6 @@ def get_sales_by_offer(token, date_str):
             "https://api.allegro.pl/order/checkout-forms",
             headers=hdrs(token),
             params={
-                "status":                  "READY_FOR_PROCESSING",
                 "lineItems.boughtAt.gte":  d_from,
                 "lineItems.boughtAt.lte":  d_to,
                 "limit":                   100,
@@ -213,6 +212,9 @@ def get_sales_by_offer(token, date_str):
         forms = data.get("checkoutForms", [])
 
         for form in forms:
+            # Skip cancelled orders
+            if form.get("status") == "CANCELLED":
+                continue
             # Only PL market (allegro-pl + allegro-business-pl)
             mkt = (form.get("marketplace") or {}).get("id", "allegro-pl")
             if mkt not in ("allegro-pl", "allegro-business-pl"):

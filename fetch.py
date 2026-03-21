@@ -274,13 +274,13 @@ def get_unit_sales_by_offer(token, date_str):
         resp = requests.get(
             "https://api.allegro.pl/order/checkout-forms",
             headers=hdrs(token),
-            params={"status":"READY_FOR_PROCESSING",
-                    "lineItems.boughtAt.gte":d_from,"lineItems.boughtAt.lte":d_to,
+            params={"lineItems.boughtAt.gte":d_from,"lineItems.boughtAt.lte":d_to,
                     "limit":100,"offset":offset},
             timeout=30)
         if resp.status_code != 200: break
         forms = resp.json().get("checkoutForms", [])
         for form in forms:
+            if form.get("status") == "CANCELLED": continue
             mkt = (form.get("marketplace") or {}).get("id", "allegro-pl")
             if mkt not in ("allegro-pl", "allegro-business-pl"): continue
             for item in form.get("lineItems", []):
