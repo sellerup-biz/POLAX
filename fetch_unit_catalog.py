@@ -167,16 +167,29 @@ def extract_ean(offer):
     return None
 
 
+_debug_printed = False  # печатаем структуру только для первого оффера
+
 def fetch_offer_detail(token, offer_id):
     """Fetch full offer detail to get parameters (EAN etc.).
     Uses /sale/product-offers/{id} — the current supported endpoint.
     Old /sale/offers/{id} is deprecated and blocked since 2025."""
+    global _debug_printed
     resp = requests.get(
         f"https://api.allegro.pl/sale/product-offers/{offer_id}",
         headers=hdrs(token),
         timeout=30)
     if resp.status_code == 200:
-        return resp.json()
+        data = resp.json()
+        if not _debug_printed:
+            _debug_printed = True
+            import json as _json
+            print(f"\n  [DEBUG] /sale/product-offers/{offer_id} keys: {list(data.keys())}")
+            print(f"  [DEBUG] parameters: {_json.dumps(data.get('parameters', [])[:3], ensure_ascii=False)}")
+            print(f"  [DEBUG] productSet: {_json.dumps(data.get('productSet', [])[:2], ensure_ascii=False)}")
+            p = data.get('product') or {}
+            print(f"  [DEBUG] product.id={p.get('id')} product.name={str(p.get('name',''))[:50]}")
+        return data
+    print(f"\n  [DEBUG] /sale/product-offers/{offer_id}: HTTP {resp.status_code} {resp.text[:200]}")
     return {}
 
 
