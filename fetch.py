@@ -6,13 +6,12 @@ POLAX — ежедневный сбор данных (все 3 магазина)
   1. Вчера  — полные данные (complete)
   2. Сегодня — накопленные данные с начала дня (partial: true)
 
-Сегодняшняя partial-запись при следующем запуске автоматически
-перезаписывается полными вчерашними данными.
-
-Это позволяет goal-блоку и analytics.html показывать
-растущий текущий месяц в течение дня.
+  + Юнит-экономика по офферам (только польский рынок):
+  3. Вчера  — per-offer: revenue, fees, ads, promo → unit_data/YYYY-MM.json
+  4. Сегодня — partial → unit_data/YYYY-MM.json
+  Токен ротируется один раз для всех четырёх фаз.
 """
-import requests, json, os, base64, calendar
+import requests, json, os, base64, calendar, time
 from datetime import datetime, timedelta, timezone
 from nacl import encoding, public
 from collections import defaultdict
@@ -229,6 +228,156 @@ def get_billing_for_day(token, date_str, marketplace_id=None):
     return {k: round(v, 2) for k, v in costs.items()}
 
 
+# ══════════════════════════════════════════════════════════════
+# ЮНИТ-ЭКОНОМИКА PER-OFFER (только польский рынок: PL + biz-PL)
+# ══════════════════════════════════════════════════════════════
+#   ads   = CPC / Sponsored Products (performance, оплата за клик)
+#   promo = Wyróżnienie, Podświetlenie, Pogrubienie и др. (видимость)
+
+UNIT_BILLING_MAP = {
+    "SUC":"fees","SUJ":"fees","LDS":"fees","HUN":"fees",
+    "REF":"zwrot_fees",
+    "NSP":"ads","CPC":"ads",
+    "WYR":"promo","POD":"promo","BOL":"promo",
+    "DPG":"promo","EMF":"promo","FEA":"promo","BRG":"promo","FSF":"promo",
+    "PAD":"IGNORE","SUM":"IGNORE","SB2":"IGNORE","ABN":"IGNORE",
+    "RET":"IGNORE","PS1":"IGNORE",
+    "HB4":"IGNORE","HB1":"IGNORE","HB8":"IGNORE","HB9":"IGNORE",
+    "DPB":"IGNORE","DXP":"IGNORE","HXO":"IGNORE","HLB":"IGNORE",
+    "ORB":"IGNORE","DHR":"IGNORE","DAP":"IGNORE","DKP":"IGNORE","DPP":"IGNORE",
+    "GLS":"IGNORE","UPS":"IGNORE","UPD":"IGNORE","DTR":"IGNORE",
+    "DPA":"IGNORE","ITR":"IGNORE","HLA":"IGNORE","DDP":"IGNORE",
+    "HB3":"IGNORE","DPS":"IGNORE","UTR":"IGNORE",
+}
+
+
+def get_unit_bcat(tid, tname):
+    if tid in UNIT_BILLING_MAP: return UNIT_BILLING_MAP[tid]
+    n = tname.lower()
+    if any(x in n for x in ["kampani","cpc","sponsored"]):               return "ads"
+    if any(x in n for x in ["wyróżnienie","podświetlenie","pogrubienie",
+                              "featured","branding","display"]):          return "promo"
+    if any(x in n for x in ["prowizja","lokalna dopłata"]):               return "fees"
+    if "zwrot prowizji" in n:                                              return "zwrot_fees"
+    return "IGNORE"
+
+
+def get_unit_sales_by_offer(token, date_str):
+    """payment-operations → {offer_id: [tx_count, revenue_pln]}"""
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    tz = get_tz(dt.month)
+    d_from = f"{date_str}T00:00:00+0{tz}:00"
+    d_to   = f"{date_str}T23:59:59+0{tz}:00"
+    result = defaultdict(lambda: [0, 0.0])
+    offset = 0
+    while True:
+        resp = requests.get(
+            "https://api.allegro.pl/payments/payment-operations",
+            headers=hdrs(token),
+            params={"group":"INCOME","occurredAt.gte":d_from,"occurredAt.lte":d_to,
+                    "marketplaceId":"allegro-pl","limit":50,"offset":offset},
+            timeout=30)
+        if resp.status_code != 200: break
+        ops = resp.json().get("paymentOperations", [])
+        for op in ops:
+            oid = (op.get("offer") or {}).get("id")
+            if not oid: continue
+            try:
+                result[oid][0] += 1
+                result[oid][1] += float(op["value"]["amount"])
+            except Exception: pass
+        if len(ops) < 50: break
+        offset += 50
+        time.sleep(0.05)
+    return {oid: [v[0], round(v[1], 2)] for oid, v in result.items()}
+
+
+def get_unit_costs_by_offer(token, date_str):
+    """billing-entries (no mktId → PL+biz) → {offer_id: [fees, ads, promo]}"""
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    tz = get_tz(dt.month)
+    d_from = f"{date_str}T00:00:00+0{tz}:00"
+    d_to   = f"{date_str}T23:59:59+0{tz}:00"
+    result = defaultdict(lambda: [0.0, 0.0, 0.0])
+    offset = 0
+    while True:
+        resp = requests.get(
+            "https://api.allegro.pl/billing/billing-entries",
+            headers=hdrs(token),
+            params={"occurredAt.gte":d_from,"occurredAt.lte":d_to,
+                    "limit":100,"offset":offset},
+            timeout=30)
+        if resp.status_code != 200: break
+        entries = resp.json().get("billingEntries", [])
+        for e in entries:
+            oid = (e.get("offer") or {}).get("id")
+            if not oid: continue
+            cat = get_unit_bcat(e["type"]["id"], e.get("type", {}).get("name", ""))
+            if cat == "IGNORE": continue
+            try:
+                amt = float(e["value"]["amount"])
+                if cat == "fees"        and amt < 0: result[oid][0] += abs(amt)
+                elif cat == "zwrot_fees" and amt > 0: result[oid][0] = max(0.0, result[oid][0]-amt)
+                elif cat == "ads"       and amt < 0: result[oid][1] += abs(amt)
+                elif cat == "promo"     and amt < 0: result[oid][2] += abs(amt)
+            except Exception: pass
+        if len(entries) < 100: break
+        offset += 100
+        time.sleep(0.05)
+    return {oid: [round(v[0],2), round(v[1],2), round(v[2],2)] for oid, v in result.items()}
+
+
+def load_unit_month(ym):
+    os.makedirs("unit_data", exist_ok=True)
+    try:
+        with open(f"unit_data/{ym}.json", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"month": ym, "days": {}}
+
+
+def save_unit_month(ym, data):
+    with open(f"unit_data/{ym}.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+
+
+def collect_unit_day(access_tokens, date_str, partial=False):
+    """
+    Collect per-offer unit data for one day.
+    Saves to unit_data/YYYY-MM.json. Reuses access_tokens (no new rotation).
+    Data format: offer_id → [sales, revenue, fees, ads, promo]
+    """
+    ym = date_str[:7]
+    md = load_unit_month(ym)
+    md["days"].pop(date_str, None)   # remove existing (re-collect)
+
+    day_entry = {}
+    if partial:
+        day_entry["_partial"] = True
+
+    for shop_name, token in access_tokens.items():
+        if not token: continue
+        print(f"    [unit] {shop_name}...", end=" ", flush=True)
+
+        sales     = get_unit_sales_by_offer(token, date_str)
+        costs     = get_unit_costs_by_offer(token, date_str)
+        shop_data = {}
+
+        for oid in set(sales) | set(costs):
+            s = sales.get(oid, [0, 0.0])
+            c = costs.get(oid, [0.0, 0.0, 0.0])
+            if s[1] == 0.0 and c == [0.0, 0.0, 0.0]: continue
+            shop_data[oid] = [s[0], s[1], c[0], c[1], c[2]]
+
+        day_entry[shop_name] = shop_data
+        n   = len(shop_data)
+        rev = sum(v[1] for v in shop_data.values())
+        print(f"{n} офферов  rev={rev:,.0f} PLN")
+
+    md["days"][date_str] = day_entry
+    save_unit_month(ym, md)
+
+
 # ── СБОР ДАННЫХ ЗА ОДИН ДЕНЬ ─────────────────────────────────
 
 def collect_day(access_tokens, date_str, nbp, partial=False):
@@ -414,3 +563,17 @@ if cur_month:
           f"(цель 200 000, выполнено {cur_total/200000*100:.1f}%)")
 
 print(f"\n✅ Готово. Дней в data.json: {len(data['days'])}")
+
+# ── ШАГ 4: Юнит-экономика — вчера (complete) ─────────────────
+if access_tokens and collect_yesterday:
+    print(f"\n── Юнит-экономика: {yesterday} ─────────────────────────")
+    collect_unit_day(access_tokens, yesterday, partial=False)
+    print(f"  ✅ unit {yesterday} сохранён")
+
+# ── ШАГ 5: Юнит-экономика — сегодня (partial) ────────────────
+if access_tokens:
+    print(f"\n── Юнит-экономика: {today_str} (partial) ───────────────")
+    collect_unit_day(access_tokens, today_str, partial=True)
+    print(f"  ✅ unit {today_str} (partial) сохранён")
+
+print(f"\n✅ Всё готово.")

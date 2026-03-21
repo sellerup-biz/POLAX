@@ -1,26 +1,39 @@
-name: Fetch Daily Data
+name: Unit — Load History
 
 on:
-  schedule:
-    - cron: '0 3 * * *'  # каждую ночь в 03:00 UTC
   workflow_dispatch:
+    inputs:
+      unit_from:
+        description: 'От (YYYY-MM-DD)'
+        required: true
+        default: '2026-01-01'
+      unit_to:
+        description: 'До (YYYY-MM-DD)'
+        required: true
+        default: '2026-03-20'
 
 permissions:
   contents: write
 
 jobs:
-  fetch:
+  unit_history:
     runs-on: ubuntu-latest
+    timeout-minutes: 300   # до 5 часов (большие исторические диапазоны)
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - run: pip install requests PyNaCl
-      - run: python fetch.py
+
+      - run: python fetch_unit_history.py
         env:
+          UNIT_FROM:           ${{ github.event.inputs.unit_from }}
+          UNIT_TO:             ${{ github.event.inputs.unit_to }}
           CLIENT_ID_MLOT:      ${{ secrets.CLIENT_ID_MLOT }}
           CLIENT_SECRET_MLOT:  ${{ secrets.CLIENT_SECRET_MLOT }}
           REFRESH_TOKEN_MLOT:  ${{ secrets.REFRESH_TOKEN_MLOT }}
@@ -31,10 +44,11 @@ jobs:
           CLIENT_SECRET_SILA:  ${{ secrets.CLIENT_SECRET_SILA }}
           REFRESH_TOKEN_SILA:  ${{ secrets.REFRESH_TOKEN_SILA }}
           GH_TOKEN:            ${{ secrets.GH_TOKEN }}
+
       - run: |
           git config user.name "github-actions"
           git config user.email "bot@polax"
-          git add data.json unit_data/
-          git diff --staged --quiet || git commit -m "Daily data $(date +%Y-%m-%d)"
+          git add unit_data/
+          git diff --staged --quiet || git commit -m "Unit history ${{ github.event.inputs.unit_from }} → ${{ github.event.inputs.unit_to }}"
           git pull --rebase origin main
           git push

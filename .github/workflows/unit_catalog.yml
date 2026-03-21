@@ -1,26 +1,38 @@
-name: Fetch Daily Data
+name: Unit — Import Catalog
 
 on:
-  schedule:
-    - cron: '0 3 * * *'  # каждую ночь в 03:00 UTC
   workflow_dispatch:
+    inputs:
+      catalog_limit:
+        description: 'Лимит офферов (0 = все, 50 = тест)'
+        required: false
+        default: '50'
+      catalog_shop:
+        description: 'Магазин (all / Mlot_i_Klucz / PolaxEuroGroup / Sila_Narzedzi)'
+        required: false
+        default: 'all'
 
 permissions:
   contents: write
 
 jobs:
-  fetch:
+  catalog:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - run: pip install requests PyNaCl
-      - run: python fetch.py
+
+      - run: python fetch_unit_catalog.py
         env:
+          CATALOG_LIMIT:       ${{ github.event.inputs.catalog_limit }}
+          CATALOG_SHOP:        ${{ github.event.inputs.catalog_shop }}
           CLIENT_ID_MLOT:      ${{ secrets.CLIENT_ID_MLOT }}
           CLIENT_SECRET_MLOT:  ${{ secrets.CLIENT_SECRET_MLOT }}
           REFRESH_TOKEN_MLOT:  ${{ secrets.REFRESH_TOKEN_MLOT }}
@@ -31,10 +43,11 @@ jobs:
           CLIENT_SECRET_SILA:  ${{ secrets.CLIENT_SECRET_SILA }}
           REFRESH_TOKEN_SILA:  ${{ secrets.REFRESH_TOKEN_SILA }}
           GH_TOKEN:            ${{ secrets.GH_TOKEN }}
+
       - run: |
           git config user.name "github-actions"
           git config user.email "bot@polax"
-          git add data.json unit_data/
-          git diff --staged --quiet || git commit -m "Daily data $(date +%Y-%m-%d)"
+          git add products.json unit_data/categories.json
+          git diff --staged --quiet || git commit -m "Unit catalog import (limit=${{ github.event.inputs.catalog_limit }})"
           git pull --rebase origin main
           git push

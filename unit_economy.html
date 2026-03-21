@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLAX · Юнит-экономика</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1a;min-height:100vh;padding:1.5rem}
+
+.hdr{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:12px 18px;margin-bottom:1.25rem;flex-wrap:wrap}
+.logo{width:38px;height:38px;background:#BA7517;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
+.hdr h1{font-size:20px;font-weight:700;letter-spacing:2px}
+.hdr p{font-size:11px;color:#888;margin-top:2px}
+.hdr-nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn-nav{font-size:12px;padding:7px 16px;border-radius:8px;background:#f4f2ee;color:#555;border:1px solid #ddd;cursor:pointer;text-decoration:none;display:inline-block;font-weight:500;white-space:nowrap}
+.btn-nav:hover{background:#fdfaf4;border-color:#BA7517;color:#BA7517}
+
+/* LOADING */
+.loading{padding:64px;text-align:center;color:#aaa;font-size:13px}
+.loading-spin{display:inline-block;width:28px;height:28px;border:3px solid #e0dcd4;border-top-color:#BA7517;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.shop-tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.stab{font-size:12px;padding:7px 18px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#777;cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.stab:hover:not(.active){background:#fdfaf4;border-color:#BA7517;color:#BA7517}
+.stab.active.s-all{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:700}
+.stab.active.s-mlot{background:#BA7517;color:#fff;border-color:#BA7517;font-weight:700}
+.stab.active.s-polax{background:#0F6E56;color:#fff;border-color:#0F6E56;font-weight:700}
+.stab.active.s-sila{background:#185FA5;color:#fff;border-color:#185FA5;font-weight:700}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.filter-bar{background:#fff;border:1px solid #e0dcd4;border-radius:12px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fpill{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid #e0dcd4;background:#f9f7f4;color:#666;cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
+.fpill:hover:not(.active){border-color:#BA7517;color:#BA7517;background:#fdfaf4}
+.fpill.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:700}
+.f-sep{width:1px;height:22px;background:#e5e1d8;flex-shrink:0}
+.cat-sel{font-size:12px;padding:5px 10px;border:1px solid #ddd;border-radius:8px;background:#f9f7f4;color:#555;cursor:pointer;outline:none;font-family:inherit}
+.cat-sel:focus{border-color:#BA7517}
+.sort-wrap{margin-left:auto;display:flex;align-items:center;gap:6px}
+.sort-lbl{font-size:11px;color:#aaa}
+.sort-sel{font-size:12px;padding:5px 10px;border:1px solid #ddd;border-radius:8px;background:#f9f7f4;color:#555;cursor:pointer;outline:none;font-family:inherit}
+.sort-sel:focus{border-color:#BA7517}
+.sort-dir{font-size:13px;color:#BA7517;cursor:pointer;padding:4px 9px;border:1px solid #e5e1d8;border-radius:6px;background:#fdfaf4;user-select:none;line-height:1}
+.sort-dir:hover{background:#FAEEDA}
+
+/* DATE BAR */
+.date-bar{background:#fff;border:1px solid #e0dcd4;border-radius:12px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dpreset{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid #e0dcd4;background:#f9f7f4;color:#666;cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.dpreset:hover:not(.active){border-color:#BA7517;color:#BA7517;background:#fdfaf4}
+.dpreset.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:700}
+.dpreset.active.d-30{background:#185FA5;border-color:#185FA5}
+.d-sep{width:1px;height:22px;background:#e5e1d8;flex-shrink:0}
+.date-inputs{display:flex;align-items:center;gap:7px}
+.date-lbl{font-size:11px;color:#aaa;white-space:nowrap}
+.date-inp{font-size:12px;padding:5px 9px;border:1px solid #ddd;border-radius:8px;background:#f9f7f4;color:#1a1a1a;cursor:pointer;outline:none;font-family:inherit;transition:border-color .15s}
+.date-inp:focus{border-color:#BA7517}
+.date-inp::-webkit-calendar-picker-indicator{opacity:.5;cursor:pointer}
+.date-inp.custom-active{border-color:#BA7517;background:#fdfaf4;color:#BA7517;font-weight:600}
+.date-arrow{font-size:12px;color:#bbb}
+.date-badge{margin-left:auto;display:flex;align-items:center;gap:6px}
+.d-pill{font-size:10px;padding:3px 9px;border-radius:4px;background:#f0ece4;color:#888;font-weight:600;white-space:nowrap}
+.d-pill.active-period{background:#E6F1FB;color:#0C447C}
+.d-pill.loading-pill{background:#faeeda;color:#854F0B;animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.tbl-wrap{background:#fff;border:1px solid #e0dcd4;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.tbl-head{display:grid;grid-template-columns:1fr 90px 130px 120px 130px 22px;padding:9px 16px;border-bottom:2px solid #f0ece4;background:#fdfaf4;align-items:center}
+.tbl-head span{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap}
+.tbl-head span:hover{color:#BA7517}
+.tbl-head span.sorted{color:#BA7517}
+.tbl-head span:not(:first-child){text-align:right}
+
+.prod-row{display:grid;grid-template-columns:1fr 90px 130px 120px 130px 22px;padding:10px 16px;border-bottom:1px solid #f5f2ec;cursor:pointer;transition:background .1s;align-items:center}
+.prod-row:last-child{border-bottom:none}
+.prod-row:hover{background:#fdfaf4}
+.prod-row.sel{background:#fdfaf4;border-left:3px solid #BA7517}
+.pr-name{font-size:13px;font-weight:600;color:#1a1a1a;line-height:1.3}
+.pr-meta{font-size:10px;color:#aaa;margin-top:3px;line-height:1.8}
+.cog-line{font-size:10px;color:#6b7280;font-weight:600}
+.pr-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:1px 7px;border-radius:3px;margin-bottom:3px;letter-spacing:.2px}
+.b-hit{background:#FAEEDA;color:#854F0B}
+.b-winning{background:#E1F5EE;color:#085041}
+.b-losing{background:#FCEBEB;color:#791F1F}
+.b-sleeping{background:#f0ece4;color:#888}
+.b-nocog{background:#f0f0ff;color:#555}
+.tc{font-size:13px;text-align:right}
+.tc small{display:block;font-size:10px;color:#bbb;margin-top:1px}
+.tc.gr{color:#0F6E56;font-weight:600}
+.tc.rd{color:#A32D2D;font-weight:600}
+.tc.am{color:#BA7517}
+.pbar{width:100%;height:3px;background:#f0ece4;border-radius:2px;margin-top:4px}
+.pbar-f{height:100%;border-radius:2px}
+.tc-arrow{font-size:12px;color:#ddd;text-align:right}
+.prod-row:hover .tc-arrow{color:#BA7517}
+
+.empty{padding:48px;text-align:center;color:#bbb;font-size:13px}
+
+.pagination{display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:1.5rem;flex-wrap:wrap}
+.pg{font-size:12px;padding:6px 11px;border-radius:7px;border:1px solid #ddd;background:#fff;color:#555;cursor:pointer;font-family:inherit;transition:all .15s}
+.pg:hover:not(:disabled):not(.pgon){border-color:#BA7517;color:#BA7517;background:#fdfaf4}
+.pg.pgon{background:#BA7517;color:#fff;border-color:#BA7517;font-weight:700}
+.pg:disabled{color:#ccc;border-color:#ede9e3;cursor:default;background:#faf9f6}
+.pg-info{font-size:11px;color:#aaa;padding:0 6px}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.18);z-index:99}
+.overlay.open{display:block}
+.sidebar{position:fixed;top:0;right:-500px;width:480px;max-width:100vw;height:100vh;background:#fff;border-left:1px solid #e0dcd4;z-index:100;overflow-y:auto;transition:right .25s cubic-bezier(.4,0,.2,1);box-shadow:-6px 0 32px rgba(0,0,0,.1)}
+.sidebar.open{right:0}
+.sb-head{padding:16px 18px 14px;border-bottom:1px solid #f0ece4;position:sticky;top:0;background:#fff;z-index:1}
+.sb-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;border:1px solid #e5e1d8;background:#f9f7f4;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#888;transition:all .15s}
+.sb-close:hover{background:#FCEBEB;border-color:#A32D2D;color:#A32D2D}
+.sb-name{font-size:18px;font-weight:800;color:#1a1a1a;margin:6px 0 6px;padding-right:36px;line-height:1.3}
+.sb-ids{font-size:11px;color:#888;line-height:2}
+.id-val{font-family:monospace;color:#777;font-size:11px}
+.shop-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:3px;margin:1px 3px 1px 0;font-weight:600;white-space:nowrap}
+.st-mlot{background:#FAEEDA;color:#854F0B}
+.st-polax{background:#E1F5EE;color:#085041}
+.st-sila{background:#E6F1FB;color:#0C447C}
+.sb-body{padding:14px 18px}
+.mc2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.mc{background:#F4F2EE;border:1px solid #e5e1d8;border-radius:10px;padding:12px 14px}
+.mc-l{font-size:10px;color:#888;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.mc-v{font-size:19px;font-weight:800;color:#1a1a1a;line-height:1.1}
+.mc-s{font-size:10px;color:#bbb;margin-top:3px}
+.mc.gr .mc-v{color:#0F6E56}
+.mc.rd .mc-v{color:#A32D2D}
+.mc.am .mc-v{color:#BA7517}
+.dist-sec{margin-bottom:4px}
+.dist-lbl{font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.dist-bar{height:10px;border-radius:5px;overflow:hidden;display:flex;gap:1px;margin-bottom:10px}
+.dist-seg{height:100%;transition:width .3s}
+.dist-leg{display:flex;flex-wrap:wrap;gap:8px 14px}
+.dl{display:flex;align-items:center;gap:5px;font-size:10px;color:#555}
+.dl-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.dl-v{font-weight:700;color:#1a1a1a;margin-left:2px}
+.sb-shops{margin-bottom:14px}
+.sb-shop-row{display:grid;grid-template-columns:110px 1fr 90px 90px;gap:8px;padding:8px 12px;background:#f9f7f4;border:1px solid #e5e1d8;border-radius:8px;margin-bottom:6px;align-items:center;font-size:11px}
+.sb-shop-name{font-weight:700;color:#555}
+.sb-shop-meta{color:#aaa;font-size:10px}
+
+.footer{text-align:center;font-size:11px;color:#ccc;margin-top:.5rem;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">P</div>
+  <div>
+    <h1>POLAX</h1>
+    <p id="hdrSub">Юнит-экономика · Allegro PL · загрузка…</p>
+  </div>
+  <div class="hdr-nav">
+    <a href="index.html" class="btn-nav">← Главная</a>
+    <a href="analytics.html" class="btn-nav">Аналитика</a>
+  </div>
+</div>
+
+<div id="mainContent">
+  <div class="loading">
+    <div class="loading-spin"></div><br>
+    Загрузка каталога и данных…
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar"></div>
+
+<div class="footer" id="footer">POLAX · Юнит-экономика</div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────────
+const SHOPS = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
+const SL    = {Mlot_i_Klucz:'Mlot i Klucz',PolaxEuroGroup:'PolaxEuroGroup',Sila_Narzedzi:'Sila Narzedzi'};
+const SC    = {Mlot_i_Klucz:'#BA7517',PolaxEuroGroup:'#0F6E56',Sila_Narzedzi:'#185FA5'};
+const ST    = {Mlot_i_Klucz:'st-mlot',PolaxEuroGroup:'st-polax',Sila_Narzedzi:'st-sila'};
+const SHORT = {Mlot_i_Klucz:'Mlot',PolaxEuroGroup:'Polax',Sila_Narzedzi:'Sila'};
+const BADGE = {hit:'★ Хит',winning:'↑ Выигрывает',losing:'✕ Проигрышный',sleeping:'◎ Спящий',nocog:'? Нет COG'};
+const BCLS  = {hit:'b-hit',winning:'b-winning',losing:'b-losing',sleeping:'b-sleeping',nocog:'b-nocog'};
+const PER_PAGE = 50;
+const SLEEP_SALES_THRESHOLD = 5;  // <= N продаж за период = спящий
+const HIT_TOP_N = 50;             // топ N по продажам = хит
+
+// ── App state ─────────────────────────────────────────────────
+let PRODUCTS   = [];          // [{ean,sku,name,category,cog,offers,price}]
+let offerToKey = {};          // offerId → product key (ean: or sku: or offer:)
+let keyToIdx   = {};          // product key → index in PRODUCTS[]
+
+let monthData  = {};          // {ym: {month,days}} — loaded monthly files cache
+let loadingYMs = new Set();   // months currently being fetched
+let aggCache   = null;        // {key: {shop: {sales,revenue,fees,ads,promo,cost}}} for current period
+let statusCache= null;        // {key: status_string}
+
+let DATE_MIN = '2026-01-01';
+let DATE_MAX = '2026-03-21';
+
+// UI state
+let curShop    = 'all';
+let curFilter  = 'all';
+let curCat     = '';
+let sortCol    = 'revenue';
+let sortDir    = 'desc';
+let curPage    = 1;
+let selKey     = null;
+let datePreset = 'all';
+let dateFrom   = DATE_MIN;
+let dateTo     = DATE_MAX;
+let dataReady  = false;
+
+// ── Helpers ───────────────────────────────────────────────────
+function zl(n) {
+  return Math.round(Math.abs(n)).toLocaleString('ru-RU') + ' zł';
+}
+function fmtCog(cog) {
+  if (cog === null || cog === undefined) return '—';
+  return (Number.isInteger(cog) ? cog.toLocaleString('ru-RU')
+                                : cog.toFixed(2).replace('.',',')) + ' zł';
+}
+function datesInRange(from, to) {
+  const dates = [];
+  let d = new Date(from);
+  const end = new Date(to);
+  while (d <= end) {
+    dates.push(d.toISOString().slice(0,10));
+    d.setDate(d.getDate()+1);
+  }
+  return dates;
+}
+function monthsInRange(from, to) {
+  const seen = new Set(), result = [];
+  for (const ds of datesInRange(from, to)) {
+    const ym = ds.slice(0,7);
+    if (!seen.has(ym)) { seen.add(ym); result.push(ym); }
+  }
+  return result;
+}
+function productKey(p) {
+  if (p.ean)  return 'ean:' + p.ean;
+  if (p.sku)  return 'sku:' + p.sku;
+  const oid = Object.values(p.offers||{}).find(x=>x);
+  return 'offer:' + (oid||Math.random());
+}
+
+// ── Data loading ──────────────────────────────────────────────
+async function loadProducts() {
+  const resp = await fetch('products.json?_=' + Date.now());
+  if (!resp.ok) throw new Error('products.json not found');
+  const data = await resp.json();
+  PRODUCTS = data.products || [];
+
+  // Build reverse lookup: offerId → key, key → index
+  offerToKey = {};
+  keyToIdx   = {};
+  PRODUCTS.forEach((p, i) => {
+    const k = productKey(p);
+    keyToIdx[k] = i;
+    SHOPS.forEach(s => {
+      if (p.offers && p.offers[s]) offerToKey[p.offers[s]] = k;
+    });
+  });
+  return data;
+}
+
+async function loadMonthData(ym) {
+  if (monthData[ym] || loadingYMs.has(ym)) return;
+  loadingYMs.add(ym);
+  try {
+    const resp = await fetch(`unit_data/${ym}.json?_=` + Date.now());
+    if (resp.ok) {
+      monthData[ym] = await resp.json();
+    } else {
+      monthData[ym] = {month: ym, days: {}};  // no data for this month yet
+    }
+  } catch(e) {
+    monthData[ym] = {month: ym, days: {}};
+  } finally {
+    loadingYMs.delete(ym);
+  }
+}
+
+async function ensureMonthsLoaded(from, to) {
+  const yms = monthsInRange(from, to);
+  await Promise.all(yms.map(ym => loadMonthData(ym)));
+}
+
+// ── Aggregation engine ────────────────────────────────────────
+// Builds aggCache: {productKey: {shop: {sales,revenue,fees,ads,promo}}}
+// Also builds offerLevelAgg: {productKey: {shop: {sales,revenue,fees,ads,promo}}}
+function buildAggCache(from, to) {
+  const agg = {};  // key → {shop → {sales,revenue,fees,ads,promo}}
+
+  const dates = datesInRange(from, to);
+  for (const date of dates) {
+    const ym = date.slice(0,7);
+    const md = monthData[ym];
+    if (!md) continue;
+    const dayEntry = md.days[date];
+    if (!dayEntry) continue;
+
+    for (const shop of SHOPS) {
+      const shopData = dayEntry[shop];
+      if (!shopData) continue;
+
+      for (const [oid, vals] of Object.entries(shopData)) {
+        const key = offerToKey[oid];
+        if (!key) continue;  // offer not in catalog
+
+        if (!agg[key]) agg[key] = {};
+        if (!agg[key][shop]) agg[key][shop] = {sales:0, revenue:0, fees:0, ads:0, promo:0};
+
+        const a = agg[key][shop];
+        // vals = [sales, revenue, fees, ads, promo]
+        a.sales   += vals[0] || 0;
+        a.revenue += vals[1] || 0;
+        a.fees    += vals[2] || 0;
+        a.ads     += vals[3] || 0;
+        a.promo   += vals[4] || 0;
+      }
+    }
+  }
+
+  // Round all values
+  for (const key of Object.keys(agg)) {
+    for (const shop of Object.keys(agg[key])) {
+      const a = agg[key][shop];
+      a.revenue = Math.round(a.revenue * 100) / 100;
+      a.fees    = Math.round(a.fees    * 100) / 100;
+      a.ads     = Math.round(a.ads     * 100) / 100;
+      a.promo   = Math.round(a.promo   * 100) / 100;
+    }
+  }
+
+  aggCache = agg;
+}
+
+// ── Per-product data getters ──────────────────────────────────
+function getShopData(p, shop) {
+  // Returns {sales,revenue,fees,ads,promo} or null
+  const key = productKey(p);
+  if (!aggCache || !aggCache[key] || !aggCache[key][shop]) return null;
+  return aggCache[key][shop];
+}
+
+function combineShops(p) {
+  // Returns combined {sales,revenue,fees,ads,promo,cost} for all shops
+  const result = {sales:0, revenue:0, fees:0, ads:0, promo:0, cost:0};
+  for (const shop of SHOPS) {
+    const d = getShopData(p, shop);
+    if (!d) continue;
+    result.sales   += d.sales;
+    result.revenue += d.revenue;
+    result.fees    += d.fees;
+    result.ads     += d.ads;
+    result.promo   += d.promo;
+    const cog = (p.cog && p.cog[shop]) || 0;
+    result.cost += cog * d.sales;
+  }
+  result.revenue = Math.round(result.revenue * 100) / 100;
+  result.fees    = Math.round(result.fees    * 100) / 100;
+  result.ads     = Math.round(result.ads     * 100) / 100;
+  result.promo   = Math.round(result.promo   * 100) / 100;
+  result.cost    = Math.round(result.cost    * 100) / 100;
+  return result;
+}
+
+function getProductData(p, shop) {
+  // Returns augmented data {sales,revenue,fees,ads,promo,cost} or null
+  if (shop === 'all') {
+    const d = combineShops(p);
+    return (d.revenue > 0 || d.sales > 0) ? d : null;
+  }
+  const d = getShopData(p, shop);
+  if (!d) return null;
+  const cog = (p.cog && p.cog[shop]) || 0;
+  return {...d, cost: Math.round(cog * d.sales * 100) / 100};
+}
+
+function margin(d) {
+  if (!d) return 0;
+  return d.revenue - (d.cost||0) - d.fees - d.ads - d.promo;
+}
+function marginPct(d) {
+  return (d && d.revenue > 0) ? margin(d) / d.revenue * 100 : 0;
+}
+
+// ── Status calculation ────────────────────────────────────────
+// Hits = top HIT_TOP_N by sales (among positive-margin products)
+function buildStatusCache() {
+  // Compute sales for all products in current shop context
+  const salesList = PRODUCTS.map(p => {
+    const d = getProductData(p, curShop);
+    return {key: productKey(p), sales: d ? d.sales : 0, d};
+  }).sort((a, b) => b.sales - a.sales);
+
+  const hitKeys = new Set();
+  let hitCount = 0;
+  for (const item of salesList) {
+    if (hitCount >= HIT_TOP_N) break;
+    if (item.sales > SLEEP_SALES_THRESHOLD) {
+      const mp = marginPct(item.d);
+      if (mp >= 0) {
+        hitKeys.add(item.key);
+        hitCount++;
+      }
+    }
+  }
+
+  const cache = {};
+  for (const p of PRODUCTS) {
+    const key = productKey(p);
+    const d   = getProductData(p, curShop);
+
+    if (!d || d.sales === 0) {
+      cache[key] = 'sleeping';
+      continue;
+    }
+
+    const hasCog = curShop === 'all'
+      ? SHOPS.some(s => p.offers && p.offers[s] && p.cog && p.cog[s] != null)
+      : (p.cog && p.cog[curShop] != null);
+
+    if (!hasCog) { cache[key] = 'nocog'; continue; }
+
+    if (d.sales <= SLEEP_SALES_THRESHOLD) {
+      cache[key] = 'sleeping';
+    } else if (marginPct(d) < 0) {
+      cache[key] = 'losing';
+    } else if (hitKeys.has(key)) {
+      cache[key] = 'hit';
+    } else {
+      cache[key] = 'winning';
+    }
+  }
+  statusCache = cache;
+}
+
+function getStatus(p) {
+  return (statusCache && statusCache[productKey(p)]) || 'sleeping';
+}
+
+// ── Refresh on period/shop change ────────────────────────────
+async function refresh() {
+  if (!dataReady) return;
+  aggCache    = null;
+  statusCache = null;
+
+  // Ensure month files are loaded
+  showLoadingPill(true);
+  await ensureMonthsLoaded(dateFrom, dateTo);
+  showLoadingPill(false);
+
+  buildAggCache(dateFrom, dateTo);
+  buildStatusCache();
+  curPage = 1;
+  renderAll();
+}
+
+function showLoadingPill(on) {
+  const el = document.getElementById('loadPill');
+  if (el) el.style.display = on ? '' : 'none';
+}
+
+// ── Filtering & sorting ───────────────────────────────────────
+function filteredProducts() {
+  return PRODUCTS.filter(p => {
+    if (curShop !== 'all' && !(p.offers && p.offers[curShop])) return false;
+    if (curCat && p.category !== curCat) return false;
+    const st = getStatus(p);
+    if (curFilter !== 'all' && st !== curFilter) return false;
+    return true;
+  });
+}
+
+function sortedProducts(arr) {
+  return [...arr].sort((a, b) => {
+    const da = getProductData(a, curShop) || {sales:0,revenue:0,fees:0,ads:0,promo:0,cost:0};
+    const db = getProductData(b, curShop) || {sales:0,revenue:0,fees:0,ads:0,promo:0,cost:0};
+    let va, vb;
+    if      (sortCol === 'sales')     { va = da.sales;       vb = db.sales; }
+    else if (sortCol === 'revenue')   { va = da.revenue;     vb = db.revenue; }
+    else if (sortCol === 'fees')      { va = da.fees;        vb = db.fees; }
+    else if (sortCol === 'margin')    { va = margin(da);     vb = margin(db); }
+    else if (sortCol === 'marginPct') { va = marginPct(da);  vb = marginPct(db); }
+    else                              { va = da.revenue;     vb = db.revenue; }
+    return sortDir === 'desc' ? vb - va : va - vb;
+  });
+}
+
+function getCounts() {
+  const base = PRODUCTS.filter(p => curShop === 'all' || (p.offers && p.offers[curShop]));
+  const r = {all:0, winning:0, losing:0, hit:0, sleeping:0, nocog:0};
+  base.forEach(p => {
+    const st = getStatus(p);
+    r.all++;
+    if (r[st] !== undefined) r[st]++;
+  });
+  return r;
+}
+
+function getCategories() {
+  const s = new Set();
+  PRODUCTS.forEach(p => {
+    if (curShop === 'all' || (p.offers && p.offers[curShop]))
+      if (p.category) s.add(p.category);
+  });
+  return [...s].sort();
+}
+
+// ── Render helpers ────────────────────────────────────────────
+function getPeriodDays() {
+  const from = new Date(dateFrom), to = new Date(dateTo);
+  return Math.max(1, Math.round((to - from) / 86400000) + 1);
+}
+
+function renderAll() {
+  renderShopTabs();
+  renderDateBar();
+  renderFilterBar();
+  renderTable();
+}
+
+// ── Shop tabs ─────────────────────────────────────────────────
+function renderShopTabs() {
+  const tabs = [
+    {id:'all',   label:'Все магазины', cls:'s-all',   dot:'#1a1a1a'},
+    {id:'Mlot_i_Klucz',   label:'Mlot i Klucz',   cls:'s-mlot',  dot:'#BA7517'},
+    {id:'PolaxEuroGroup', label:'PolaxEuroGroup', cls:'s-polax', dot:'#0F6E56'},
+    {id:'Sila_Narzedzi',  label:'Sila Narzedzi',  cls:'s-sila',  dot:'#185FA5'},
+  ];
+  document.getElementById('shopTabs').innerHTML = tabs.map(t =>
+    `<button class="stab ${t.cls}${curShop===t.id?' active':''}" onclick="setShop('${t.id}')">
+      <span class="sdot" style="background:${t.dot}"></span>${t.label}
+    </button>`).join('');
+}
+
+// ── Date bar ──────────────────────────────────────────────────
+function renderDateBar() {
+  const days = getPeriodDays();
+  const fmt  = s => s.split('-').reverse().join('.');
+  const periodLabel = datePreset==='all'
+    ? `Весь период · ${days} дн.`
+    : datePreset==='last30'
+    ? `Последние 30 дней · ${days} дн.`
+    : `${fmt(dateFrom)} — ${fmt(dateTo)} · ${days} дн.`;
+
+  document.getElementById('dateBar').innerHTML = `
+    <span style="font-size:11px;color:#aaa;font-weight:600;letter-spacing:.3px">📅 ПЕРИОД:</span>
+    <button class="dpreset${datePreset==='all'?' active':''}" onclick="setDatePreset('all')">Все время</button>
+    <button class="dpreset d-30${datePreset==='last30'?' active':''}" onclick="setDatePreset('last30')">Последние 30 дней</button>
+    <div class="d-sep"></div>
+    <div class="date-inputs">
+      <span class="date-lbl">С</span>
+      <input class="date-inp${datePreset==='custom'?' custom-active':''}" type="date" id="dateFromInp"
+        value="${dateFrom}" min="${DATE_MIN}" max="${DATE_MAX}"
+        onchange="setCustomDate('from',this.value)">
+      <span class="date-arrow">→</span>
+      <span class="date-lbl">По</span>
+      <input class="date-inp${datePreset==='custom'?' custom-active':''}" type="date" id="dateToInp"
+        value="${dateTo}" min="${DATE_MIN}" max="${DATE_MAX}"
+        onchange="setCustomDate('to',this.value)">
+    </div>
+    <div class="date-badge">
+      <span class="d-pill active-period">${periodLabel}</span>
+      <span class="d-pill loading-pill" id="loadPill" style="display:none">⟳ загрузка…</span>
+    </div>`;
+}
+
+// ── Filter bar ────────────────────────────────────────────────
+function renderFilterBar() {
+  const c = getCounts();
+  const filters = [
+    {id:'all',     label:`Все (${c.all})`},
+    {id:'hit',     label:`★ Хиты (${c.hit})`},
+    {id:'winning', label:`↑ Выигрывает (${c.winning})`},
+    {id:'losing',  label:`✕ Проигрышные (${c.losing})`},
+    {id:'sleeping',label:`◎ Спящие (${c.sleeping})`},
+    {id:'nocog',   label:`? Без COG (${c.nocog})`},
+  ];
+  const catList = getCategories();
+  const catOpts = `<option value="">Все категории</option>` +
+    catList.map(c => `<option value="${c}"${curCat===c?' selected':''}>${c}</option>`).join('');
+
+  document.getElementById('filterBar').innerHTML = `
+    ${filters.map(f =>
+      `<button class="fpill${curFilter===f.id?' active':''}" onclick="setFilter('${f.id}')">${f.label}</button>`
+    ).join('')}
+    <div class="f-sep"></div>
+    <select class="cat-sel" onchange="setCat(this.value)">${catOpts}</select>
+    <div class="sort-wrap">
+      <span class="sort-lbl">Сортировка:</span>
+      <select class="sort-sel" onchange="setSort(this.value)">
+        <option value="revenue"${sortCol==='revenue'?' selected':''}>Доход</option>
+        <option value="sales"${sortCol==='sales'?' selected':''}>Продажи</option>
+        <option value="fees"${sortCol==='fees'?' selected':''}>Сборы</option>
+        <option value="margin"${sortCol==='margin'?' selected':''}>Маржа</option>
+        <option value="marginPct"${sortCol==='marginPct'?' selected':''}>Маржа %</option>
+      </select>
+      <button class="sort-dir" onclick="toggleDir()">${sortDir==='desc'?'↓':'↑'}</button>
+    </div>`;
+}
+
+// ── Table ─────────────────────────────────────────────────────
+function renderTable() {
+  const allFiltered = sortedProducts(filteredProducts());
+  const totalPages  = Math.max(1, Math.ceil(allFiltered.length / PER_PAGE));
+  if (curPage > totalPages) curPage = 1;
+  const page = allFiltered.slice((curPage-1)*PER_PAGE, curPage*PER_PAGE);
+
+  if (allFiltered.length === 0) {
+    document.getElementById('tblWrap').innerHTML = '<div class="empty">Нет товаров по выбранным фильтрам</div>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  const maxRev = Math.max(...allFiltered.map(p => (getProductData(p,curShop)||{revenue:0}).revenue));
+
+  const head = `<div class="tbl-head">
+    <span>Продукт</span>
+    <span class="${sortCol==='sales'?'sorted':''}" onclick="setSort('sales')">Продажи</span>
+    <span class="${sortCol==='revenue'?'sorted':''}" onclick="setSort('revenue')">Доход</span>
+    <span class="${sortCol==='fees'?'sorted':''}" onclick="setSort('fees')">Сборы</span>
+    <span class="${sortCol==='margin'||sortCol==='marginPct'?'sorted':''}" onclick="setSort('marginPct')">Маржа</span>
+    <span></span>
+  </div>`;
+
+  const rows = page.map(p => {
+    const key = productKey(p);
+    const d   = getProductData(p, curShop);
+    const st  = getStatus(p);
+
+    if (!d) {
+      // Product in catalog but no sales in this period
+      const cogVal = curShop==='all' ? null : (p.cog && p.cog[curShop]);
+      const meta = buildMeta(p);
+      return `<div class="prod-row${selKey===key?' sel':''}" onclick="openSidebar('${key}')">
+        <div>
+          <div class="pr-badge ${BCLS[st]}">${BADGE[st]}</div>
+          <div class="pr-name">${escHtml(p.name)}</div>
+          <div class="pr-meta">${meta}</div>
+        </div>
+        <div class="tc" style="color:#ccc">0 шт.</div>
+        <div class="tc" style="color:#ccc">—</div>
+        <div class="tc" style="color:#ccc">—</div>
+        <div class="tc" style="color:#ccc">—</div>
+        <div class="tc-arrow">›</div>
+      </div>`;
+    }
+
+    const m   = margin(d);
+    const mp  = marginPct(d);
+    const barW = maxRev > 0 ? Math.round(d.revenue / maxRev * 100) : 0;
+    const barC = mp>=35?'#0F6E56':mp>=15?'#BA7517':mp>=0?'#e5a43a':'#A32D2D';
+    const meta = buildMeta(p);
+
+    return `<div class="prod-row${selKey===key?' sel':''}" onclick="openSidebar('${key}')">
+      <div>
+        <div class="pr-badge ${BCLS[st]}">${BADGE[st]}</div>
+        <div class="pr-name">${escHtml(p.name)}</div>
+        <div class="pr-meta">${meta}</div>
+      </div>
+      <div class="tc">${d.sales} шт.</div>
+      <div class="tc am">${zl(d.revenue)}
+        <div class="pbar"><div class="pbar-f" style="width:${barW}%;background:${barC}"></div></div>
+      </div>
+      <div class="tc rd">−${zl(d.fees)}<small>${d.revenue>0?(d.fees/d.revenue*100).toFixed(1):0}%</small></div>
+      <div class="tc ${m>=0?'gr':'rd'}">${m>=0?'':'-'}${zl(m)}<small>${mp.toFixed(1)}%</small></div>
+      <div class="tc-arrow">›</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('tblWrap').innerHTML = head + rows;
+  renderPagination(totalPages, allFiltered.length);
+}
+
+function buildMeta(p) {
+  if (curShop === 'all') {
+    const tags = SHOPS.filter(s => p.offers && p.offers[s])
+      .map(s => `<span class="shop-tag ${ST[s]}">${SHORT[s]}: <span class="id-val">…${p.offers[s].slice(-4)}</span></span>`)
+      .join('');
+    const cogAll = SHOPS.filter(s => p.cog && p.cog[s] != null)
+      .map(s => `${SHORT[s]}: ${fmtCog(p.cog[s])}`).join(' / ');
+    return `${tags}<br><span class="id-val">EAN: ${p.ean||'—'}</span> · <span class="id-val">SKU: ${p.sku||'—'}</span> · <span class="cog-line">📦 COG: ${cogAll||'—'}</span>`;
+  }
+  const oid = p.offers && p.offers[curShop];
+  return `ID: <span class="id-val">…${oid?oid.slice(-4):'—'}</span> · <span class="id-val">EAN: ${p.ean||'—'}</span> · <span class="id-val">SKU: ${p.sku||'—'}</span> · <span class="cog-line">📦 COG: ${fmtCog(p.cog&&p.cog[curShop])}</span>`;
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Pagination ────────────────────────────────────────────────
+function renderPagination(totalPages, total) {
+  const el = document.getElementById('pagination');
+  if (totalPages <= 1) { el.innerHTML = `<span class="pg-info">${total} товаров</span>`; return; }
+  let html = `<button class="pg" onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>`;
+  const start = Math.max(1, curPage-2), end = Math.min(totalPages, curPage+2);
+  if (start > 1) html += `<button class="pg" onclick="goPage(1)">1</button>${start>2?'<span class="pg-info">…</span>':''}`;
+  for (let i=start; i<=end; i++) html += `<button class="pg${i===curPage?' pgon':''}" onclick="goPage(${i})">${i}</button>`;
+  if (end < totalPages) html += `${end<totalPages-1?'<span class="pg-info">…</span>':''}<button class="pg" onclick="goPage(${totalPages})">${totalPages}</button>`;
+  html += `<button class="pg" onclick="goPage(${curPage+1})" ${curPage===totalPages?'disabled':''}>›</button>`;
+  html += `<span class="pg-info">${total} товаров · стр. ${curPage} из ${totalPages}</span>`;
+  el.innerHTML = html;
+}
+
+// ── Sidebar (product detail) ──────────────────────────────────
+function openSidebar(key) {
+  const idx = keyToIdx[key];
+  if (idx === undefined) return;
+  const p   = PRODUCTS[idx];
+  const d   = getProductData(p, curShop);
+  const st  = getStatus(p);
+  selKey    = key;
+
+  const m   = d ? margin(d) : 0;
+  const mp  = d ? marginPct(d) : 0;
+
+  // Shop tags
+  let idsHtml = '';
+  if (curShop === 'all') {
+    idsHtml = SHOPS.filter(s => p.offers&&p.offers[s])
+      .map(s => `<span class="shop-tag ${ST[s]}">${SL[s]}: <span class="id-val">…${p.offers[s].slice(-4)}</span></span>`).join('');
+  } else {
+    idsHtml = `<span class="shop-tag ${ST[curShop]}">${SL[curShop]}</span> ID: <span class="id-val">${(p.offers&&p.offers[curShop])||'—'}</span>`;
+  }
+
+  let metricsHtml = '', distHtml = '', shopsHtml = '';
+
+  if (d) {
+    const feePct  = d.revenue > 0 ? d.fees  / d.revenue * 100 : 0;
+    const costPct = d.revenue > 0 ? (d.cost||0) / d.revenue * 100 : 0;
+    const adsPct  = d.revenue > 0 ? d.ads   / d.revenue * 100 : 0;
+    const promoPct= d.revenue > 0 ? d.promo / d.revenue * 100 : 0;
+    const mgPct   = Math.max(0, mp);
+    const roas    = (d.ads+d.promo) > 0 ? (d.revenue/(d.ads+d.promo)).toFixed(1) : '—';
+
+    metricsHtml = `
+    <div class="mc2">
+      <div class="mc">
+        <div class="mc-l">Доход</div>
+        <div class="mc-v">${zl(d.revenue)}</div>
+        <div class="mc-s">${d.sales} транзакций</div>
+      </div>
+      <div class="mc ${m>=0?'gr':'rd'}">
+        <div class="mc-l">Чистая маржа</div>
+        <div class="mc-v">${m>=0?'':'-'}${zl(m)}</div>
+        <div class="mc-s">${mp.toFixed(1)}% от выручки</div>
+      </div>
+      <div class="mc rd">
+        <div class="mc-l">Сборы Allegro</div>
+        <div class="mc-v">−${zl(d.fees)}</div>
+        <div class="mc-s">${feePct.toFixed(1)}% от выручки</div>
+      </div>
+      <div class="mc am">
+        <div class="mc-l">ROAS</div>
+        <div class="mc-v">${roas}</div>
+        <div class="mc-s">${zl(d.ads+d.promo)} реклама+промо</div>
+      </div>
+    </div>`;
+
+    // Distribution bar
+    const total = costPct + feePct + adsPct + promoPct + mgPct;
+    const w = v => total > 0 ? Math.round(v/total*100)+'%' : '0%';
+    distHtml = `
+    <div class="dist-sec">
+      <div class="dist-lbl">Распределение выручки</div>
+      <div class="dist-bar">
+        <div class="dist-seg" style="width:${w(costPct)};background:#6b7280;border-radius:5px 0 0 5px"></div>
+        <div class="dist-seg" style="width:${w(feePct)};background:#A32D2D"></div>
+        <div class="dist-seg" style="width:${w(adsPct)};background:#BA7517"></div>
+        <div class="dist-seg" style="width:${w(promoPct)};background:#7C3AED"></div>
+        <div class="dist-seg" style="width:${w(mgPct)};background:#0F6E56;border-radius:0 5px 5px 0"></div>
+      </div>
+      <div class="dist-leg">
+        <div class="dl"><div class="dl-dot" style="background:#6b7280"></div>Себестоимость<span class="dl-v">${costPct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#A32D2D"></div>Сборы Allegro<span class="dl-v">${feePct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#BA7517"></div>Реклама CPC<span class="dl-v">${adsPct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#7C3AED"></div>Промование<span class="dl-v">${promoPct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#0F6E56"></div>Маржа<span class="dl-v">${mgPct.toFixed(0)}%</span></div>
+      </div>
+    </div>`;
+
+    // Per-shop breakdown (for "all" view)
+    if (curShop === 'all') {
+      const shopRows = SHOPS.filter(s => p.offers&&p.offers[s]).map(s => {
+        const sd  = getShopData(p, s);
+        const cog = (p.cog&&p.cog[s]) || 0;
+        if (!sd) return `<div class="sb-shop-row"><span class="sb-shop-name" style="color:${SC[s]}">${SHORT[s]}</span><span class="sb-shop-meta">нет продаж</span><span>—</span><span>—</span></div>`;
+        const sdCost = cog * sd.sales;
+        const sdM    = sd.revenue - sdCost - sd.fees - sd.ads - sd.promo;
+        const sdMp   = sd.revenue > 0 ? sdM/sd.revenue*100 : 0;
+        return `<div class="sb-shop-row">
+          <span class="sb-shop-name" style="color:${SC[s]}">${SHORT[s]}</span>
+          <span class="sb-shop-meta">${sd.sales} шт. · COG ${fmtCog(cog)}</span>
+          <span style="color:#BA7517">${zl(sd.revenue)}</span>
+          <span style="color:${sdM>=0?'#0F6E56':'#A32D2D'};font-weight:600">${sdM>=0?'':'-'}${zl(sdM)} <small style="font-weight:400;color:#aaa">${sdMp.toFixed(1)}%</small></span>
+        </div>`;
+      }).join('');
+      shopsHtml = `<div class="sb-shops">${shopRows}</div>`;
+    }
+  } else {
+    metricsHtml = `<div style="padding:20px;color:#aaa;font-size:13px">Нет данных за выбранный период</div>`;
+  }
+
+  document.getElementById('sidebar').innerHTML = `
+    <div class="sb-head">
+      <button class="sb-close" onclick="closeSidebar()">✕</button>
+      <div class="pr-badge ${BCLS[st]}" style="margin-top:4px">${BADGE[st]}</div>
+      <div class="sb-name">${escHtml(p.name)}</div>
+      <div class="sb-ids">${idsHtml}<br>
+        EAN: <span class="id-val">${p.ean||'—'}</span> ·
+        SKU: <span class="id-val">${p.sku||'—'}</span> ·
+        📦 COG: <span class="id-val" style="color:#6b7280;font-weight:700">${
+          curShop==='all'
+            ? SHOPS.filter(s=>p.cog&&p.cog[s]!=null).map(s=>`${SHORT[s]}: ${fmtCog(p.cog[s])}`).join(' / ')||'—'
+            : fmtCog(p.cog&&p.cog[curShop])
+        }</span>
+      </div>
+    </div>
+    <div class="sb-body">
+      ${shopsHtml}
+      ${metricsHtml}
+      ${distHtml}
+    </div>`;
+
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  renderTable();  // update selection highlight
+}
+
+function closeSidebar() {
+  selKey = null;
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  renderTable();
+}
+
+// ── Event handlers ────────────────────────────────────────────
+function setShop(s)   { curShop = s; curPage = 1; aggCache = null; statusCache = null; buildAggCache(dateFrom, dateTo); buildStatusCache(); renderAll(); }
+function setFilter(f) { curFilter = f; curPage = 1; renderAll(); }
+function setCat(c)    { curCat = c; curPage = 1; renderAll(); }
+function setSort(col) {
+  if (sortCol === col) { sortDir = sortDir==='desc'?'asc':'desc'; }
+  else { sortCol = col; sortDir = 'desc'; }
+  curPage = 1; renderAll();
+}
+function toggleDir()  { sortDir = sortDir==='desc'?'asc':'desc'; curPage = 1; renderAll(); }
+function goPage(n)    { curPage = n; renderAll(); }
+
+function setDatePreset(p) {
+  datePreset = p;
+  if (p === 'all')    { dateFrom = DATE_MIN; dateTo = DATE_MAX; }
+  if (p === 'last30') {
+    const to   = new Date(DATE_MAX);
+    const from = new Date(to); from.setDate(from.getDate()-29);
+    dateFrom = from.toISOString().slice(0,10);
+    dateTo   = DATE_MAX;
+  }
+  refresh();
+}
+function setCustomDate(which, val) {
+  datePreset = 'custom';
+  if (which === 'from') dateFrom = val;
+  else                  dateTo   = val;
+  if (dateFrom > dateTo) { if (which==='from') dateTo=dateFrom; else dateFrom=dateTo; }
+  refresh();
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────
+async function init() {
+  try {
+    const catalog = await loadProducts();
+    const updated = catalog.updated || '';
+
+    // Determine date range from data
+    const allYMs = Object.keys(monthData);
+
+    // Load initial months (all time = load current month + last 2 months)
+    const today = new Date().toISOString().slice(0,10);
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth()-2);
+    threeMonthsAgo.setDate(1);
+    const defFrom = threeMonthsAgo.toISOString().slice(0,10).slice(0,7) + '-01';
+
+    DATE_MIN  = catalog.date_min || defFrom;
+    DATE_MAX  = catalog.date_max || today;
+    dateFrom  = DATE_MIN;
+    dateTo    = DATE_MAX;
+
+    // Build the main UI shell
+    document.getElementById('mainContent').innerHTML = `
+      <div class="shop-tabs" id="shopTabs"></div>
+      <div class="date-bar"  id="dateBar"></div>
+      <div class="filter-bar" id="filterBar"></div>
+      <div class="tbl-wrap" id="tblWrap">
+        <div class="loading"><div class="loading-spin"></div><br>Загрузка данных…</div>
+      </div>
+      <div class="pagination" id="pagination"></div>`;
+
+    document.getElementById('hdrSub').textContent =
+      `Юнит-экономика · Allegro PL · ${PRODUCTS.length} товаров · обновлено ${updated}`;
+    document.getElementById('footer').textContent =
+      `POLAX · Юнит-экономика · ${PRODUCTS.length} товаров`;
+
+    dataReady = true;
+
+    // Load data for default period
+    await ensureMonthsLoaded(dateFrom, dateTo);
+    buildAggCache(dateFrom, dateTo);
+    buildStatusCache();
+    renderAll();
+
+  } catch(e) {
+    document.getElementById('mainContent').innerHTML = `
+      <div style="padding:48px;text-align:center;color:#A32D2D;font-size:13px">
+        <div style="font-size:28px;margin-bottom:12px">⚠</div>
+        <strong>Ошибка загрузки данных</strong><br><br>
+        Убедитесь что <code>products.json</code> существует.<br>
+        Запустите <code>python fetch_unit_catalog.py</code> для импорта каталога.<br><br>
+        <code style="font-size:10px;color:#888">${e.message}</code>
+      </div>`;
+    console.error('init error:', e);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
