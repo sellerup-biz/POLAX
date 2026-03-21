@@ -178,7 +178,6 @@ const SHORT = {Mlot_i_Klucz:'Mlot',PolaxEuroGroup:'Polax',Sila_Narzedzi:'Sila'};
 const BADGE = {hit:'★ Хит',winning:'↑ Выигрывает',losing:'✕ Проигрышный',sleeping:'◎ Спящий',nocog:'? Нет COG'};
 const BCLS  = {hit:'b-hit',winning:'b-winning',losing:'b-losing',sleeping:'b-sleeping',nocog:'b-nocog'};
 const PER_PAGE = 50;
-const SLEEP_SALES_THRESHOLD = 5;  // <= N продаж за период = спящий
 const HIT_TOP_N = 50;             // топ N по продажам = хит
 
 // ── App state ─────────────────────────────────────────────────
@@ -396,7 +395,7 @@ function buildStatusCache() {
   let hitCount = 0;
   for (const item of salesList) {
     if (hitCount >= HIT_TOP_N) break;
-    if (item.sales > SLEEP_SALES_THRESHOLD) {
+    if (item.sales > 0) {
       const mp = marginPct(item.d);
       if (mp >= 0) {
         hitKeys.add(item.key);
@@ -416,12 +415,12 @@ function buildStatusCache() {
     }
 
     const hasCog = curShop === 'all'
-      ? SHOPS.some(s => p.offers && p.offers[s] && p.cog && p.cog[s] != null)
-      : (p.cog && p.cog[curShop] != null);
+      ? SHOPS.some(s => p.offers && p.offers[s] && p.cog && p.cog[s] > 0)
+      : (p.cog && p.cog[curShop] > 0);
 
     if (!hasCog) { cache[key] = 'nocog'; continue; }
 
-    if (d.sales <= SLEEP_SALES_THRESHOLD) {
+    if (d.sales === 0) {
       cache[key] = 'sleeping';
     } else if (marginPct(d) < 0) {
       cache[key] = 'losing';
@@ -586,17 +585,7 @@ function renderFilterBar() {
     ).join('')}
     <div class="f-sep"></div>
     <select class="cat-sel" onchange="setCat(this.value)">${catOpts}</select>
-    <div class="sort-wrap">
-      <span class="sort-lbl">Сортировка:</span>
-      <select class="sort-sel" onchange="setSort(this.value)">
-        <option value="revenue"${sortCol==='revenue'?' selected':''}>Доход</option>
-        <option value="sales"${sortCol==='sales'?' selected':''}>Продажи</option>
-        <option value="fees"${sortCol==='fees'?' selected':''}>Сборы</option>
-        <option value="margin"${sortCol==='margin'?' selected':''}>Маржа</option>
-        <option value="marginPct"${sortCol==='marginPct'?' selected':''}>Маржа %</option>
-      </select>
-      <button class="sort-dir" onclick="toggleDir()">${sortDir==='desc'?'↓':'↑'}</button>
-    </div>`;
+    `;
 }
 
 // ── Table ─────────────────────────────────────────────────────
@@ -677,9 +666,8 @@ function buildMeta(p) {
     const tags = SHOPS.filter(s => p.offers && p.offers[s])
       .map(s => `<span class="shop-tag ${ST[s]}">${SHORT[s]}: <span class="id-val">…${p.offers[s].slice(-4)}</span></span>`)
       .join('');
-    const cogAll = SHOPS.filter(s => p.cog && p.cog[s] != null)
-      .map(s => `${SHORT[s]}: ${fmtCog(p.cog[s])}`).join(' / ');
-    return `${tags}<br><span class="id-val">EAN: ${p.ean||'—'}</span> · <span class="id-val">SKU: ${p.sku||'—'}</span> · <span class="cog-line">📦 COG: ${cogAll||'—'}</span>`;
+    const cogVal = SHOPS.map(s => p.cog && p.cog[s]).find(v => v != null && v > 0);
+    return `${tags}<br><span class="id-val">EAN: ${p.ean||'—'}</span> · <span class="id-val">SKU: ${p.sku||'—'}</span> · <span class="cog-line">📦 COG: ${cogVal != null ? fmtCog(cogVal) : '—'}</span>`;
   }
   const oid = p.offers && p.offers[curShop];
   return `ID: <span class="id-val">…${oid?oid.slice(-4):'—'}</span> · <span class="id-val">EAN: ${p.ean||'—'}</span> · <span class="id-val">SKU: ${p.sku||'—'}</span> · <span class="cog-line">📦 COG: ${fmtCog(p.cog&&p.cog[curShop])}</span>`;
@@ -812,7 +800,7 @@ function openSidebar(key) {
         SKU: <span class="id-val">${p.sku||'—'}</span> ·
         📦 COG: <span class="id-val" style="color:#6b7280;font-weight:700">${
           curShop==='all'
-            ? SHOPS.filter(s=>p.cog&&p.cog[s]!=null).map(s=>`${SHORT[s]}: ${fmtCog(p.cog[s])}`).join(' / ')||'—'
+            ? fmtCog(SHOPS.map(s=>p.cog&&p.cog[s]).find(v=>v!=null&&v>0)) || '—'
             : fmtCog(p.cog&&p.cog[curShop])
         }</span>
       </div>
