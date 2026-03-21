@@ -145,17 +145,37 @@ def resolve_category(token, cat_id, cache):
 
 def extract_ean(offer):
     """
-    Try to find EAN/GTIN in offer parameters.
-    Allegro stores EAN as a parameter with name containing 'EAN' or 'GTIN'.
+    Extract EAN/GTIN from offer parameters or productSet.
+    Works on full offer detail (from GET /sale/offers/{id}).
+    /sale/offers list does NOT return parameters — need individual fetch.
     """
+    # 1. parameters array (standard)
     for param in offer.get("parameters", []):
         name_lc = param.get("name", "").lower()
-        if "ean" in name_lc or "gtin" in name_lc or "kod" in name_lc:
+        if "ean" in name_lc or "gtin" in name_lc:
             vals = param.get("values", [])
-            if vals and str(vals[0]).strip().isdigit() and len(str(vals[0]).strip()) >= 8:
-                return str(vals[0]).strip()
-    # Fallback: check valuesIds (rangeValue) — unlikely for EAN but safe to check
+            if vals:
+                v = str(vals[0]).strip()
+                if v.isdigit() and 8 <= len(v) <= 14:
+                    return v
+    # 2. productSet → product.id (GTIN/EAN stored as product identifier)
+    for ps in offer.get("productSet", []):
+        prod = ps.get("product") or {}
+        pid = prod.get("id", "")
+        if pid and pid.isdigit() and 8 <= len(pid) <= 14:
+            return pid
     return None
+
+
+def fetch_offer_detail(token, offer_id):
+    """Fetch full offer detail to get parameters (EAN etc.)."""
+    resp = requests.get(
+        f"https://api.allegro.pl/sale/offers/{offer_id}",
+        headers=hdrs(token),
+        timeout=30)
+    if resp.status_code == 200:
+        return resp.json()
+    return {}
 
 
 # ── Offers fetch ──────────────────────────────────────────────
@@ -163,6 +183,8 @@ def extract_ean(offer):
 def get_offers_for_shop(token, shop_name, cat_cache, limit=0):
     """
     Fetch all active allegro-pl offers for a shop.
+    Step 1: /sale/offers list (id, name, sku, category, price)
+    Step 2: /sale/offers/{id} detail per offer (to get parameters → EAN)
     Returns list of normalized dicts:
       {offerId, name, ean, sku, category, cat_id, price}
     """
@@ -193,9 +215,7 @@ def get_offers_for_shop(token, shop_name, cat_cache, limit=0):
         for offer in batch:
             cat_id   = offer.get("category", {}).get("id", "")
             cat_name = resolve_category(token, cat_id, cat_cache)
-
-            ean = extract_ean(offer)
-            sku = (offer.get("external") or {}).get("id", "")
+            sku      = (offer.get("external") or {}).get("id", "")
 
             price_raw = (offer.get("sellingMode") or {}).get("price", {}).get("amount")
             price     = round(float(price_raw), 2) if price_raw else None
@@ -203,7 +223,7 @@ def get_offers_for_shop(token, shop_name, cat_cache, limit=0):
             offers.append({
                 "offerId":  offer["id"],
                 "name":     offer.get("name", "").strip(),
-                "ean":      ean,
+                "ean":      None,   # filled in step 2
                 "sku":      sku.strip(),
                 "category": cat_name,
                 "cat_id":   cat_id,
@@ -212,14 +232,30 @@ def get_offers_for_shop(token, shop_name, cat_cache, limit=0):
 
             if limit > 0 and len(offers) >= limit:
                 print(f"  {shop_name}: ограничено до {limit} офферов")
-                return offers
+                break
 
         print(f"  {shop_name}: {len(offers)}/{total} офферов...", end="\r")
 
+        if limit > 0 and len(offers) >= limit:
+            break
         if len(batch) < page:
             break
         offset += page
         time.sleep(0.15)
+
+    # Step 2: fetch individual offer details to get EAN from parameters
+    print(f"\n  {shop_name}: получаем EAN для {len(offers)} офферов...")
+    ean_found = 0
+    for i, o in enumerate(offers):
+        detail = fetch_offer_detail(token, o["offerId"])
+        ean = extract_ean(detail)
+        if ean:
+            o["ean"] = ean
+            ean_found += 1
+        time.sleep(0.1)
+        if (i + 1) % 50 == 0:
+            print(f"    {i+1}/{len(offers)} обработано, EAN найдено: {ean_found}")
+    print(f"  {shop_name}: EAN найдено {ean_found}/{len(offers)}")
 
     print(f"  {shop_name}: итого {len(offers)} офферов              ")
     return offers
