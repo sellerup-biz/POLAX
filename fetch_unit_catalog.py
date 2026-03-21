@@ -168,9 +168,11 @@ def extract_ean(offer):
 
 
 def fetch_offer_detail(token, offer_id):
-    """Fetch full offer detail to get parameters (EAN etc.)."""
+    """Fetch full offer detail to get parameters (EAN etc.).
+    Uses /sale/product-offers/{id} — the current supported endpoint.
+    Old /sale/offers/{id} is deprecated and blocked since 2025."""
     resp = requests.get(
-        f"https://api.allegro.pl/sale/offers/{offer_id}",
+        f"https://api.allegro.pl/sale/product-offers/{offer_id}",
         headers=hdrs(token),
         timeout=30)
     if resp.status_code == 200:
