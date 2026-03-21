@@ -1,6 +1,6 @@
 """
 Отладка: смотрим реальную структуру /sale/offers/{id}
-чтобы понять где хранится EAN в ответе API.
+Пробуем все три магазина чтобы найти оффер 18325278148 (plandeka из скриншота).
 """
 import requests, json, os
 try:
@@ -10,6 +10,13 @@ except ImportError:
     pass
 
 REDIRECT_URI = "https://sellerup-biz.github.io/POLAX/callback.html"
+OFFER_ID = "18325278148"  # Plandeka с EAN 4823127517116
+
+SHOPS = {
+    "Mlot_i_Klucz":   (os.environ.get("CLIENT_ID_MLOT",""),  os.environ.get("CLIENT_SECRET_MLOT",""),  os.environ.get("REFRESH_TOKEN_MLOT","")),
+    "PolaxEuroGroup":  (os.environ.get("CLIENT_ID_POLAX",""), os.environ.get("CLIENT_SECRET_POLAX",""), os.environ.get("REFRESH_TOKEN_POLAX","")),
+    "Sila_Narzedzi":   (os.environ.get("CLIENT_ID_SILA",""),  os.environ.get("CLIENT_SECRET_SILA",""),  os.environ.get("REFRESH_TOKEN_SILA","")),
+}
 
 def get_token(cid, cs, rt):
     r = requests.post("https://allegro.pl/auth/oauth/token",
@@ -17,40 +24,39 @@ def get_token(cid, cs, rt):
         data={"grant_type":"refresh_token","refresh_token":rt,"redirect_uri":REDIRECT_URI},
         timeout=30)
     d = r.json()
-    if "access_token" not in d:
-        print(f"ОШИБКА токена: {d}"); exit(1)
-    return d["access_token"]
+    return d.get("access_token"), d.get("refresh_token","")
 
 def hdrs(t):
     return {"Authorization":f"Bearer {t}","Accept":"application/vnd.allegro.public.v1+json"}
 
-token = get_token(
-    os.environ["CLIENT_ID_POLAX"],
-    os.environ["CLIENT_SECRET_POLAX"],
-    os.environ["REFRESH_TOKEN_POLAX"])
-print("Токен OK")
+for shop_name, (cid, cs, rt) in SHOPS.items():
+    print(f"\n{'='*60}")
+    print(f"Магазин: {shop_name}")
+    token, _ = get_token(cid, cs, rt)
+    if not token:
+        print("  Токен не получен"); continue
+    print("  Токен OK")
 
-# Берём оффер 18325278148 (plandeka с EAN 4823127517116 из скриншота)
-OFFER_ID = "18325278148"
+    resp = requests.get(
+        f"https://api.allegro.pl/sale/offers/{OFFER_ID}",
+        headers=hdrs(token), timeout=30)
+    print(f"  Status: {resp.status_code}")
 
-resp = requests.get(
-    f"https://api.allegro.pl/sale/offers/{OFFER_ID}",
-    headers=hdrs(token), timeout=30)
-print(f"Status: {resp.status_code}")
-data = resp.json()
+    if resp.status_code != 200:
+        print(f"  Ответ: {resp.text[:200]}")
+        continue
 
-# Выводим только нужные поля
-print("\n=== parameters ===")
-for p in data.get("parameters", []):
-    print(f"  name={p.get('name')!r:30} values={p.get('values')} valuesIds={p.get('valuesIds')}")
+    data = resp.json()
+    print(f"  Ключи: {list(data.keys())}")
 
-print("\n=== productSet ===")
-for ps in data.get("productSet", []):
-    prod = ps.get("product") or {}
-    print(f"  product.id={prod.get('id')} product.name={str(prod.get('name',''))[:50]}")
+    print("\n  === parameters ===")
+    for p in data.get("parameters", []):
+        print(f"    name={p.get('name')!r:35} values={p.get('values')} valuesIds={p.get('valuesIds')}")
 
-print("\n=== external ===")
-print(f"  {data.get('external')}")
+    print("\n  === productSet ===")
+    for ps in data.get("productSet", []):
+        prod = ps.get("product") or {}
+        print(f"    product.id={prod.get('id')} name={str(prod.get('name',''))[:50]}")
 
-print("\n=== Все ключи верхнего уровня ===")
-print(list(data.keys()))
+    print(f"\n  === external ===  {data.get('external')}")
+    break  # нашли нужный магазин — дальше не идём
