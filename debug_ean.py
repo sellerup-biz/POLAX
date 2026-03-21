@@ -11,33 +11,33 @@ def get_token(cid, cs, rt):
         data={"grant_type":"refresh_token","refresh_token":rt,"redirect_uri":REDIRECT}, timeout=20)
     return r.json().get("access_token")
 
-# Используем POLAX токен
 cid = os.environ.get("CLIENT_ID_POLAX","")
 cs  = os.environ.get("CLIENT_SECRET_POLAX","")
 rt  = os.environ.get("REFRESH_TOKEN_POLAX","")
-
-if not cid:
-    print("Нет токенов в .env"); exit(1)
-
 token = get_token(cid, cs, rt)
-if not token:
-    print("Ошибка токена"); exit(1)
+print(f"Token: {'OK' if token else 'FAIL'}")
 
-hdrs = {"Authorization":f"Bearer {token}","Accept":"application/vnd.allegro.public.v1+json"}
+# Пробуем разные версии заголовков для /ads/campaigns
+versions = ["v1","v2","v3","v4"]
+for v in versions:
+    hdrs = {
+        "Authorization": f"Bearer {token}",
+        "Accept": f"application/vnd.allegro.public.{v}+json"
+    }
+    r = requests.get("https://api.allegro.pl/ads/campaigns", headers=hdrs, timeout=10)
+    print(f"  /ads/campaigns [{v}]: HTTP {r.status_code} — {r.text[:200]}")
 
-# Проверяем разные рекламные эндпоинты
-endpoints = [
-    "/sale/offer-statistics",
-    "/ads/campaigns",
-    "/sale/offers/sponsored",
-    "/reporting/revenue-by-offer",
-]
-
-for ep in endpoints:
-    r = requests.get(f"https://api.allegro.pl{ep}", headers=hdrs, params={"limit":1}, timeout=10)
-    print(f"{ep}: HTTP {r.status_code}")
-    if r.status_code == 200:
-        data = r.json()
-        print(f"  keys: {list(data.keys())[:5]}")
-    elif r.status_code != 404:
-        print(f"  {r.text[:150]}")
+# Также проверим NSP billing entry — есть ли там offer.id
+print("\n--- Проверка billing entries с NSP ---")
+hdrs = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.allegro.public.v1+json"}
+r = requests.get("https://api.allegro.pl/billing/billing-entries",
+    headers=hdrs,
+    params={"type.id":"NSP", "limit":5, "occurredAt.gte":"2026-03-01T00:00:00+01:00", "occurredAt.lte":"2026-03-20T23:59:59+01:00"},
+    timeout=20)
+print(f"NSP billing: HTTP {r.status_code}")
+if r.status_code == 200:
+    data = r.json()
+    entries = data.get("billingEntries", [])
+    print(f"Найдено {len(entries)} NSP записей")
+    for e in entries[:3]:
+        print(f"  id={e.get('id')} type={e.get('type',{}).get('id')} offer={e.get('offer')} amount={e.get('amount',{}).get('amount')}")
