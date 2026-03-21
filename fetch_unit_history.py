@@ -177,12 +177,13 @@ def day_range(date_str):
 
 def get_sales_by_offer(token, date_str):
     """
-    GET /payments/payment-operations (allegro-pl, one day)
+    GET /order/checkout-forms (status=BOUGHT, boughtAt range)
     Returns: {offer_id: [sales_count, revenue_pln]}
 
-    Note: sales_count = number of payment operations (≈ order line count).
-    Revenue includes allegro-pl + allegro-business-pl (business ops appear on
-    allegro-pl marketplace query because they share the PLN settlement).
+    Uses checkout-forms API which contains lineItems with offer.id + quantity.
+    Filters to allegro-pl + allegro-business-pl marketplaces only.
+    sales_count = sum of item quantities sold.
+    revenue     = sum of (quantity × unit_price) per offer.
     """
     d_from, d_to = day_range(date_str)
     by_offer = defaultdict(lambda: [0, 0.0])
@@ -190,40 +191,45 @@ def get_sales_by_offer(token, date_str):
 
     while True:
         resp = requests.get(
-            "https://api.allegro.pl/payments/payment-operations",
+            "https://api.allegro.pl/order/checkout-forms",
             headers=hdrs(token),
             params={
-                "group":           "INCOME",
-                "occurredAt.gte":  d_from,
-                "occurredAt.lte":  d_to,
-                "marketplaceId":   "allegro-pl",  # includes business-pl
-                "limit":           50,
-                "offset":          offset,
+                "status":       "BOUGHT",
+                "boughtAt.gte": d_from,
+                "boughtAt.lte": d_to,
+                "limit":        100,
+                "offset":       offset,
             },
             timeout=30)
 
         if resp.status_code != 200:
-            print(f"\n  ⚠ payment-operations {date_str}: HTTP {resp.status_code}")
+            print(f"\n  ⚠ checkout-forms {date_str}: HTTP {resp.status_code}")
             break
 
-        ops = resp.json().get("paymentOperations", [])
-        for op in ops:
-            try:
-                oid = op.get("offer", {}).get("id")
-                if not oid:
-                    continue
-                amt = float(op["value"]["amount"])
-                by_offer[oid][0] += 1      # count (transactions)
-                by_offer[oid][1] += amt    # revenue (may be negative = refund)
-            except Exception:
-                pass
+        data  = resp.json()
+        forms = data.get("checkoutForms", [])
 
-        if len(ops) < 50:
+        for form in forms:
+            # Only PL market (allegro-pl + allegro-business-pl)
+            mkt = (form.get("marketplace") or {}).get("id", "allegro-pl")
+            if mkt not in ("allegro-pl", "allegro-business-pl"):
+                continue
+
+            for item in form.get("lineItems", []):
+                try:
+                    oid   = item["offer"]["id"]
+                    qty   = int(item.get("quantity", 1))
+                    price = float(item["price"]["amount"])
+                    by_offer[oid][0] += qty
+                    by_offer[oid][1] += qty * price
+                except Exception:
+                    pass
+
+        if len(forms) < 100:
             break
-        offset += 50
+        offset += 100
         time.sleep(0.05)
 
-    # Round revenue
     return {oid: [v[0], round(v[1], 2)] for oid, v in by_offer.items()}
 
 

@@ -263,7 +263,9 @@ def get_unit_bcat(tid, tname):
 
 
 def get_unit_sales_by_offer(token, date_str):
-    """payment-operations → {offer_id: [tx_count, revenue_pln]}"""
+    """checkout-forms (status=BOUGHT, boughtAt) → {offer_id: [qty, revenue_pln]}
+    Uses order/checkout-forms which contains lineItems with offer.id + quantity.
+    Filters to allegro-pl + allegro-business-pl only."""
     dt = datetime.strptime(date_str, "%Y-%m-%d")
     tz = get_tz(dt.month)
     d_from = f"{date_str}T00:00:00+0{tz}:00"
@@ -272,22 +274,26 @@ def get_unit_sales_by_offer(token, date_str):
     offset = 0
     while True:
         resp = requests.get(
-            "https://api.allegro.pl/payments/payment-operations",
+            "https://api.allegro.pl/order/checkout-forms",
             headers=hdrs(token),
-            params={"group":"INCOME","occurredAt.gte":d_from,"occurredAt.lte":d_to,
-                    "marketplaceId":"allegro-pl","limit":50,"offset":offset},
+            params={"status":"BOUGHT","boughtAt.gte":d_from,"boughtAt.lte":d_to,
+                    "limit":100,"offset":offset},
             timeout=30)
         if resp.status_code != 200: break
-        ops = resp.json().get("paymentOperations", [])
-        for op in ops:
-            oid = (op.get("offer") or {}).get("id")
-            if not oid: continue
-            try:
-                result[oid][0] += 1
-                result[oid][1] += float(op["value"]["amount"])
-            except Exception: pass
-        if len(ops) < 50: break
-        offset += 50
+        forms = resp.json().get("checkoutForms", [])
+        for form in forms:
+            mkt = (form.get("marketplace") or {}).get("id", "allegro-pl")
+            if mkt not in ("allegro-pl", "allegro-business-pl"): continue
+            for item in form.get("lineItems", []):
+                try:
+                    oid   = item["offer"]["id"]
+                    qty   = int(item.get("quantity", 1))
+                    price = float(item["price"]["amount"])
+                    result[oid][0] += qty
+                    result[oid][1] += qty * price
+                except Exception: pass
+        if len(forms) < 100: break
+        offset += 100
         time.sleep(0.05)
     return {oid: [v[0], round(v[1], 2)] for oid, v in result.items()}
 
