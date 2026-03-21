@@ -145,11 +145,24 @@ def resolve_category(token, cat_id, cache):
 
 def extract_ean(offer):
     """
-    Extract EAN/GTIN from offer parameters or productSet.
-    Works on full offer detail (from GET /sale/offers/{id}).
-    /sale/offers list does NOT return parameters — need individual fetch.
+    Extract EAN/GTIN from offer detail (GET /sale/product-offers/{id}).
+    EAN is stored in productSet[].product.parameters, NOT in top-level parameters.
+    Top-level parameters = offer attributes (Stan, Stan opakowania etc.)
+    productSet[].product.parameters = product catalog params including EAN (GTIN).
     """
-    # 1. parameters array (standard)
+    # 1. productSet → product.parameters → EAN (GTIN)  ← correct location
+    for ps in offer.get("productSet", []):
+        prod = ps.get("product") or {}
+        for param in prod.get("parameters", []):
+            name_lc = param.get("name", "").lower()
+            if "ean" in name_lc or "gtin" in name_lc:
+                vals = param.get("values", [])
+                if vals:
+                    v = str(vals[0]).strip()
+                    if v.isdigit() and 8 <= len(v) <= 14:
+                        return v
+
+    # 2. Fallback: top-level parameters (rarely has EAN, but check anyway)
     for param in offer.get("parameters", []):
         name_lc = param.get("name", "").lower()
         if "ean" in name_lc or "gtin" in name_lc:
@@ -158,38 +171,19 @@ def extract_ean(offer):
                 v = str(vals[0]).strip()
                 if v.isdigit() and 8 <= len(v) <= 14:
                     return v
-    # 2. productSet → product.id (GTIN/EAN stored as product identifier)
-    for ps in offer.get("productSet", []):
-        prod = ps.get("product") or {}
-        pid = prod.get("id", "")
-        if pid and pid.isdigit() and 8 <= len(pid) <= 14:
-            return pid
     return None
 
-
-_debug_printed = False  # печатаем структуру только для первого оффера
 
 def fetch_offer_detail(token, offer_id):
     """Fetch full offer detail to get parameters (EAN etc.).
     Uses /sale/product-offers/{id} — the current supported endpoint.
     Old /sale/offers/{id} is deprecated and blocked since 2025."""
-    global _debug_printed
     resp = requests.get(
         f"https://api.allegro.pl/sale/product-offers/{offer_id}",
         headers=hdrs(token),
         timeout=30)
     if resp.status_code == 200:
-        data = resp.json()
-        if not _debug_printed:
-            _debug_printed = True
-            import json as _json
-            print(f"\n  [DEBUG] /sale/product-offers/{offer_id} keys: {list(data.keys())}")
-            print(f"  [DEBUG] parameters: {_json.dumps(data.get('parameters', [])[:3], ensure_ascii=False)}")
-            print(f"  [DEBUG] productSet: {_json.dumps(data.get('productSet', [])[:2], ensure_ascii=False)}")
-            p = data.get('product') or {}
-            print(f"  [DEBUG] product.id={p.get('id')} product.name={str(p.get('name',''))[:50]}")
-        return data
-    print(f"\n  [DEBUG] /sale/product-offers/{offer_id}: HTTP {resp.status_code} {resp.text[:200]}")
+        return resp.json()
     return {}
 
 
