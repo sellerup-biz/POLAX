@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLAX · Авторизация Allegro</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background: #F4F2EE; min-height: 100vh; padding: 2rem; color: #333; }
+  .container { max-width: 560px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #BA7517; margin-bottom: 0.25rem; }
+  .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 2rem; }
+  .card { background: #fff; border: 1px solid #e0dcd4; border-radius: 12px;
+          padding: 1.5rem; margin-bottom: 1rem; }
+  .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .card p { font-size: 0.85rem; color: #666; margin-bottom: 1rem; line-height: 1.5; }
+  .btn { display: block; width: 100%; padding: 0.75rem 1rem; border: none;
+         border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+         text-decoration: none; text-align: center; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-mlot  { background: #BA7517; color: #fff; }
+  .btn-polax { background: #0F6E56; color: #fff; }
+  .btn-sila  { background: #185FA5; color: #fff; }
+  .notice { background: #fff8ee; border: 1px solid #f0d080; border-radius: 10px;
+            padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: 0.85rem;
+            color: #7a5500; line-height: 1.6; }
+  .notice b { color: #BA7517; }
+  .step { display: inline-flex; align-items: center; justify-content: center;
+          width: 22px; height: 22px; border-radius: 50%; background: #BA7517;
+          color: #fff; font-size: 0.75rem; font-weight: 700; margin-right: 0.5rem; }
+  .token-input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #d0ccc6;
+                 border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem;
+                 font-family: monospace; }
+  .token-input:focus { outline: none; border-color: #BA7517; }
+  label { font-size: 0.82rem; color: #666; display: block; margin-bottom: 0.4rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>POLAX · Авторизация Allegro</h1>
+  <p class="subtitle">Получение refresh token для каждого магазина</p>
+
+  <div class="notice">
+    <b>Порядок действий:</b><br>
+    <span class="step">1</span> Введи GitHub Token ниже<br>
+    <span class="step">2</span> Войди в браузере в нужный аккаунт Allegro<br>
+    <span class="step">3</span> Нажми кнопку магазина → подтверди авторизацию<br>
+    <span class="step">4</span> Токен сохранится автоматически в GitHub Secrets ✅
+  </div>
+
+  <div class="card">
+    <h2>🔑 GitHub Token</h2>
+    <p>Нужен для автоматического сохранения токенов в Secrets. Вводится один раз.</p>
+    <label for="gh_token">Personal Access Token (contents: read+write)</label>
+    <input type="password" id="gh_token" class="token-input" placeholder="github_pat_..." autocomplete="off">
+  </div>
+
+  <div class="card">
+    <h2>🟠 Mlot_i_Klucz</h2>
+    <p>Войди в браузере под аккаунтом <b>Mlot_i_Klucz</b>, затем нажми кнопку.</p>
+    <a href="#" class="btn btn-mlot" onclick="authorize('MLOT','eb3ca104a8564c2a8e238c2589e797e5');return false;">
+      Авторизовать Mlot_i_Klucz →
+    </a>
+  </div>
+
+  <div class="card">
+    <h2>🟢 PolaxEuroGroup</h2>
+    <p>Войди в браузере под аккаунтом <b>PolaxEuroGroup</b>, затем нажми кнопку.</p>
+    <a href="#" class="btn btn-polax" onclick="authorize('POLAX','9b34ac0f7525469da337b335d47e231b');return false;">
+      Авторизовать PolaxEuroGroup →
+    </a>
+  </div>
+
+  <div class="card">
+    <h2>🔵 Sila_Narzedzi</h2>
+    <p>Войди в браузере под аккаунтом <b>Sila_Narzedzi</b>, затем нажми кнопку.</p>
+    <a href="#" class="btn btn-sila" onclick="authorize('SILA','d64fb7b5c6bf4cc09527fb4eed4a3776');return false;">
+      Авторизовать Sila_Narzedzi →
+    </a>
+  </div>
+</div>
+
+<script>
+const REDIRECT_URI = 'https://sellerup-biz.github.io/POLAX/callback.html';
+
+function authorize(shop, clientId) {
+  const ghToken = document.getElementById('gh_token').value.trim();
+  if (!ghToken) {
+    alert('Введи GitHub Token перед авторизацией!');
+    return;
+  }
+  // Сохраняем GH Token и shop в sessionStorage — callback.html его подхватит
+  sessionStorage.setItem('gh_token', ghToken);
+  sessionStorage.setItem('pending_shop', shop);
+
+  const url = `https://allegro.pl/auth/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+  window.location.href = url;
+}
+</script>
+</body>
+</html>
