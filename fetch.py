@@ -263,20 +263,19 @@ def get_unit_bcat(tid, tname):
 
 
 def get_unit_sales_by_offer(token, date_str):
-    """checkout-forms (status=BOUGHT, boughtAt) → {offer_id: [qty, revenue_pln]}
-    Uses order/checkout-forms which contains lineItems with offer.id + quantity.
+    """checkout-forms (READY_FOR_PROCESSING, lineItems.boughtAt) → {offer_id: [qty, revenue_pln]}
+    READY_FOR_PROCESSING = paid orders. lineItems.boughtAt = correct param name.
     Filters to allegro-pl + allegro-business-pl only."""
-    dt = datetime.strptime(date_str, "%Y-%m-%d")
-    tz = get_tz(dt.month)
-    d_from = f"{date_str}T00:00:00+0{tz}:00"
-    d_to   = f"{date_str}T23:59:59+0{tz}:00"
     result = defaultdict(lambda: [0, 0.0])
     offset = 0
+    d_from = f"{date_str}T00:00:00.000Z"
+    d_to   = f"{date_str}T23:59:59.999Z"
     while True:
         resp = requests.get(
             "https://api.allegro.pl/order/checkout-forms",
             headers=hdrs(token),
-            params={"status":"BOUGHT","boughtAt.gte":d_from,"boughtAt.lte":d_to,
+            params={"status":"READY_FOR_PROCESSING",
+                    "lineItems.boughtAt.gte":d_from,"lineItems.boughtAt.lte":d_to,
                     "limit":100,"offset":offset},
             timeout=30)
         if resp.status_code != 200: break

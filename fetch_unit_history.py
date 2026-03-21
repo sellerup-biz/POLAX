@@ -177,15 +177,18 @@ def day_range(date_str):
 
 def get_sales_by_offer(token, date_str):
     """
-    GET /order/checkout-forms (status=BOUGHT, boughtAt range)
+    GET /order/checkout-forms (status=READY_FOR_PROCESSING, lineItems.boughtAt range)
     Returns: {offer_id: [sales_count, revenue_pln]}
 
     Uses checkout-forms API which contains lineItems with offer.id + quantity.
+    READY_FOR_PROCESSING = paid orders only.
     Filters to allegro-pl + allegro-business-pl marketplaces only.
-    sales_count = sum of item quantities sold.
+    sales_count = sum of item quantities.
     revenue     = sum of (quantity × unit_price) per offer.
     """
-    d_from, d_to = day_range(date_str)
+    dt     = datetime.strptime(date_str, "%Y-%m-%d")
+    d_from = f"{date_str}T00:00:00.000Z"
+    d_to   = f"{date_str}T23:59:59.999Z"
     by_offer = defaultdict(lambda: [0, 0.0])
     offset   = 0
 
@@ -194,16 +197,16 @@ def get_sales_by_offer(token, date_str):
             "https://api.allegro.pl/order/checkout-forms",
             headers=hdrs(token),
             params={
-                "status":       "BOUGHT",
-                "boughtAt.gte": d_from,
-                "boughtAt.lte": d_to,
-                "limit":        100,
-                "offset":       offset,
+                "status":                  "READY_FOR_PROCESSING",
+                "lineItems.boughtAt.gte":  d_from,
+                "lineItems.boughtAt.lte":  d_to,
+                "limit":                   100,
+                "offset":                  offset,
             },
             timeout=30)
 
         if resp.status_code != 200:
-            print(f"\n  ⚠ checkout-forms {date_str}: HTTP {resp.status_code}")
+            print(f"\n  ⚠ checkout-forms {date_str}: HTTP {resp.status_code} {resp.text[:200]}")
             break
 
         data  = resp.json()
