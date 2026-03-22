@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLAX · Продажи по категориям</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1a;min-height:100vh;padding:1.5rem}
+
+.hdr{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:12px 18px;margin-bottom:1.25rem;flex-wrap:wrap}
+.logo{width:38px;height:38px;background:#BA7517;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
+.hdr h1{font-size:20px;font-weight:700;letter-spacing:2px}
+.hdr p{font-size:11px;color:#888;margin-top:2px}
+.hdr-nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn-nav{font-size:12px;padding:7px 16px;border-radius:8px;background:#f4f2ee;color:#555;border:1px solid #ddd;cursor:pointer;text-decoration:none;display:inline-block;font-weight:500;white-space:nowrap}
+.btn-nav:hover{background:#fdfaf4;border-color:#BA7517;color:#BA7517}
+
+/* LOADING */
+.loading{padding:64px;text-align:center;color:#aaa;font-size:13px}
+.loading-spin{display:inline-block;width:28px;height:28px;border:3px solid #e0dcd4;border-top-color:#BA7517;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SHOP TABS */
+.shop-tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.stab{font-size:12px;padding:7px 18px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#777;cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.stab:hover:not(.active){background:#fdfaf4;border-color:#BA7517;color:#BA7517}
+.stab.active.s-all{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:700}
+.stab.active.s-mlot{background:#BA7517;color:#fff;border-color:#BA7517;font-weight:700}
+.stab.active.s-polax{background:#0F6E56;color:#fff;border-color:#0F6E56;font-weight:700}
+.stab.active.s-sila{background:#185FA5;color:#fff;border-color:#185FA5;font-weight:700}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* DATE BAR */
+.date-bar{background:#fff;border:1px solid #e0dcd4;border-radius:12px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dpreset{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid #e0dcd4;background:#f9f7f4;color:#666;cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
+.dpreset:hover:not(.active){border-color:#BA7517;color:#BA7517;background:#fdfaf4}
+.dpreset.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:700}
+.dpreset.active.d-30{background:#185FA5;border-color:#185FA5}
+.d-sep{width:1px;height:22px;background:#e5e1d8;flex-shrink:0}
+.date-inputs{display:flex;align-items:center;gap:7px}
+.date-lbl{font-size:11px;color:#aaa;white-space:nowrap}
+.date-inp{font-size:12px;padding:5px 9px;border:1px solid #ddd;border-radius:8px;background:#f9f7f4;color:#1a1a1a;cursor:pointer;outline:none;font-family:inherit;transition:border-color .15s}
+.date-inp:focus{border-color:#BA7517}
+.date-inp::-webkit-calendar-picker-indicator{opacity:.5;cursor:pointer}
+.date-inp.custom-active{border-color:#BA7517;background:#fdfaf4;color:#BA7517;font-weight:600}
+.date-arrow{font-size:12px;color:#bbb}
+.date-badge{margin-left:auto;display:flex;align-items:center;gap:6px}
+.d-pill{font-size:10px;padding:3px 9px;border-radius:4px;background:#f0ece4;color:#888;font-weight:600;white-space:nowrap}
+.d-pill.active-period{background:#E6F1FB;color:#0C447C}
+.d-pill.loading-pill{background:#faeeda;color:#854F0B;animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* CHART CARD */
+.chart-card{background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.chart-title{font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
+.chart-sub{font-size:11px;color:#999;margin-bottom:1rem}
+.chart-wrap{position:relative;height:360px}
+
+/* TABLE */
+.tbl-card{background:#fff;border:1px solid #e0dcd4;border-radius:14px;overflow:hidden;margin-bottom:1rem}
+.tbl-header{padding:12px 16px 10px;border-bottom:2px solid #f0ece4;background:#fdfaf4;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tbl-header-title{font-size:13px;font-weight:700;color:#1a1a1a}
+.sort-wrap{display:flex;align-items:center;gap:6px}
+.sort-lbl{font-size:11px;color:#aaa}
+.sort-sel{font-size:12px;padding:5px 10px;border:1px solid #ddd;border-radius:8px;background:#f9f7f4;color:#555;cursor:pointer;outline:none;font-family:inherit}
+.sort-sel:focus{border-color:#BA7517}
+.sort-dir{font-size:13px;color:#BA7517;cursor:pointer;padding:4px 9px;border:1px solid #e5e1d8;border-radius:6px;background:#fdfaf4;user-select:none;line-height:1}
+.sort-dir:hover{background:#FAEEDA}
+
+.cat-table{width:100%;border-collapse:collapse}
+.cat-table th{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.5px;text-transform:uppercase;padding:9px 14px;text-align:right;cursor:pointer;user-select:none;white-space:nowrap;background:#fdfaf4;border-bottom:2px solid #f0ece4}
+.cat-table th:first-child{text-align:left}
+.cat-table th:hover{color:#BA7517}
+.cat-table th.sorted{color:#BA7517}
+.cat-table th .sort-ico{display:inline-block;margin-left:4px;opacity:.5;font-size:9px}
+.cat-table th.sorted .sort-ico{opacity:1}
+.cat-table td{padding:10px 14px;border-bottom:1px solid #f5f2ec;font-size:13px;text-align:right;vertical-align:middle}
+.cat-table td:first-child{text-align:left}
+.cat-table tr:last-child td{border-bottom:none}
+.cat-table tr:hover td{background:#fdfaf4}
+.cat-name{font-weight:600;color:#1a1a1a;font-size:13px}
+.cat-bar-wrap{width:100px;display:inline-block;vertical-align:middle;margin-left:8px}
+.cat-bar{height:4px;background:#BA7517;border-radius:2px;display:inline-block}
+.cat-bar-bg{width:100px;height:4px;background:#f0ece4;border-radius:2px;display:inline-block;position:relative}
+.cat-bar-fill{height:4px;background:#BA7517;border-radius:2px;position:absolute;left:0;top:0}
+.tc-am{color:#BA7517;font-weight:600}
+.tc-gr{color:#0F6E56;font-weight:600}
+.tc-rd{color:#A32D2D;font-weight:600}
+.tc-nt{color:#888}
+.pct-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;font-weight:700;background:#f0ece4;color:#666;margin-left:4px}
+.other-row td{background:#faf9f6;font-style:italic}
+.other-row td .cat-name{color:#888}
+
+.empty{padding:48px;text-align:center;color:#bbb;font-size:13px}
+
+.footer{text-align:center;font-size:11px;color:#ccc;margin-top:.5rem;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">P</div>
+  <div>
+    <h1>POLAX</h1>
+    <p id="hdrSub">Продажи по категориям · загрузка…</p>
+  </div>
+  <div class="hdr-nav">
+    <a href="index.html" class="btn-nav">← Главная</a>
+    <a href="analytics.html" class="btn-nav">Аналитика</a>
+    <a href="unit_economy.html" class="btn-nav">Юнит-экономика</a>
+  </div>
+</div>
+
+<div id="mainContent">
+  <div class="loading">
+    <div class="loading-spin"></div><br>
+    Загрузка каталога и данных…
+  </div>
+</div>
+
+<div class="footer">POLAX · Продажи по категориям</div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────────
+const SHOPS = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
+const SL    = {Mlot_i_Klucz:'Mlot i Klucz',PolaxEuroGroup:'PolaxEuroGroup',Sila_Narzedzi:'Sila Narzedzi'};
+const SC    = {Mlot_i_Klucz:'#BA7517',PolaxEuroGroup:'#0F6E56',Sila_Narzedzi:'#185FA5'};
+const TOP_N = 15;
+
+// ── App state ─────────────────────────────────────────────────
+let PRODUCTS   = [];
+let offerToKey = {};
+let keyToIdx   = {};
+let monthData  = {};
+let loadingYMs = new Set();
+let aggCache   = null;
+
+let DATE_MIN   = '2026-01-01';
+let DATE_MAX   = '2026-03-22';
+
+let curShop    = 'all';
+let sortCol    = 'revenue';
+let sortDir    = 'desc';
+let datePreset = 'all';
+let dateFrom   = DATE_MIN;
+let dateTo     = DATE_MAX;
+let dataReady  = false;
+
+let chartInst  = null;
+
+// ── Helpers ───────────────────────────────────────────────────
+function zl(n) {
+  return Math.round(Math.abs(n)).toLocaleString('ru-RU') + ' zł';
+}
+function pct(v, total) {
+  return total > 0 ? (v / total * 100).toFixed(1) + '%' : '0%';
+}
+function datesInRange(from, to) {
+  const dates = [];
+  let d = new Date(from);
+  const end = new Date(to);
+  while (d <= end) {
+    dates.push(d.toISOString().slice(0,10));
+    d.setDate(d.getDate()+1);
+  }
+  return dates;
+}
+function monthsInRange(from, to) {
+  const seen = new Set(), result = [];
+  for (const ds of datesInRange(from, to)) {
+    const ym = ds.slice(0,7);
+    if (!seen.has(ym)) { seen.add(ym); result.push(ym); }
+  }
+  return result;
+}
+function productKey(p) {
+  if (p.ean)  return 'ean:' + p.ean;
+  if (p.sku)  return 'sku:' + p.sku;
+  const oid = Object.values(p.offers||{}).find(x=>x);
+  return 'offer:' + (oid||Math.random());
+}
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Data loading ──────────────────────────────────────────────
+async function loadProducts() {
+  const resp = await fetch('products.json?_=' + Date.now());
+  if (!resp.ok) throw new Error('products.json not found');
+  const data = await resp.json();
+  PRODUCTS = data.products || [];
+  offerToKey = {};
+  keyToIdx   = {};
+  PRODUCTS.forEach((p, i) => {
+    const k = productKey(p);
+    keyToIdx[k] = i;
+    SHOPS.forEach(s => {
+      if (p.offers && p.offers[s]) offerToKey[p.offers[s]] = k;
+    });
+  });
+  // Set DATE_MAX from data.updated
+  if (data.updated) DATE_MAX = data.updated;
+  return data;
+}
+
+async function loadMonthData(ym) {
+  if (monthData[ym] || loadingYMs.has(ym)) return;
+  loadingYMs.add(ym);
+  try {
+    const resp = await fetch(`unit_data/${ym}.json?_=` + Date.now());
+    if (resp.ok) {
+      monthData[ym] = await resp.json();
+    } else {
+      monthData[ym] = {month: ym, days: {}};
+    }
+  } catch(e) {
+    monthData[ym] = {month: ym, days: {}};
+  } finally {
+    loadingYMs.delete(ym);
+  }
+}
+
+async function ensureMonthsLoaded(from, to) {
+  const yms = monthsInRange(from, to);
+  await Promise.all(yms.map(ym => loadMonthData(ym)));
+}
+
+// ── Aggregation by offer ──────────────────────────────────────
+function buildAggCache(from, to) {
+  const agg = {};
+  const dates = datesInRange(from, to);
+  for (const date of dates) {
+    const ym = date.slice(0,7);
+    const md = monthData[ym];
+    if (!md) continue;
+    const dayEntry = md.days[date];
+    if (!dayEntry) continue;
+    for (const shop of SHOPS) {
+      if (curShop !== 'all' && shop !== curShop) continue;
+      const shopData = dayEntry[shop];
+      if (!shopData) continue;
+      for (const [oid, vals] of Object.entries(shopData)) {
+        const key = offerToKey[oid];
+        if (!key) continue;
+        if (!agg[key]) agg[key] = {};
+        if (!agg[key][shop]) agg[key][shop] = {sales:0, revenue:0, fees:0, ads:0, promo:0};
+        const a = agg[key][shop];
+        a.sales   += vals[0] || 0;
+        a.revenue += vals[1] || 0;
+        a.fees    += vals[2] || 0;
+        a.ads     += vals[3] || 0;
+        a.promo   += vals[4] || 0;
+      }
+    }
+  }
+  aggCache = agg;
+}
+
+// ── Category aggregation ──────────────────────────────────────
+function buildCategoryData() {
+  if (!aggCache) return [];
+
+  // catMap: catName → {revenue, sales, fees, ads, promo, skus: Set of keys}
+  const catMap = {};
+
+  for (const p of PRODUCTS) {
+    // Skip if shop filter is on and product not in that shop
+    if (curShop !== 'all' && !(p.offers && p.offers[curShop])) continue;
+
+    const cat = p.category || 'Остальные';
+    const key = productKey(p);
+
+    if (!catMap[cat]) catMap[cat] = {revenue:0, sales:0, fees:0, ads:0, promo:0, skus:new Set(), activeSKUs: new Set()};
+
+    catMap[cat].skus.add(key);
+
+    const pAgg = aggCache[key];
+    if (!pAgg) continue;
+
+    const shopsToSum = curShop === 'all' ? SHOPS : [curShop];
+    for (const shop of shopsToSum) {
+      const d = pAgg[shop];
+      if (!d) continue;
+      catMap[cat].revenue += d.revenue;
+      catMap[cat].sales   += d.sales;
+      catMap[cat].fees    += d.fees;
+      catMap[cat].ads     += d.ads;
+      catMap[cat].promo   += d.promo;
+      if (d.sales > 0) catMap[cat].activeSKUs.add(key);
+    }
+  }
+
+  // Round and convert to array
+  const totalRevenue = Object.values(catMap).reduce((s, c) => s + c.revenue, 0);
+  const result = Object.entries(catMap).map(([name, c]) => ({
+    name,
+    revenue:  Math.round(c.revenue  * 100) / 100,
+    sales:    c.sales,
+    fees:     Math.round(c.fees     * 100) / 100,
+    ads:      Math.round(c.ads      * 100) / 100,
+    promo:    Math.round(c.promo    * 100) / 100,
+    skuCount: c.skus.size,
+    activeSkuCount: c.activeSKUs.size,
+    pctRevenue: totalRevenue > 0 ? c.revenue / totalRevenue * 100 : 0,
+    marginAmt: 0, // computed below
+    marginPct: 0,
+  }));
+
+  // Compute margin (no COG data → revenue - fees - ads - promo)
+  result.forEach(c => {
+    c.marginAmt = c.revenue - c.fees - c.ads - c.promo;
+    c.marginPct = c.revenue > 0 ? c.marginAmt / c.revenue * 100 : 0;
+  });
+
+  return result;
+}
+
+function sortCategories(arr) {
+  return [...arr].sort((a, b) => {
+    let va, vb;
+    if      (sortCol === 'revenue')   { va = a.revenue;   vb = b.revenue; }
+    else if (sortCol === 'sales')     { va = a.sales;     vb = b.sales; }
+    else if (sortCol === 'pct')       { va = a.pctRevenue; vb = b.pctRevenue; }
+    else if (sortCol === 'skus')      { va = a.skuCount;  vb = b.skuCount; }
+    else if (sortCol === 'marginPct') { va = a.marginPct; vb = b.marginPct; }
+    else                              { va = a.revenue;   vb = b.revenue; }
+    return sortDir === 'desc' ? vb - va : va - vb;
+  });
+}
+
+// ── Chart render ─────────────────────────────────────────────
+function renderChart(cats) {
+  // Sort by revenue for chart always (descending)
+  const bySales = [...cats].sort((a, b) => b.revenue - a.revenue);
+
+  // Top 15 + "Остальные"
+  const top15 = bySales.slice(0, TOP_N);
+  const rest  = bySales.slice(TOP_N);
+
+  const chartData = [...top15];
+  if (rest.length > 0) {
+    const restRev   = rest.reduce((s, c) => s + c.revenue, 0);
+    const restSales = rest.reduce((s, c) => s + c.sales, 0);
+    const restFees  = rest.reduce((s, c) => s + c.fees, 0);
+    const restAds   = rest.reduce((s, c) => s + c.ads, 0);
+    const restPromo = rest.reduce((s, c) => s + c.promo, 0);
+    const total     = cats.reduce((s, c) => s + c.revenue, 0);
+    chartData.push({
+      name: `Остальные (${rest.length})`,
+      revenue: restRev,
+      sales: restSales,
+      fees: restFees,
+      ads: restAds,
+      promo: restPromo,
+      pctRevenue: total > 0 ? restRev / total * 100 : 0,
+      _isOther: true,
+    });
+  }
+
+  const total = cats.reduce((s, c) => s + c.revenue, 0);
+  const labels  = chartData.map(c => c.name);
+  const values  = chartData.map(c => Math.round(c.revenue));
+  const pcts    = chartData.map(c => c.pctRevenue);
+  const colors  = chartData.map((c, i) => c._isOther ? 'rgba(180,170,155,0.75)' : `hsl(${30 + i * 18},60%,${50 - i * 1.2}%)`);
+
+  const ctx = document.getElementById('catChart');
+  if (!ctx) return;
+
+  if (chartInst) { chartInst.destroy(); chartInst = null; }
+
+  chartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Выручка (zł)',
+        data: values,
+        backgroundColor: colors,
+        borderColor: colors.map(c => c.replace('0.75','1')),
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const i = ctx.dataIndex;
+              const v = ctx.parsed.y;
+              const p = pcts[i].toFixed(1);
+              const s = chartData[i].sales;
+              return [`Выручка: ${v.toLocaleString('ru-RU')} zł`, `Доля: ${p}%`, `Продано: ${s} шт.`];
+            }
+          }
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: { size: 10, family: "'Segoe UI', system-ui, sans-serif" },
+            maxRotation: 35,
+            minRotation: 25,
+            color: '#888',
+            callback: function(val, i) {
+              const lbl = labels[i];
+              return lbl.length > 18 ? lbl.slice(0, 16) + '…' : lbl;
+            }
+          }
+        },
+        y: {
+          grid: { color: '#f0ece4' },
+          ticks: {
+            font: { size: 10 },
+            color: '#aaa',
+            callback: v => v.toLocaleString('ru-RU') + ' zł'
+          }
+        }
+      },
+      // Draw value + pct labels on bars
+      animation: {
+        onComplete: function() {
+          const chart = this;
+          const ctx2  = chart.ctx;
+          ctx2.save();
+          ctx2.font = 'bold 10px Segoe UI, system-ui, sans-serif';
+          ctx2.textAlign = 'center';
+          ctx2.textBaseline = 'bottom';
+          ctx2.fillStyle = '#555';
+          chart.data.datasets.forEach((ds, di) => {
+            const meta = chart.getDatasetMeta(di);
+            meta.data.forEach((bar, i) => {
+              const v = ds.data[i];
+              const p = pcts[i].toFixed(1);
+              const y = bar.y - 4;
+              ctx2.fillStyle = '#1a1a1a';
+              ctx2.fillText(v.toLocaleString('ru-RU') + ' zł', bar.x, y);
+              ctx2.fillStyle = '#BA7517';
+              ctx2.fillText(p + '%', bar.x, y - 12);
+            });
+          });
+          ctx2.restore();
+        }
+      }
+    }
+  });
+}
+
+// ── Table render ──────────────────────────────────────────────
+function renderTable(cats) {
+  const sorted = sortCategories(cats);
+  const total  = cats.reduce((s, c) => s + c.revenue, 0);
+  const maxRev = cats.length > 0 ? Math.max(...cats.map(c => c.revenue)) : 1;
+
+  const colDef = [
+    {id:'name',      label:'Категория',       align:'left'},
+    {id:'revenue',   label:'Выручка',         align:'right'},
+    {id:'sales',     label:'Кол-во шт.',      align:'right'},
+    {id:'pct',       label:'% продаж',        align:'right'},
+    {id:'skus',      label:'SKU в категории', align:'right'},
+    {id:'marginPct', label:'Маржа %',         align:'right'},
+  ];
+
+  const ico = col => {
+    if (sortCol !== col) return `<span class="sort-ico">↕</span>`;
+    return `<span class="sort-ico">${sortDir==='desc'?'↓':'↑'}</span>`;
+  };
+
+  const headHtml = colDef.map(c =>
+    `<th class="${sortCol===c.id&&c.id!=='name'?'sorted':''}" style="text-align:${c.align}" onclick="${c.id!=='name'?`setSort('${c.id}')`:''}">${c.label}${c.id!=='name'?ico(c.id):''}</th>`
+  ).join('');
+
+  const rowsHtml = sorted.map(c => {
+    const barW = maxRev > 0 ? Math.round(c.revenue / maxRev * 100) : 0;
+    const mpColor = c.marginPct >= 30 ? 'tc-gr' : c.marginPct >= 10 ? 'tc-am' : 'tc-rd';
+    return `<tr>
+      <td>
+        <div class="cat-name">${escHtml(c.name)}</div>
+        <div class="cat-bar-bg" style="margin-top:4px"><div class="cat-bar-fill" style="width:${barW}%"></div></div>
+      </td>
+      <td class="tc-am">${zl(c.revenue)}</td>
+      <td>${c.sales.toLocaleString('ru-RU')} шт.</td>
+      <td>
+        <span style="font-weight:700">${c.pctRevenue.toFixed(1)}%</span>
+      </td>
+      <td class="tc-nt">${c.skuCount}</td>
+      <td class="${mpColor}">${c.marginPct.toFixed(1)}%<small style="display:block;font-size:10px;color:#aaa;font-weight:400">${c.marginAmt >= 0 ? '' : '-'}${zl(c.marginAmt)}</small></td>
+    </tr>`;
+  }).join('');
+
+  const sumRevenue  = cats.reduce((s, c) => s + c.revenue, 0);
+  const sumSales    = cats.reduce((s, c) => s + c.sales, 0);
+  const sumFees     = cats.reduce((s, c) => s + c.fees, 0);
+  const sumAds      = cats.reduce((s, c) => s + c.ads, 0);
+  const sumPromo    = cats.reduce((s, c) => s + c.promo, 0);
+  const sumMarginAmt = sumRevenue - sumFees - sumAds - sumPromo;
+  const sumMarginPct = sumRevenue > 0 ? sumMarginAmt / sumRevenue * 100 : 0;
+  const mpC2 = sumMarginPct >= 30 ? 'tc-gr' : sumMarginPct >= 10 ? 'tc-am' : 'tc-rd';
+
+  const footerHtml = `<tr style="background:#fdfaf4;border-top:2px solid #e0dcd4;font-weight:700">
+    <td style="font-weight:700;font-size:12px">Итого (${cats.length} категорий)</td>
+    <td class="tc-am" style="font-weight:700">${zl(sumRevenue)}</td>
+    <td style="font-weight:700">${sumSales.toLocaleString('ru-RU')} шт.</td>
+    <td style="font-weight:700">100%</td>
+    <td class="tc-nt">—</td>
+    <td class="${mpC2}" style="font-weight:700">${sumMarginPct.toFixed(1)}%<small style="display:block;font-size:10px;color:#aaa;font-weight:400">${sumMarginAmt >= 0 ? '' : '-'}${zl(sumMarginAmt)}</small></td>
+  </tr>`;
+
+  document.getElementById('catTbl').innerHTML = `
+    <table class="cat-table">
+      <thead><tr>${headHtml}</tr></thead>
+      <tbody>${rowsHtml}</tbody>
+      <tfoot>${footerHtml}</tfoot>
+    </table>`;
+}
+
+// ── Sort ──────────────────────────────────────────────────────
+function setSort(col) {
+  if (sortCol === col) sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+  else { sortCol = col; sortDir = 'desc'; }
+  rerender();
+}
+
+// ── Refresh ───────────────────────────────────────────────────
+function showLoadingPill(on) {
+  const el = document.getElementById('loadPill');
+  if (el) el.style.display = on ? '' : 'none';
+}
+
+async function refresh() {
+  if (!dataReady) return;
+  aggCache = null;
+  showLoadingPill(true);
+  await ensureMonthsLoaded(dateFrom, dateTo);
+  showLoadingPill(false);
+  buildAggCache(dateFrom, dateTo);
+  rerender();
+}
+
+function rerender() {
+  const cats = buildCategoryData();
+  if (cats.length === 0) {
+    document.getElementById('catChartWrap').innerHTML = '<div class="empty">Нет данных за выбранный период</div>';
+    document.getElementById('catTbl').innerHTML = '<div class="empty">Нет данных за выбранный период</div>';
+    return;
+  }
+  renderChart(cats);
+  renderTable(cats);
+  renderHeaderStats(cats);
+}
+
+function renderHeaderStats(cats) {
+  const total   = cats.reduce((s, c) => s + c.revenue, 0);
+  const totalSales = cats.reduce((s, c) => s + c.sales, 0);
+  const days    = getPeriodDays();
+  document.getElementById('hdrSub').textContent =
+    `Продажи по категориям · ${cats.length} кат. · ${zl(total)} · ${totalSales.toLocaleString('ru-RU')} шт. · ${days} дн.`;
+}
+
+// ── Date helpers ──────────────────────────────────────────────
+function getPeriodDays() {
+  const from = new Date(dateFrom), to = new Date(dateTo);
+  return Math.max(1, Math.round((to - from) / 86400000) + 1);
+}
+
+function setDatePreset(p) {
+  datePreset = p;
+  if (p === 'all') {
+    dateFrom = DATE_MIN;
+    dateTo   = DATE_MAX;
+  } else if (p === 'last30') {
+    const d = new Date(DATE_MAX);
+    d.setDate(d.getDate() - 29);
+    dateFrom = d.toISOString().slice(0,10);
+    dateTo   = DATE_MAX;
+  }
+  refresh().then(() => renderDateBar());
+}
+
+function setCustomDate(which, val) {
+  datePreset = 'custom';
+  if (which === 'from') dateFrom = val;
+  else dateTo = val;
+  refresh().then(() => renderDateBar());
+}
+
+function setShop(s) {
+  curShop = s;
+  refresh().then(() => { renderShopTabs(); });
+}
+
+// ── Render controls ───────────────────────────────────────────
+function renderShopTabs() {
+  const tabs = [
+    {id:'all',   label:'Все магазины', cls:'s-all',  dot:'#1a1a1a'},
+    {id:'Mlot_i_Klucz',   label:'Mlot i Klucz',   cls:'s-mlot',  dot:'#BA7517'},
+    {id:'PolaxEuroGroup', label:'PolaxEuroGroup', cls:'s-polax', dot:'#0F6E56'},
+    {id:'Sila_Narzedzi',  label:'Sila Narzedzi',  cls:'s-sila',  dot:'#185FA5'},
+  ];
+  document.getElementById('shopTabs').innerHTML = tabs.map(t =>
+    `<button class="stab ${t.cls}${curShop===t.id?' active':''}" onclick="setShop('${t.id}')">
+      <span class="sdot" style="background:${t.dot}"></span>${t.label}
+    </button>`).join('');
+}
+
+function renderDateBar() {
+  const days = getPeriodDays();
+  const fmt  = s => s.split('-').reverse().join('.');
+  const periodLabel = datePreset==='all'
+    ? `Весь период · ${days} дн.`
+    : datePreset==='last30'
+    ? `Последние 30 дней · ${days} дн.`
+    : `${fmt(dateFrom)} — ${fmt(dateTo)} · ${days} дн.`;
+
+  document.getElementById('dateBar').innerHTML = `
+    <span style="font-size:11px;color:#aaa;font-weight:600;letter-spacing:.3px">📅 ПЕРИОД:</span>
+    <button class="dpreset${datePreset==='all'?' active':''}" onclick="setDatePreset('all')">Все время</button>
+    <button class="dpreset d-30${datePreset==='last30'?' active':''}" onclick="setDatePreset('last30')">Последние 30 дней</button>
+    <div class="d-sep"></div>
+    <div class="date-inputs">
+      <span class="date-lbl">С</span>
+      <input class="date-inp${datePreset==='custom'?' custom-active':''}" type="date" id="dateFromInp"
+        value="${dateFrom}" min="${DATE_MIN}" max="${DATE_MAX}"
+        onchange="setCustomDate('from',this.value)">
+      <span class="date-arrow">→</span>
+      <span class="date-lbl">По</span>
+      <input class="date-inp${datePreset==='custom'?' custom-active':''}" type="date" id="dateToInp"
+        value="${dateTo}" min="${DATE_MIN}" max="${DATE_MAX}"
+        onchange="setCustomDate('to',this.value)">
+    </div>
+    <div class="date-badge">
+      <span class="d-pill active-period">${periodLabel}</span>
+      <span class="d-pill loading-pill" id="loadPill" style="display:none">⟳ загрузка…</span>
+    </div>`;
+}
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  try {
+    const data = await loadProducts();
+    if (data.updated) {
+      DATE_MAX = data.updated;
+      dateTo   = DATE_MAX;
+    }
+    // Load all months
+    const yms = monthsInRange(DATE_MIN, DATE_MAX);
+    await Promise.all(yms.map(ym => loadMonthData(ym)));
+
+    dataReady = true;
+
+    // Render skeleton
+    document.getElementById('mainContent').innerHTML = `
+      <div class="shop-tabs" id="shopTabs"></div>
+      <div class="date-bar" id="dateBar"></div>
+      <div class="chart-card">
+        <div class="chart-title">Топ ${TOP_N} категорий по выручке</div>
+        <div class="chart-sub">Остальные категории объединены в группу «Остальные»</div>
+        <div class="chart-wrap" id="catChartWrap"><canvas id="catChart"></canvas></div>
+      </div>
+      <div class="tbl-card">
+        <div class="tbl-header">
+          <span class="tbl-header-title">Все категории · сводная таблица</span>
+          <div class="sort-wrap">
+            <span class="sort-lbl">Сортировка:</span>
+            <select class="sort-sel" onchange="setSort(this.value)">
+              <option value="revenue"   ${sortCol==='revenue'?'selected':''}>По выручке</option>
+              <option value="sales"     ${sortCol==='sales'?'selected':''}>По кол-ву</option>
+              <option value="pct"       ${sortCol==='pct'?'selected':''}>По % продаж</option>
+              <option value="skus"      ${sortCol==='skus'?'selected':''}>По кол-ву SKU</option>
+              <option value="marginPct" ${sortCol==='marginPct'?'selected':''}>По марже</option>
+            </select>
+            <button class="sort-dir" onclick="toggleSortDir()">${sortDir==='desc'?'↓':'↑'}</button>
+          </div>
+        </div>
+        <div id="catTbl"></div>
+      </div>`;
+
+    renderShopTabs();
+    renderDateBar();
+    buildAggCache(dateFrom, dateTo);
+    rerender();
+
+  } catch(e) {
+    document.getElementById('mainContent').innerHTML =
+      `<div class="empty">Ошибка загрузки данных: ${e.message}</div>`;
+  }
+}
+
+function toggleSortDir() {
+  sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+  rerender();
+}
+
+init();
+</script>
+</body>
+</html>
