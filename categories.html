@@ -127,7 +127,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 const SHOPS = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
 const SL    = {Mlot_i_Klucz:'Mlot i Klucz',PolaxEuroGroup:'PolaxEuroGroup',Sila_Narzedzi:'Sila Narzedzi'};
 const SC    = {Mlot_i_Klucz:'#BA7517',PolaxEuroGroup:'#0F6E56',Sila_Narzedzi:'#185FA5'};
-const TOP_N = 15;
+let topN = 15;
 
 // ── App state ─────────────────────────────────────────────────
 let PRODUCTS   = [];
@@ -336,8 +336,8 @@ function renderChart(cats) {
   const bySales = [...cats].sort((a, b) => b.revenue - a.revenue);
 
   // Top 15 + "Остальные"
-  const top15 = bySales.slice(0, TOP_N);
-  const rest  = bySales.slice(TOP_N);
+  const top15 = bySales.slice(0, topN);
+  const rest  = bySales.slice(topN);
 
   const chartData = [...top15];
   if (rest.length > 0) {
@@ -659,7 +659,19 @@ async function init() {
       <div class="shop-tabs" id="shopTabs"></div>
       <div class="date-bar" id="dateBar"></div>
       <div class="chart-card">
-        <div class="chart-title">Топ ${TOP_N} категорий по выручке</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+          <div class="chart-title" id="chartTitle">Топ ${topN} категорий по выручке</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:11px;color:#aaa">Показывать топ:</span>
+            <select class="sort-sel" id="topNSel" onchange="setTopN(+this.value)">
+              <option value="5"  ${topN===5?'selected':''}>5</option>
+              <option value="10" ${topN===10?'selected':''}>10</option>
+              <option value="15" selected>15</option>
+              <option value="20" ${topN===20?'selected':''}>20</option>
+              <option value="30" ${topN===30?'selected':''}>30</option>
+            </select>
+          </div>
+        </div>
         <div class="chart-sub">Остальные категории объединены в группу «Остальные»</div>
         <div class="chart-wrap" id="catChartWrap"><canvas id="catChart"></canvas></div>
       </div>
@@ -690,6 +702,14 @@ async function init() {
     document.getElementById('mainContent').innerHTML =
       `<div class="empty">Ошибка загрузки данных: ${e.message}</div>`;
   }
+}
+
+function setTopN(n) {
+  topN = n;
+  const el = document.getElementById('chartTitle');
+  if (el) el.textContent = `Топ ${topN} категорий по выручке`;
+  const cats = buildCategoryData();
+  if (cats.length > 0) renderChart(cats);
 }
 
 function toggleSortDir() {
