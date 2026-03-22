@@ -486,7 +486,11 @@ function sortedProducts(arr) {
 }
 
 function getCounts() {
-  const base = PRODUCTS.filter(p => curShop === 'all' || (p.offers && p.offers[curShop]));
+  const base = PRODUCTS.filter(p => {
+    if (curShop !== 'all' && !(p.offers && p.offers[curShop])) return false;
+    if (curCat && p.category !== curCat) return false;
+    return true;
+  });
   const r = {all:0, winning:0, losing:0, hit:0, sleeping:0, nocog:0};
   base.forEach(p => {
     const st = getStatus(p);
