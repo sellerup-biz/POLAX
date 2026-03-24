@@ -292,10 +292,15 @@ def save_data(data):
 
 def update_months(data):
     """Пересчитываем месячные агрегаты из дневных записей."""
+    def empty_costs():
+        return {"commission":0,"delivery":0,"ads":0,"subscription":0,"discount":0}
+    def empty_shop_costs():
+        return {"Mlot_i_Klucz":empty_costs(),"PolaxEuroGroup":empty_costs(),"Sila_Narzedzi":empty_costs()}
     months_map = defaultdict(lambda:{
         "Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
         "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0},
-        "costs":{"commission":0,"delivery":0,"ads":0,"subscription":0,"discount":0}
+        "costs":empty_costs(),
+        "shop_costs":empty_shop_costs(),
     })
     for day in data["days"]:
         raw = day["date"][:7]
@@ -309,6 +314,11 @@ def update_months(data):
         for cat in COST_CATS:
             months_map[mk]["costs"][cat] = round(
                 months_map[mk]["costs"][cat] + day.get("costs",{}).get(cat, 0), 2)
+        for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]:
+            sc = day.get("shop_costs", {}).get(shop, {})
+            for cat in COST_CATS:
+                months_map[mk]["shop_costs"][shop][cat] = round(
+                    months_map[mk]["shop_costs"][shop][cat] + sc.get(cat, 0), 2)
 
     MONTH_RU_REV = {v:k for k,v in MONTH_RU.items()}
     data["months"] = [
@@ -479,11 +489,16 @@ for mk in sorted(month_data.keys(), key=lambda x: (int(x[-4:]), MONTH_RU_REV[x[:
 
     day_entry = {
         "date":          f"{mk_year:04d}-{mk_month:02d}-01",
-        "Mlot_i_Klucz":  round(ml["total"], 2),   # только PLN
-        "PolaxEuroGroup":round(pl["total"], 2),    # только PLN
-        "Sila_Narzedzi": round(si["total"], 2),    # только PLN
-        "countries":     countries,                # PLN + нативные CZK/HUF/EUR
-        "costs":         costs_total,              # всё в PLN
+        "Mlot_i_Klucz":  round(ml["total"], 2),
+        "PolaxEuroGroup":round(pl["total"], 2),
+        "Sila_Narzedzi": round(si["total"], 2),
+        "countries":     countries,
+        "costs":         costs_total,
+        "shop_costs": {
+            "Mlot_i_Klucz":   {k: round(v, 2) for k, v in ml["costs_pln"].items()},
+            "PolaxEuroGroup":  {k: round(v, 2) for k, v in pl["costs_pln"].items()},
+            "Sila_Narzedzi":   {k: round(v, 2) for k, v in si["costs_pln"].items()},
+        },
     }
     data["days"].append(day_entry)
 

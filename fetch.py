@@ -398,6 +398,11 @@ def collect_day(access_tokens, date_str, nbp, partial=False):
         "Sila_Narzedzi": 0.0,
         "countries":     {"allegro-pl":0.0,"allegro-cz":0.0,"allegro-hu":0.0,"allegro-sk":0.0},
         "costs":         {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
+        "shop_costs":    {
+            "Mlot_i_Klucz":   {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
+            "PolaxEuroGroup":  {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
+            "Sila_Narzedzi":   {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
+        },
     }
     if partial:
         entry["partial"] = True
@@ -437,6 +442,7 @@ def collect_day(access_tokens, date_str, nbp, partial=False):
 
         for cat in COST_CATS:
             entry["costs"][cat] = round(entry["costs"][cat] + costs_pln.get(cat, 0.0), 2)
+            entry["shop_costs"][shop_name][cat] = round(costs_pln.get(cat, 0.0), 2)
 
         total_costs = sum(v for k,v in costs_pln.items() if k != "discount")
         print(f"PLN={total:,.2f}  costs={total_costs:,.2f}")
@@ -462,10 +468,15 @@ def save_data(data):
 
 
 def update_months(data):
+    def empty_costs():
+        return {"commission":0,"delivery":0,"ads":0,"subscription":0,"discount":0}
+    def empty_shop_costs():
+        return {"Mlot_i_Klucz":empty_costs(),"PolaxEuroGroup":empty_costs(),"Sila_Narzedzi":empty_costs()}
     months_map = defaultdict(lambda:{
         "Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
         "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0},
-        "costs":{"commission":0,"delivery":0,"ads":0,"subscription":0,"discount":0}
+        "costs":empty_costs(),
+        "shop_costs":empty_shop_costs(),
     })
     for day in data["days"]:
         raw = day["date"][:7]
@@ -479,6 +490,11 @@ def update_months(data):
         for cat in COST_CATS:
             months_map[mk]["costs"][cat] = round(
                 months_map[mk]["costs"][cat] + day.get("costs",{}).get(cat, 0), 2)
+        for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]:
+            sc = day.get("shop_costs", {}).get(shop, {})
+            for cat in COST_CATS:
+                months_map[mk]["shop_costs"][shop][cat] = round(
+                    months_map[mk]["shop_costs"][shop][cat] + sc.get(cat, 0), 2)
     MONTH_RU_REV = {v:k for k,v in MONTH_RU.items()}
     data["months"] = [
         {"month":k,**v}

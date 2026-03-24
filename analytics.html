@@ -392,15 +392,8 @@ function renderShopTables(){
   var allSales = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
   var html = SHOPS.map(function(s,i){
     var sales = m[s] || 0;
-    var ratio = allSales > 0 ? sales/allSales : 0;
-    var sc = {
-      commission:   Math.round((c.commission||0)   * ratio * 100)/100,
-      delivery:     Math.round((c.delivery||0)     * ratio * 100)/100,
-      ads:          Math.round((c.ads||0)           * ratio * 100)/100,
-      subscription: Math.round((c.subscription||0) * ratio * 100)/100,
-      discount:     Math.round((c.discount||0)      * ratio * 100)/100
-    };
-    var net = sc.commission + sc.delivery + sc.ads + sc.subscription;
+    var sc = (m.shop_costs && m.shop_costs[s]) ? m.shop_costs[s] : {};
+    var net = (sc.commission||0) + (sc.delivery||0) + (sc.ads||0) + (sc.subscription||0);
     var pct = sales > 0 ? (net/sales*100).toFixed(1) : '0.0';
     function row(label, val, isPos){
       if(val === 0) return '';
@@ -415,11 +408,11 @@ function renderShopTables(){
       +'<thead><tr><th style="text-align:left">Категория</th><th>Сумма</th><th>% продаж</th></tr></thead>'
       +'<tbody>'
       +'<tr><td>Продажи</td><td>'+fmt(sales)+' zł</td><td>100%</td></tr>'
-      +row('Obowiązkowe', sc.commission, false)
-      +row('Dostawa',     sc.delivery,   false)
-      +row('Reklama',     sc.ads,        false)
-      +row('Abonament',   sc.subscription, false)
-      +row('Rabaty',      sc.discount,   true)
+      +row('Obowiązkowe', sc.commission||0, false)
+      +row('Dostawa',     sc.delivery||0,   false)
+      +row('Reklama',     sc.ads||0,        false)
+      +row('Abonament',   sc.subscription||0, false)
+      +row('Rabaty',      sc.discount||0,   true)
       +'<tr style="border-top:1px solid #e0dcd4">'
       +'<td style="font-weight:700">Итого расходы</td>'
       +'<td class="neg-c" style="font-weight:700">-'+fmt(net)+' zł</td>'
