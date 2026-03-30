@@ -140,6 +140,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 .sb-shop-meta{color:#aaa;font-size:10px}
 
 .footer{text-align:center;font-size:11px;color:#ccc;margin-top:.5rem;letter-spacing:1px}
+.btn-csv{font-size:12px;padding:5px 13px;border-radius:8px;border:1px solid #0F6E56;background:#E1F5EE;color:#085041;cursor:pointer;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;margin-left:auto}
+.btn-csv:hover{background:#0F6E56;color:#fff;border-color:#0F6E56}
 </style>
 </head>
 <body>
@@ -584,12 +586,14 @@ function renderFilterBar() {
   const catOpts = `<option value="">Все категории</option>` +
     catList.map(c => `<option value="${c}"${curCat===c?' selected':''}>${c}</option>`).join('');
 
+  const total = filteredProducts().length;
   document.getElementById('filterBar').innerHTML = `
     ${filters.map(f =>
       `<button class="fpill${curFilter===f.id?' active':''}" onclick="setFilter('${f.id}')">${f.label}</button>`
     ).join('')}
     <div class="f-sep"></div>
     <select class="cat-sel" onchange="setCat(this.value)">${catOpts}</select>
+    <button class="btn-csv" onclick="downloadCSV()" title="Скачать текущую выборку в CSV">⬇ CSV (${total})</button>
     `;
 }
 
@@ -857,6 +861,60 @@ function setCustomDate(which, val) {
   else                  dateTo   = val;
   if (dateFrom > dateTo) { if (which==='from') dateTo=dateFrom; else dateFrom=dateTo; }
   refresh();
+}
+
+// ── CSV Export ────────────────────────────────────────────────
+function downloadCSV() {
+  const products = sortedProducts(filteredProducts());
+
+  const shopLabel = curShop === 'all' ? 'Все_магазины' : SL[curShop].replace(/\s/g,'_');
+  const filterLabel = {all:'Все',hit:'Хиты',winning:'Выигрывает',losing:'Проигрышные',sleeping:'Спящие',nocog:'Без_COG'}[curFilter] || curFilter;
+  const periodLabel = datePreset==='all' ? 'все_время' : datePreset==='last30' ? 'посл_30дн' : `${dateFrom}_${dateTo}`;
+  const filename = `unit_economy_${shopLabel}_${filterLabel}_${periodLabel}.csv`;
+
+  const headers = ['Название','EAN','SKU','Категория','Статус'];
+  if (curShop === 'all') {
+    SHOPS.forEach(s => { headers.push(`Offer ${SHORT[s]}`, `COG ${SHORT[s]} (zł)`); });
+  } else {
+    headers.push('Offer ID', 'COG (zł)');
+  }
+  headers.push('Продажи (шт)','Доход (zł)','Сборы (zł)','Реклама (zł)','Промо (zł)','Себестоимость (zł)','Маржа (zł)','Маржа (%)');
+
+  const statusLabels = {hit:'Хит',winning:'Выигрывает',losing:'Проигрышный',sleeping:'Спящий',nocog:'Без COG'};
+  const csvCell = v => { const s = String(v==null?'':v).replace(/"/g,'""'); return /[,"\n\r]/.test(s)?`"${s}"`:s; };
+
+  const rows = [headers.map(csvCell).join(',')];
+  for (const p of products) {
+    const d  = getProductData(p, curShop);
+    const st = getStatus(p);
+    const row = [p.name||'', p.ean||'', p.sku||'', p.category||'', statusLabels[st]||st];
+
+    if (curShop === 'all') {
+      SHOPS.forEach(s => {
+        row.push((p.offers&&p.offers[s])||'');
+        row.push((p.cog&&p.cog[s]!=null) ? p.cog[s] : '');
+      });
+    } else {
+      row.push((p.offers&&p.offers[curShop])||'');
+      row.push((p.cog&&p.cog[curShop]!=null) ? p.cog[curShop] : '');
+    }
+
+    if (d) {
+      const m  = Math.round(margin(d)*100)/100;
+      const mp = Math.round(marginPct(d)*10)/10;
+      row.push(d.sales, d.revenue, d.fees, d.ads, d.promo, d.cost||0, m, mp);
+    } else {
+      row.push(0,'','','','','','','');
+    }
+
+    rows.push(row.map(csvCell).join(','));
+  }
+
+  const blob = new Blob(['\ufeff'+rows.join('\r\n')], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────
