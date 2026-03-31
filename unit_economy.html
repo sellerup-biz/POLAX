@@ -629,7 +629,7 @@ function renderTable() {
     if (!d) {
       // Product in catalog but no sales in this period
       const cogVal = curShop==='all' ? null : (p.cog && p.cog[curShop]);
-      const meta = buildMeta(p);
+      const meta = buildMeta(p, null);
       return `<div class="prod-row${selKey===key?' sel':''}" onclick="openSidebar('${key}')">
         <div>
           <div class="pr-badge ${BCLS[st]}">${BADGE[st]}</div>
@@ -648,7 +648,7 @@ function renderTable() {
     const mp  = marginPct(d);
     const barW = maxRev > 0 ? Math.round(d.revenue / maxRev * 100) : 0;
     const barC = mp>=35?'#0F6E56':mp>=15?'#BA7517':mp>=0?'#e5a43a':'#A32D2D';
-    const meta = buildMeta(p);
+    const meta = buildMeta(p, d);
 
     return `<div class="prod-row${selKey===key?' sel':''}" onclick="openSidebar('${key}')">
       <div>
@@ -670,7 +670,7 @@ function renderTable() {
   renderPagination(totalPages, allFiltered.length);
 }
 
-function buildMeta(p) {
+function buildMeta(p, d) {
   if (curShop === 'all') {
     const tags = SHOPS.filter(s => p.offers && p.offers[s])
       .map(s => `<span class="shop-tag ${ST[s]}">${SHORT[s]}: <span class="id-val">…${p.offers[s].slice(-4)}</span></span>`)
@@ -679,7 +679,11 @@ function buildMeta(p) {
     return `${tags}<br><span class="id-val">EAN: ${p.ean||'—'}</span> · <span class="id-val">SKU: ${p.sku||'—'}</span> · <span class="cog-line">📦 COG: ${cogVal != null ? fmtCog(cogVal) : '—'}</span>`;
   }
   const oid = p.offers && p.offers[curShop];
-  return `ID: <span class="id-val">…${oid?oid.slice(-4):'—'}</span> · <span class="id-val">EAN: ${p.ean||'—'}</span> · <span class="id-val">SKU: ${p.sku||'—'}</span> · <span class="cog-line">📦 COG: ${fmtCog(p.cog&&p.cog[curShop])}</span>`;
+  const avgPrice = (d && d.sales > 0) ? Math.round(d.revenue / d.sales * 100) / 100 : null;
+  const priceStr = avgPrice != null
+    ? ` · <span style="color:#0F6E56;font-weight:700">🏷 ${fmtCog(avgPrice)}</span>`
+    : ' · 🏷 —';
+  return `ID: <span class="id-val">…${oid?oid.slice(-4):'—'}</span> · <span class="id-val">EAN: ${p.ean||'—'}</span> · <span class="id-val">SKU: ${p.sku||'—'}</span> · <span class="cog-line">📦 COG: ${fmtCog(p.cog&&p.cog[curShop])}${priceStr}</span>`;
 }
 
 function escHtml(s) {
@@ -821,7 +825,7 @@ function openSidebar(key) {
           curShop==='all'
             ? fmtCog(SHOPS.map(s=>p.cog&&p.cog[s]).find(v=>v!=null&&v>0)) || '—'
             : fmtCog(p.cog&&p.cog[curShop])
-        }</span>
+        }</span>${curShop!=='all' ? ` · 🏷 Цена: <span class="id-val" style="color:#0F6E56;font-weight:700">${d && d.sales>0 ? fmtCog(Math.round(d.revenue/d.sales*100)/100) : '—'}</span>` : ''}
       </div>
     </div>
     <div class="sb-body">
@@ -886,7 +890,7 @@ function downloadCSV() {
   if (curShop === 'all') {
     SHOPS.forEach(s => { headers.push(`Offer ${SHORT[s]}`, `COG ${SHORT[s]} (zł)`); });
   } else {
-    headers.push('Offer ID', 'COG (zł)');
+    headers.push('Offer ID', 'COG (zł)', 'Цена продажи (zł)');
   }
   headers.push('Продажи (шт)','Доход (zł)','Сборы (zł)','Реклама (zł)','Промо (zł)','Себестоимость (zł)','Маржа (zł)','Маржа (%)');
 
@@ -907,6 +911,7 @@ function downloadCSV() {
     } else {
       row.push((p.offers&&p.offers[curShop])||'');
       row.push((p.cog&&p.cog[curShop]!=null) ? p.cog[curShop] : '');
+      row.push(d && d.sales > 0 ? Math.round(d.revenue / d.sales * 100) / 100 : '');
     }
 
     if (d) {
