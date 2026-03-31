@@ -753,6 +753,16 @@ function openSidebar(key) {
         <div class="mc-v">${roas}</div>
         <div class="mc-s">${zl(d.ads+d.promo)} реклама+промо</div>
       </div>
+      <div class="mc" style="border-color:#BA7517;background:#fdfaf4">
+        <div class="mc-l" style="color:#854F0B">Реклама CPC</div>
+        <div class="mc-v" style="color:#BA7517">−${zl(d.ads)}</div>
+        <div class="mc-s">${adsPct.toFixed(1)}% от выручки</div>
+      </div>
+      <div class="mc" style="border-color:#7C3AED;background:#faf5ff">
+        <div class="mc-l" style="color:#5B21B6">Промование</div>
+        <div class="mc-v" style="color:#7C3AED">−${zl(d.promo)}</div>
+        <div class="mc-s">${promoPct.toFixed(1)}% от выручки</div>
+      </div>
     </div>`;
 
     // Distribution bar
