@@ -412,20 +412,18 @@ function buildStatusCache() {
     const key = productKey(p);
     const d   = getProductData(p, curShop);
 
-    if (!d || d.sales === 0) {
-      cache[key] = 'sleeping';
-      continue;
-    }
-
     const hasCog = curShop === 'all'
       ? SHOPS.some(s => p.offers && p.offers[s] && p.cog && p.cog[s] > 0)
       : (p.cog && p.cog[curShop] > 0);
 
     if (!hasCog) { cache[key] = 'nocog'; continue; }
 
-    if (d.sales === 0) {
+    if (!d || d.sales === 0) {
       cache[key] = 'sleeping';
-    } else if (marginPct(d) < 0) {
+      continue;
+    }
+
+    if (marginPct(d) < 0) {
       cache[key] = 'losing';
     } else if (hitKeys.has(key)) {
       cache[key] = 'hit';
