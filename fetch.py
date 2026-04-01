@@ -520,13 +520,6 @@ def collect_day(access_tokens, date_str, nbp, partial=False):
         total_costs = sum(v for k,v in costs_pln.items() if k != "discount")
         print(f"PLN={total:,.2f}  costs={total_costs:,.2f}")
 
-    # eMAG — добавляем данные за день
-    emag = get_emag_day(date_str, nbp)
-    if emag:
-        entry["EMAG"] = emag.get("EMAG", 0.0)
-        for mid in ["emag-ro", "emag-bg", "emag-hu"]:
-            entry["countries"][mid] = emag.get(mid, 0.0)
-
     # Финальное округление
     for mkt in entry["countries"]: entry["countries"][mkt] = round(entry["countries"][mkt], 2)
     for cat in entry["costs"]:     entry["costs"][cat]     = round(entry["costs"][cat], 2)
