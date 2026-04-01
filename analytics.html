@@ -25,7 +25,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 .sl{font-size:9px;font-weight:700;color:#aaa;letter-spacing:1.2px;text-transform:uppercase;margin:0 0 8px 2px}
 
 .c4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
-@media(max-width:700px){.c4{grid-template-columns:1fr 1fr}}
+.c5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
+@media(max-width:700px){.c4,.c5{grid-template-columns:1fr 1fr}}
 .mc{background:#fff;border:1px solid #e0dcd4;border-radius:12px;padding:12px 16px}
 .mc-l{font-size:10px;color:#888;margin-bottom:6px;font-weight:600}
 .mc-v{font-size:18px;font-weight:700;color:#1a1a1a}
@@ -96,7 +97,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 <div class="tabs" id="tabs"></div>
 
 <div class="sl" id="month-label">Продажи за месяц · в PLN</div>
-<div class="c4" id="cards"></div>
+<div class="c5" id="cards"></div>
 
 <div class="two">
   <div class="pn">
@@ -145,7 +146,7 @@ var dynChart    = null;
 
 // Курсы НБП (загружаются асинхронно при старте)
 // PLN за 1 единицу иностранной валюты
-var NBP_RATES = { CZK: 0, HUF: 0, EUR: 0 };
+var NBP_RATES = { CZK: 0, HUF: 0, EUR: 0, RON: 0 };
 var nbpLoaded = false;
 
 function fmt(n){
@@ -164,13 +165,15 @@ function fetchNBPRates(){
         if(r.code === 'CZK') NBP_RATES.CZK = r.mid;
         if(r.code === 'HUF') NBP_RATES.HUF = r.mid;
         if(r.code === 'EUR') NBP_RATES.EUR = r.mid;
+        if(r.code === 'RON') NBP_RATES.RON = r.mid;
       });
       nbpLoaded = true;
       var dt = tables[0].effectiveDate || '';
       document.getElementById('nbp-badge').textContent =
         'НБП ' + dt + '  CZK=' + NBP_RATES.CZK.toFixed(4) +
         '  HUF=' + NBP_RATES.HUF.toFixed(6) +
-        '  EUR=' + NBP_RATES.EUR.toFixed(4);
+        '  EUR=' + NBP_RATES.EUR.toFixed(4) +
+        '  RON=' + NBP_RATES.RON.toFixed(4);
     })
     .catch(function(){
       document.getElementById('nbp-badge').textContent = 'НБП недоступен';
@@ -180,12 +183,15 @@ function fetchNBPRates(){
 // ── НОРМАЛИЗАЦИЯ СТРАН ────────────────────────────────────────
 // Хранит нативные валюты: PL=PLN, CZ=CZK, HU=HUF, SK=EUR
 function normalizeCountries(c){
-  if(!c) return {PL:0, CZ:0, HU:0, SK:0};
+  if(!c) return {PL:0, CZ:0, HU:0, SK:0, EMAG_RO:0, EMAG_BG:0, EMAG_HU:0};
   return {
-    PL: (c['allegro-pl']||c['PL']||0) + (c['allegro-business-pl']||0),
-    CZ:  c['allegro-cz']||c['CZ']||0,
-    HU:  c['allegro-hu']||c['HU']||0,
-    SK:  c['allegro-sk']||c['SK']||0
+    PL:      (c['allegro-pl']||c['PL']||0) + (c['allegro-business-pl']||0),
+    CZ:       c['allegro-cz']||c['CZ']||0,
+    HU:       c['allegro-hu']||c['HU']||0,
+    SK:       c['allegro-sk']||c['SK']||0,
+    EMAG_RO:  c['emag-ro']||c['EMAG_RO']||0,   // RON
+    EMAG_BG:  c['emag-bg']||c['EMAG_BG']||0,   // EUR
+    EMAG_HU:  c['emag-hu']||c['EMAG_HU']||0    // HUF
   };
 }
 
@@ -213,13 +219,18 @@ function renderTabs(){
 // ── CARDS ─────────────────────────────────────────────────────
 function renderCards(){
   var m     = DATA.months[activeMonth];
-  var total = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
+  var emag  = m['EMAG'] || 0;
+  var total = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + emag;
   var html  = SHOPS.map(function(s,i){
     return '<div class="mc '+['am','bl','tl'][i]+'">'
       +'<div class="mc-l">'+s+'</div>'
       +'<div class="mc-v">'+fmt(m[s]||0)+' zł</div>'
       +'<div class="mc-s">продажи PLN за месяц</div></div>';
   }).join('');
+  html += '<div class="mc" style="border-color:#C4153A">'
+    +'<div class="mc-l" style="color:#C4153A">eMAG (RO/BG/HU)</div>'
+    +'<div class="mc-v" style="color:#C4153A">'+fmt(emag)+' zł</div>'
+    +'<div class="mc-s">продажи PLN за месяц</div></div>';
   html += '<div class="mc gd"><div class="mc-l">Все магазины</div>'
     +'<div class="mc-v">'+fmt(total)+' zł</div>'
     +'<div class="mc-s">'+m.month+'</div></div>';
@@ -234,7 +245,8 @@ function renderCards(){
 // ── SHOPS BREAKDOWN ───────────────────────────────────────────
 function renderShopsBreakdown(){
   var m     = DATA.months[activeMonth];
-  var total = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
+  var emag  = m['EMAG'] || 0;
+  var total = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + emag;
   var html  = SHOPS.map(function(s,i){
     var val = m[s]||0;
     var pct = total > 0 ? Math.round(val/total*100) : 0;
@@ -247,6 +259,16 @@ function renderShopsBreakdown(){
       +'<span class="pct">'+pct+'%</span>'
       +'</div></div>';
   }).join('');
+  // eMAG row
+  var emagPct = total > 0 ? Math.round(emag/total*100) : 0;
+  html += '<div class="crow"><span>eMAG (RO/BG/HU)</span>'
+    +'<div class="crow-r">'
+    +'<div style="text-align:right">'
+    +'<div style="font-size:11px;font-weight:600;color:#C4153A">'+fmt(emag)+' zł</div>'
+    +'<div class="bi" style="background:#C4153A;width:'+emagPct+'%"></div>'
+    +'</div>'
+    +'<span class="pct">'+emagPct+'%</span>'
+    +'</div></div>';
   html += '<div class="crow"><span>Итого</span>'
     +'<div class="crow-r"><span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(total)+' zł</span>'
     +'<span class="pct">100%</span></div></div>';
@@ -268,20 +290,30 @@ function renderCountriesBreakdown(){
   var plnHU = (c.HU || 0) * NBP_RATES.HUF;
   var plnSK = (c.SK || 0) * NBP_RATES.EUR;
 
-  // Общая PLN-сумма продаж по магазинам (для % столбца)
+  // Общая PLN-сумма продаж по магазинам + eMAG (для % столбца)
   var shopTotal = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
+  var emagTotal = m['EMAG'] || 0;
+
+  // eMAG нативные суммы и PLN-эквиваленты
+  var plnEmagRO = (c.EMAG_RO || 0) * NBP_RATES.RON;
+  var plnEmagBG = (c.EMAG_BG || 0) * NBP_RATES.EUR;
+  var plnEmagHU = (c.EMAG_HU || 0) * NBP_RATES.HUF;
 
   var rows = [
-    {flag:'🇵🇱', name:'Польша',   curr:'PLN', native:c.PL||0, pln:plnPL, rate:null,           color:'#BA7517'},
-    {flag:'🇨🇿', name:'Чехия',    curr:'CZK', native:c.CZ||0, pln:plnCZ, rate:NBP_RATES.CZK,  color:'#185FA5'},
-    {flag:'🇭🇺', name:'Венгрия',  curr:'HUF', native:c.HU||0, pln:plnHU, rate:NBP_RATES.HUF,  color:'#0F6E56'},
-    {flag:'🇸🇰', name:'Словакия', curr:'EUR', native:c.SK||0, pln:plnSK, rate:NBP_RATES.EUR,  color:'#854F0B'}
+    {flag:'🇵🇱', name:'Польша',          curr:'PLN', native:c.PL||0,      pln:plnPL,     rate:null,           color:'#BA7517'},
+    {flag:'🇨🇿', name:'Чехия',           curr:'CZK', native:c.CZ||0,      pln:plnCZ,     rate:NBP_RATES.CZK,  color:'#185FA5'},
+    {flag:'🇭🇺', name:'Венгрия',         curr:'HUF', native:c.HU||0,      pln:plnHU,     rate:NBP_RATES.HUF,  color:'#0F6E56'},
+    {flag:'🇸🇰', name:'Словакия',        curr:'EUR', native:c.SK||0,      pln:plnSK,     rate:NBP_RATES.EUR,  color:'#854F0B'},
+    {flag:'🇷🇴', name:'Румыния (eMAG)',  curr:'RON', native:c.EMAG_RO||0, pln:plnEmagRO, rate:NBP_RATES.RON,  color:'#C4153A'},
+    {flag:'🇧🇬', name:'Болгария (eMAG)', curr:'EUR', native:c.EMAG_BG||0, pln:plnEmagBG, rate:NBP_RATES.EUR,  color:'#C4153A'},
+    {flag:'🇭🇺', name:'Венгрия (eMAG)',  curr:'HUF', native:c.EMAG_HU||0, pln:plnEmagHU, rate:NBP_RATES.HUF,  color:'#C4153A'}
   ];
 
-  var totalPLN = plnPL + plnCZ + plnHU + plnSK;
+  var totalPLN = plnPL + plnCZ + plnHU + plnSK + plnEmagRO + plnEmagBG + plnEmagHU;
 
+  var allTotal = shopTotal + emagTotal;
   var html = rows.map(function(r){
-    var pct  = shopTotal > 0 ? (r.pln / shopTotal * 100).toFixed(1) : '0.0';
+    var pct  = allTotal > 0 ? (r.pln / allTotal * 100).toFixed(1) : '0.0';
     var barW = totalPLN > 0  ? Math.round(r.pln / totalPLN * 100)   : 0;
     var nativeStr = r.curr !== 'PLN'
       ? ('<div class="native-val">'
@@ -302,11 +334,11 @@ function renderCountriesBreakdown(){
       +'</div></div>';
   }).join('');
 
-  // Итого — реальная PLN-сумма по магазинам (authoritative)
+  // Итого — реальная PLN-сумма по магазинам + eMAG (authoritative)
   html += '<div class="crow">'
     +'<span style="font-weight:700;color:#1a1a1a">Итого (все → PLN)</span>'
     +'<div class="crow-r">'
-    +'<span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(shopTotal)+' zł</span>'
+    +'<span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(allTotal)+' zł</span>'
     +'<span class="pct">100%</span>'
     +'</div></div>';
 
@@ -320,7 +352,7 @@ function totalCostsVal(c){
 
 function renderCostsBreakdown(){
   var m     = DATA.months[activeMonth];
-  var sales = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
+  var sales = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + (m['EMAG']||0);
   var c     = m.costs || {};
   var net   = totalCostsVal(c);
   var rows  = [
@@ -360,7 +392,7 @@ function renderCostsBreakdown(){
 function renderSummaryBlock(){
   var m      = DATA.months[activeMonth];
   var c      = m.costs || {};
-  var sales  = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
+  var sales  = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + (m['EMAG']||0);
   var costs  = (c.commission||0)+(c.delivery||0)+(c.ads||0)+(c.subscription||0);
   var profit = sales - costs + (c.discount||0);
   var margin = sales > 0 ? (profit/sales*100).toFixed(1) : 0;
@@ -426,7 +458,7 @@ function renderShopTables(){
 function renderDynChart(){
   var labels   = DATA.months.map(function(m){ return m.month; });
   var sales    = DATA.months.map(function(m){
-    return SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
+    return SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + (m['EMAG']||0);
   });
   var costs    = DATA.months.map(function(m){
     var c = m.costs || {};
