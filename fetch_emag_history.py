@@ -30,7 +30,7 @@ MARKETS = {
 
 CURRENCY_MAP = {
     "emag-ro": "ron",
-    "emag-bg": "bgn",
+    "emag-bg": "eur",   # eMAG Bulgaria торгует в EUR, не в BGN
     "emag-hu": "huf",
 }
 
@@ -114,7 +114,12 @@ def get_orders_total(base_url, date_from, date_to):
             break
 
         for o in orders:
-            total += safe_float(o.get("cashed_co")) + safe_float(o.get("cashed_cod"))
+            # sale_price × qty × (1+vat) = цена для покупателя с НДС = совпадает с кабинетом eMAG
+            order_total = sum(
+                safe_float(p.get("sale_price")) * int(p.get("quantity") or 1) * (1 + safe_float(p.get("vat")))
+                for p in o.get("products", [])
+            )
+            total += order_total
             count += 1
 
         if len(orders) < 100:
@@ -168,7 +173,7 @@ def collect_months():
 
         # NBP курсы для этого месяца
         nbp = {}
-        for cur_name in ["ron", "bgn", "huf"]:
+        for cur_name in ["ron", "eur", "huf"]:
             rate = get_nbp_monthly_rate(cur_name, year, month)
             if rate is None:
                 rate = get_nbp_current_rate(cur_name) or 1.0
