@@ -94,7 +94,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
   <div class="logo">P</div>
   <div>
     <h1>POLAX</h1>
-    <p>Правила ценообразования · Allegro · 3 магазина</p>
+    <p>Правила ценообразования · Allegro + eMAG · 4 магазина</p>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;flex-shrink:0">
     <a href="analytics.html" style="font-size:12px;padding:7px 16px;border-radius:8px;background:#f4f2ee;color:#555;text-decoration:none;font-weight:600;border:1px solid #ddd">Подробная аналитика →</a>
@@ -110,12 +110,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-size:14px;font-weight:700;color:#1a1a1a">Продажи по дням · последние 30 дней</div>
-      <div style="font-size:11px;color:#999;margin-top:2px">данные из Allegro · обновляется каждую ночь автоматически</div>
+      <div style="font-size:11px;color:#999;margin-top:2px">Allegro + eMAG · обновляется каждую ночь автоматически</div>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#BA7517;display:inline-block"></span>Mlot_i_Klucz</div>
       <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#0F6E56;display:inline-block"></span>PolaxEuroGroup</div>
       <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#185FA5;display:inline-block"></span>Sila_Narzedzi</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#C4153A;display:inline-block"></span>eMAG (RO/BG/HU)</div>
     </div>
   </div>
   <canvas id="salesChart" style="width:100%;max-height:300px"></canvas>
@@ -126,7 +127,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-size:14px;font-weight:700;color:#1a1a1a">Продажи по месяцам · 2026</div>
-      <div style="font-size:11px;color:#999;margin-top:2px">данные из Allegro · обновляется каждую ночь автоматически</div>
+      <div style="font-size:11px;color:#999;margin-top:2px">Allegro + eMAG · обновляется каждую ночь автоматически</div>
     </div>
   </div>
   <canvas id="monthlyChart" style="width:100%;max-height:320px"></canvas>
@@ -134,7 +135,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
     <div style="font-size:11px;font-weight:700;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Сумма по месяцам</div>
     <div style="overflow-x:auto"><table id="monthlyTable" style="width:100%;font-size:12px;border-collapse:collapse"></table></div>
   </div>
-  <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px" id="monthTotalsGrid"></div>
+  <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px" id="monthTotalsGrid"></div>
 </div>
 
 <!-- PRICING RULES -->
@@ -360,9 +361,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-var SHOPS=['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
-var COLORS=['#BA7517','#0F6E56','#185FA5'];
-var BG=['rgba(186,117,23,0.18)','rgba(15,110,86,0.18)','rgba(24,95,165,0.18)'];
+var SHOPS=['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi','EMAG'];
+var COLORS=['#BA7517','#0F6E56','#185FA5','#C4153A'];
+var BG=['rgba(186,117,23,0.18)','rgba(15,110,86,0.18)','rgba(24,95,165,0.18)','rgba(196,21,58,0.18)'];
 
 function mkTotals(rows,key,elId){
   var gS=SHOPS.map(function(s){return rows.reduce(function(sum,r){return sum+(r[s]||0);},0);});
@@ -473,7 +474,7 @@ fetch('data.json')
 
 function renderGoal(months){
   var GOAL = 200000;
-  var SHOPS_LIST = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
+  var SHOPS_LIST = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi','EMAG'];
 
   // Находим лучший месяц
   var best = null;
@@ -496,7 +497,7 @@ function renderGoal(months){
   var html =
     '<div style="background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">'
     +'<div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px">Цель: 200 000 zł в месяц</div>'
-    +'<div style="font-size:11px;color:#999;margin-bottom:1.25rem">суммарно по всем 3 магазинам</div>'
+    +'<div style="font-size:11px;color:#999;margin-bottom:1.25rem">суммарно по всем 4 магазинам (Allegro + eMAG)</div>'
 
     // --- Лучший месяц ---
     +(isSame ? '' :

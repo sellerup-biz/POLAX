@@ -31,6 +31,8 @@ jobs:
           CLIENT_SECRET_SILA:  ${{ secrets.CLIENT_SECRET_SILA }}
           REFRESH_TOKEN_SILA:  ${{ secrets.REFRESH_TOKEN_SILA }}
           GH_TOKEN:            ${{ secrets.GH_TOKEN }}
+          EMAG_USERNAME:       ${{ secrets.EMAG_USERNAME }}
+          EMAG_PASSWORD:       ${{ secrets.EMAG_PASSWORD }}
       - run: |
           git config user.name "github-actions"
           git config user.email "bot@polax"

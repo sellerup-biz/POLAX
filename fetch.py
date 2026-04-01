@@ -63,6 +63,17 @@ BILLING_MAP = {
 
 COST_CATS = ["commission","delivery","ads","subscription","discount"]
 
+# ── eMAG ──────────────────────────────────────────────────────
+EMAG_USERNAME = os.environ.get("EMAG_USERNAME", "")
+EMAG_PASSWORD = os.environ.get("EMAG_PASSWORD", "")
+
+EMAG_MARKETS = {
+    "emag-ro": "https://marketplace-api.emag.ro/api-3",
+    "emag-bg": "https://marketplace-api.emag.bg/api-3",
+    "emag-hu": "https://marketplace-api.emag.hu/api-3",
+}
+EMAG_CURRENCY = {"emag-ro": "RON", "emag-bg": "BGN", "emag-hu": "HUF"}
+
 
 def get_billing_cat(tid, tnam):
     if tid in BILLING_MAP:
@@ -133,7 +144,7 @@ def get_tz(month):
 # ── НБП КУРСЫ ─────────────────────────────────────────────────
 
 def get_nbp_rates():
-    rates = {"CZK": 0.0, "HUF": 0.0, "EUR": 0.0}
+    rates = {"CZK": 0.0, "HUF": 0.0, "EUR": 0.0, "RON": 0.0, "BGN": 0.0}
     try:
         resp = requests.get(
             "https://api.nbp.pl/api/exchangerates/tables/a/?format=json",
@@ -142,12 +153,73 @@ def get_nbp_rates():
             for r in resp.json()[0]["rates"]:
                 if r["code"] in rates:
                     rates[r["code"]] = r["mid"]
-            print(f"  НБП: CZK={rates['CZK']:.4f}  HUF={rates['HUF']:.6f}  EUR={rates['EUR']:.4f}")
+            print(f"  НБП: CZK={rates['CZK']:.4f}  HUF={rates['HUF']:.6f}  EUR={rates['EUR']:.4f}  RON={rates['RON']:.4f}")
         else:
             print(f"  ⚠ НБП: HTTP {resp.status_code}")
     except Exception as e:
         print(f"  ⚠ НБП недоступен: {e}")
+    # BGN нет в таблице A — отдельный запрос
+    if rates["BGN"] == 0.0:
+        try:
+            r = requests.get("https://api.nbp.pl/api/exchangerates/rates/a/bgn/?format=json", timeout=10)
+            if r.status_code == 200:
+                rates["BGN"] = r.json()["rates"][0]["mid"]
+        except Exception:
+            pass
+    print(f"  НБП BGN={rates['BGN']:.4f}")
     return rates
+
+
+# ── eMAG ПРОДАЖИ ──────────────────────────────────────────────
+
+def get_emag_day(date_str, nbp):
+    """
+    Собирает продажи eMAG за один день по всем 3 странам.
+    Возвращает {"emag-ro": native, "emag-bg": native, "emag-hu": native, "EMAG": pln_total}
+    """
+    if not EMAG_USERNAME or not EMAG_PASSWORD:
+        return {}
+    from base64 import b64encode
+    token = b64encode(f"{EMAG_USERNAME}:{EMAG_PASSWORD}".encode()).decode()
+    headers = {"Authorization": f"Basic {token}", "Content-Type": "application/json"}
+    fr = date_str + " 00:00:00"
+    to = date_str + " 23:59:59"
+
+    result = {}
+    total_pln = 0.0
+    for market_id, base_url in EMAG_MARKETS.items():
+        market_total = 0.0
+        page = 1
+        while True:
+            try:
+                resp = requests.post(
+                    f"{base_url}/order/read", headers=headers,
+                    json={"currentPage": page, "itemsPerPage": 100,
+                          "createdAfter": fr, "createdBefore": to, "status": 4},
+                    timeout=20)
+                orders = resp.json().get("results", [])
+            except Exception as e:
+                print(f"    ⚠ eMAG {market_id}: {e}")
+                break
+            if not isinstance(orders, list) or not orders:
+                break
+            for o in orders:
+                try:
+                    market_total += float(o.get("cashed_co") or 0) + float(o.get("cashed_cod") or 0)
+                except Exception:
+                    pass
+            if len(orders) < 100:
+                break
+            page += 1
+        result[market_id] = round(market_total, 2)
+        cur = EMAG_CURRENCY[market_id]
+        rate = nbp.get(cur, 0.0)
+        total_pln += market_total * rate
+
+    result["EMAG"] = round(total_pln, 2)
+    print(f"    eMAG: RO={result['emag-ro']:.2f} BG={result['emag-bg']:.2f} "
+          f"HU={result['emag-hu']:.0f} → {result['EMAG']:.2f} PLN")
+    return result
 
 
 # ── ПРОДАЖИ ───────────────────────────────────────────────────
@@ -396,6 +468,7 @@ def collect_day(access_tokens, date_str, nbp, partial=False):
         "Mlot_i_Klucz":  0.0,
         "PolaxEuroGroup":0.0,
         "Sila_Narzedzi": 0.0,
+        "EMAG":          0.0,
         "countries":     {"allegro-pl":0.0,"allegro-cz":0.0,"allegro-hu":0.0,"allegro-sk":0.0},
         "costs":         {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
         "shop_costs":    {
@@ -447,10 +520,17 @@ def collect_day(access_tokens, date_str, nbp, partial=False):
         total_costs = sum(v for k,v in costs_pln.items() if k != "discount")
         print(f"PLN={total:,.2f}  costs={total_costs:,.2f}")
 
+    # eMAG — добавляем данные за день
+    emag = get_emag_day(date_str, nbp)
+    if emag:
+        entry["EMAG"] = emag.get("EMAG", 0.0)
+        for mid in ["emag-ro", "emag-bg", "emag-hu"]:
+            entry["countries"][mid] = emag.get(mid, 0.0)
+
     # Финальное округление
     for mkt in entry["countries"]: entry["countries"][mkt] = round(entry["countries"][mkt], 2)
     for cat in entry["costs"]:     entry["costs"][cat]     = round(entry["costs"][cat], 2)
-    for s in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]: entry[s] = round(entry[s], 2)
+    for s in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi","EMAG"]: entry[s] = round(entry[s], 2)
     return entry
 
 
@@ -473,7 +553,7 @@ def update_months(data):
     def empty_shop_costs():
         return {"Mlot_i_Klucz":empty_costs(),"PolaxEuroGroup":empty_costs(),"Sila_Narzedzi":empty_costs()}
     months_map = defaultdict(lambda:{
-        "Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
+        "Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,"EMAG":0,
         "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0},
         "costs":empty_costs(),
         "shop_costs":empty_shop_costs(),
@@ -482,9 +562,10 @@ def update_months(data):
         raw = day["date"][:7]
         y, mo = int(raw[:4]), int(raw[5:7])
         mk = MONTH_RU[mo] + " " + str(y)
-        for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]:
+        for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi","EMAG"]:
             months_map[mk][shop] = round(months_map[mk][shop] + day.get(shop, 0), 2)
-        for c in ["allegro-pl","allegro-cz","allegro-hu","allegro-sk"]:
+        for c in ["allegro-pl","allegro-cz","allegro-hu","allegro-sk",
+                  "emag-ro","emag-bg","emag-hu"]:
             months_map[mk]["countries"][c] = round(
                 months_map[mk]["countries"][c] + day.get("countries",{}).get(c, 0), 2)
         for cat in COST_CATS:
@@ -579,7 +660,8 @@ cur_month = next((m for m in data["months"] if m["month"] == cur_month_key), Non
 if cur_month:
     cur_total = (cur_month.get("Mlot_i_Klucz",0)
                 +cur_month.get("PolaxEuroGroup",0)
-                +cur_month.get("Sila_Narzedzi",0))
+                +cur_month.get("Sila_Narzedzi",0)
+                +cur_month.get("EMAG",0))
     print(f"\n📊 {cur_month_key} — текущий итог: {cur_total:,.2f} PLN  "
           f"(цель 200 000, выполнено {cur_total/200000*100:.1f}%)")
 
