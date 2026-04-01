@@ -469,7 +469,8 @@ def collect_day(access_tokens, date_str, nbp, partial=False):
         "PolaxEuroGroup":0.0,
         "Sila_Narzedzi": 0.0,
         "EMAG":          0.0,
-        "countries":     {"allegro-pl":0.0,"allegro-cz":0.0,"allegro-hu":0.0,"allegro-sk":0.0},
+        "countries":     {"allegro-pl":0.0,"allegro-cz":0.0,"allegro-hu":0.0,"allegro-sk":0.0,
+                          "emag-ro":0.0,"emag-bg":0.0,"emag-hu":0.0},
         "costs":         {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
         "shop_costs":    {
             "Mlot_i_Klucz":   {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
@@ -547,7 +548,8 @@ def update_months(data):
         return {"Mlot_i_Klucz":empty_costs(),"PolaxEuroGroup":empty_costs(),"Sila_Narzedzi":empty_costs()}
     months_map = defaultdict(lambda:{
         "Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,"EMAG":0,
-        "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0},
+        "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0,
+                     "emag-ro":0,"emag-bg":0,"emag-hu":0},
         "costs":empty_costs(),
         "shop_costs":empty_shop_costs(),
     })
