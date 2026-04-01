@@ -218,7 +218,9 @@ def patch_day(days_map, day_str, emag_data, partial=False):
 
 def git_push(yesterday, today_str):
     try:
+        subprocess.run(["git", "stash"], capture_output=True)
         subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=True)
+        subprocess.run(["git", "stash", "pop"], capture_output=True)
         subprocess.run(["git", "add", "data.json"], check=True)
         result = subprocess.run(["git", "diff", "--staged", "--quiet"])
         if result.returncode == 0:
