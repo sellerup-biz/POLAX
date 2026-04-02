@@ -470,7 +470,7 @@ var css = `
   /* Controls bar */
   #polax-controls {
     display:flex; align-items:center; gap:6px;
-    margin-left:auto; flex-shrink:0; flex-wrap:wrap;
+    flex-shrink:0; flex-wrap:wrap;
     min-width:258px;
   }
   #polax-theme-btn {
