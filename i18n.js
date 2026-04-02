@@ -450,7 +450,7 @@ var css = `
     --tag-rd-bg:#1a0606; --tag-rd-t:#E04545;
     --progress-bg:#1a1a1a; --chart-grid:rgba(255,255,255,0.07);
     --chart-tick:#666; --chart-legend:#aaa; --chart-line:#e8e8e8;
-    --shadow:rgba(0,0,0,0.6);
+    --shadow:rgba(0,0,0,0.6); --active-neutral:#2a2a2a; --active-neutral-t:#fff;
   }
   [data-theme="light"] {
     --bg-page:#F4F2EE; --bg-card:#ffffff; --bg-subtle:#fdfaf4;
@@ -465,7 +465,7 @@ var css = `
     --tag-rd-bg:#FCEBEB; --tag-rd-t:#A32D2D;
     --progress-bg:#f0ece4; --chart-grid:rgba(0,0,0,0.04);
     --chart-tick:#999; --chart-legend:#555; --chart-line:#1a1a1a;
-    --shadow:rgba(0,0,0,0.15);
+    --shadow:rgba(0,0,0,0.15); --active-neutral:#555; --active-neutral-t:#fff;
   }
   /* Controls bar */
   #polax-controls {
