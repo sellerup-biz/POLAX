@@ -31,6 +31,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
 .stab.active.s-polax{background:#0F6E56;color:#fff;border-color:#0F6E56;font-weight:700}
 .stab.active.s-sila{background:#185FA5;color:#fff;border-color:#185FA5;font-weight:700}
 .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.stab.active.s-all .sdot{background:#fff !important}
 
 /* DATE BAR */
 .date-bar{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -601,7 +602,7 @@ function setShop(s) {
 // ── Render controls ───────────────────────────────────────────
 function renderShopTabs() {
   const tabs = [
-    {id:'all',   label:'Все магазины', cls:'s-all',  dot:'#1a1a1a'},
+    {id:'all',   label:T('all_shops'), cls:'s-all',  dot:'#1a1a1a'},
     {id:'Mlot_i_Klucz',   label:'Mlot i Klucz',   cls:'s-mlot',  dot:'#BA7517'},
     {id:'PolaxEuroGroup', label:'PolaxEuroGroup', cls:'s-polax', dot:'#0F6E56'},
     {id:'Sila_Narzedzi',  label:'Sila Narzedzi',  cls:'s-sila',  dot:'#185FA5'},
@@ -616,30 +617,30 @@ function renderDateBar() {
   const days = getPeriodDays();
   const fmt  = s => s.split('-').reverse().join('.');
   const periodLabel = datePreset==='all'
-    ? `Весь период · ${days} дн.`
+    ? `${T('p_all')} · ${days} ${T('days_abbr')}`
     : datePreset==='last30'
-    ? `Последние 30 дней · ${days} дн.`
-    : `${fmt(dateFrom)} — ${fmt(dateTo)} · ${days} дн.`;
+    ? `${T('p_30')} · ${days} ${T('days_abbr')}`
+    : `${fmt(dateFrom)} — ${fmt(dateTo)} · ${days} ${T('days_abbr')}`;
 
   document.getElementById('dateBar').innerHTML = `
-    <span style="font-size:11px;color:#aaa;font-weight:600;letter-spacing:.3px">📅 ПЕРИОД:</span>
+    <span style="font-size:11px;color:var(--text-secondary);font-weight:600;letter-spacing:.3px">${T('period_lbl')}</span>
     <button class="dpreset${datePreset==='all'?' active':''}" onclick="setDatePreset('all')">${T('p_all')}</button>
     <button class="dpreset d-30${datePreset==='last30'?' active':''}" onclick="setDatePreset('last30')">${T('p_30')}</button>
     <div class="d-sep"></div>
     <div class="date-inputs">
-      <span class="date-lbl">С</span>
+      <span class="date-lbl">${T('from_lbl')}</span>
       <input class="date-inp${datePreset==='custom'?' custom-active':''}" type="date" id="dateFromInp"
         value="${dateFrom}" min="${DATE_MIN}" max="${DATE_MAX}"
         onchange="setCustomDate('from',this.value)">
       <span class="date-arrow">→</span>
-      <span class="date-lbl">По</span>
+      <span class="date-lbl">${T('to_lbl')}</span>
       <input class="date-inp${datePreset==='custom'?' custom-active':''}" type="date" id="dateToInp"
         value="${dateTo}" min="${DATE_MIN}" max="${DATE_MAX}"
         onchange="setCustomDate('to',this.value)">
     </div>
     <div class="date-badge">
       <span class="d-pill active-period">${periodLabel}</span>
-      <span class="d-pill loading-pill" id="loadPill" style="display:none">⟳ загрузка…</span>
+      <span class="d-pill loading-pill" id="loadPill" style="display:none">${T('loading_pill')}</span>
     </div>`;
 }
 
@@ -663,9 +664,9 @@ async function init() {
       <div class="date-bar" id="dateBar"></div>
       <div class="chart-card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px">
-          <div class="chart-title" id="chartTitle">Топ ${topN} категорий по выручке</div>
+          <div class="chart-title" id="chartTitle">${T('cat_top_pfx')} ${topN} ${T('cat_top_sfx')}</div>
           <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:11px;color:#aaa">Показывать топ:</span>
+            <span class="top-show-lbl" style="font-size:11px;color:var(--text-secondary)">${T('top_show')}</span>
             <select class="sort-sel" id="topNSel" onchange="setTopN(+this.value)">
               <option value="5"  ${topN===5?'selected':''}>5</option>
               <option value="10" ${topN===10?'selected':''}>10</option>
@@ -675,20 +676,20 @@ async function init() {
             </select>
           </div>
         </div>
-        <div class="chart-sub">Остальные категории объединены в группу «Остальные»</div>
+        <div class="chart-sub" id="catOthersSub">${T('cat_others')}</div>
         <div class="chart-wrap" id="catChartWrap"><canvas id="catChart"></canvas></div>
       </div>
       <div class="tbl-card">
         <div class="tbl-header">
-          <span class="tbl-header-title">Все категории · сводная таблица</span>
+          <span class="tbl-header-title" id="catTblTitle">${T('cat_tbl_t')}</span>
           <div class="sort-wrap">
-            <span class="sort-lbl">Сортировка:</span>
-            <select class="sort-sel" onchange="setSort(this.value)">
-              <option value="revenue"   ${sortCol==='revenue'?'selected':''}>По выручке</option>
-              <option value="sales"     ${sortCol==='sales'?'selected':''}>По кол-ву</option>
-              <option value="pct"       ${sortCol==='pct'?'selected':''}>По % продаж</option>
-              <option value="skus"      ${sortCol==='skus'?'selected':''}>По кол-ву SKU</option>
-              <option value="marginPct" ${sortCol==='marginPct'?'selected':''}>По марже</option>
+            <span class="sort-lbl" id="catSortLbl">${T('sort_lbl')}</span>
+            <select class="sort-sel" id="catSortSel" onchange="setSort(this.value)">
+              <option value="revenue"   ${sortCol==='revenue'?'selected':''}>${T('cat_sort_rev')}</option>
+              <option value="sales"     ${sortCol==='sales'?'selected':''}>${T('cat_sort_qty')}</option>
+              <option value="pct"       ${sortCol==='pct'?'selected':''}>${T('cat_sort_pct')}</option>
+              <option value="skus"      ${sortCol==='skus'?'selected':''}>${T('cat_sort_skus')}</option>
+              <option value="marginPct" ${sortCol==='marginPct'?'selected':''}>${T('cat_sort_mg')}</option>
             </select>
             <button class="sort-dir" onclick="toggleSortDir()">${sortDir==='desc'?'↓':'↑'}</button>
           </div>
@@ -710,7 +711,7 @@ async function init() {
 function setTopN(n) {
   topN = n;
   const el = document.getElementById('chartTitle');
-  if (el) el.textContent = `Топ ${topN} категорий по выручке`;
+  if (el) el.textContent = T('cat_top_pfx')+' '+topN+' '+T('cat_top_sfx');
   const cats = buildCategoryData();
   if (cats.length > 0) renderChart(cats);
 }
@@ -720,8 +721,43 @@ function toggleSortDir() {
   rerender();
 }
 
+function refreshLabels() {
+  const ct = document.getElementById('chartTitle');
+  if (ct) ct.textContent = T('cat_top_pfx')+' '+topN+' '+T('cat_top_sfx');
+  const cs = document.getElementById('catOthersSub');
+  if (cs) cs.textContent = T('cat_others');
+  const tt = document.getElementById('catTblTitle');
+  if (tt) tt.textContent = T('cat_tbl_t');
+  const sl = document.getElementById('catSortLbl');
+  if (sl) sl.textContent = T('sort_lbl');
+  const ts = document.querySelector('.top-show-lbl');
+  if (ts) ts.textContent = T('top_show');
+  const sortSel = document.getElementById('catSortSel');
+  if (sortSel) {
+    const cur = sortSel.value;
+    sortSel.innerHTML =
+      `<option value="revenue"   ${sortCol==='revenue'?'selected':''}>${T('cat_sort_rev')}</option>`+
+      `<option value="sales"     ${sortCol==='sales'?'selected':''}>${T('cat_sort_qty')}</option>`+
+      `<option value="pct"       ${sortCol==='pct'?'selected':''}>${T('cat_sort_pct')}</option>`+
+      `<option value="skus"      ${sortCol==='skus'?'selected':''}>${T('cat_sort_skus')}</option>`+
+      `<option value="marginPct" ${sortCol==='marginPct'?'selected':''}>${T('cat_sort_mg')}</option>`;
+    sortSel.value = cur;
+  }
+}
+
 init();
 </script>
 <script src="i18n.js"></script>
+<script>
+if (typeof onPolaxChange === 'function') {
+  onPolaxChange(function() {
+    if (!dataReady) return;
+    refreshLabels();
+    renderShopTabs();
+    renderDateBar();
+    rerender();
+  });
+}
+</script>
 </body>
 </html>

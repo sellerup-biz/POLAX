@@ -94,6 +94,10 @@ var TR = {
     cat_tbl_t:'Все категории',
     col_cat:'Категория', col_units:'Шт.', col_margin:'Маржа %',
     col_avg:'Ср. цена', top_show:'Показывать топ:',
+    cat_top_pfx:'Топ', cat_top_sfx:'категорий по выручке',
+    cat_others:'Остальные объединены в группу «Другие»',
+    cat_sort_rev:'По выручке', cat_sort_qty:'По кол-ву',
+    cat_sort_pct:'По % продаж', cat_sort_skus:'По кол-ву SKU', cat_sort_mg:'По марже',
     // Footers
     f_main:'POLAX · ALLEGRO PRICING RULES · 2026',
     f_an:'POLAX · АНАЛИТИКА · 2026',
@@ -184,6 +188,10 @@ var TR = {
     cat_tbl_t:'Всі категорії',
     col_cat:'Категорія', col_units:'Шт.', col_margin:'Маржа %',
     col_avg:'Сер. ціна', top_show:'Показувати топ:',
+    cat_top_pfx:'Топ', cat_top_sfx:'категорій за виручкою',
+    cat_others:'Інші об\'єднані у групу «Інші»',
+    cat_sort_rev:'За виручкою', cat_sort_qty:'За кількістю',
+    cat_sort_pct:'За % продажів', cat_sort_skus:'За SKU', cat_sort_mg:'За маржею',
     f_main:'POLAX · ПРАВИЛА ЦІНОУТВОРЕННЯ · 2026',
     f_an:'POLAX · АНАЛІТИКА · 2026',
     f_ue:'POLAX · Юніт-економіка',
@@ -272,6 +280,10 @@ var TR = {
     cat_tbl_t:'All Categories',
     col_cat:'Category', col_units:'Units', col_margin:'Margin %',
     col_avg:'Avg. price', top_show:'Show top:',
+    cat_top_pfx:'Top', cat_top_sfx:'categories by revenue',
+    cat_others:'Others grouped as «Others»',
+    cat_sort_rev:'By revenue', cat_sort_qty:'By quantity',
+    cat_sort_pct:'By % of sales', cat_sort_skus:'By SKU count', cat_sort_mg:'By margin',
     f_main:'POLAX · ALLEGRO PRICING RULES · 2026',
     f_an:'POLAX · ANALYTICS · 2026',
     f_ue:'POLAX · Unit Economy',
@@ -360,6 +372,10 @@ var TR = {
     cat_tbl_t:'Wszystkie kategorie',
     col_cat:'Kategoria', col_units:'Szt.', col_margin:'Marża %',
     col_avg:'Śr. cena', top_show:'Pokaż top:',
+    cat_top_pfx:'Top', cat_top_sfx:'kategorii wg przychodu',
+    cat_others:'Pozostałe zgrupowane jako «Inne»',
+    cat_sort_rev:'Wg przychodu', cat_sort_qty:'Wg ilości',
+    cat_sort_pct:'Wg % sprzedaży', cat_sort_skus:'Wg SKU', cat_sort_mg:'Wg marży',
     f_main:'POLAX · ZASADY CENOWE ALLEGRO · 2026',
     f_an:'POLAX · ANALITYKA · 2026',
     f_ue:'POLAX · Ekonomia jednostkowa',
@@ -465,7 +481,7 @@ var css = `
     --tag-rd-bg:#FCEBEB; --tag-rd-t:#A32D2D;
     --progress-bg:#f0ece4; --chart-grid:rgba(0,0,0,0.04);
     --chart-tick:#999; --chart-legend:#555; --chart-line:#1a1a1a;
-    --shadow:rgba(0,0,0,0.15); --active-neutral:#555; --active-neutral-t:#fff;
+    --shadow:rgba(0,0,0,0.15); --active-neutral:#BA7517; --active-neutral-t:#fff;
   }
   /* Controls bar */
   #polax-controls {

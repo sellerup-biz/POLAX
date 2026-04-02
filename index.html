@@ -386,11 +386,11 @@ function mkTotals(rows,key,elId){
 function mkTable(rows,labelKey,elId,fmt){
   var th='<thead><tr><th style="text-align:left;padding:6px 10px;color:#666;font-weight:600;border-bottom:1px solid var(--border-subtle)">'+(labelKey==='date'?T('daily_title').split('·')[0].trim():T('monthly_title').split('·')[0].trim())+'</th>'
     +SHOPS.map(function(s,i){return'<th style="text-align:right;padding:6px 10px;color:'+COLORS[i]+';font-weight:600;border-bottom:1px solid var(--border-subtle)">'+s+'</th>';}).join('')
-    +'<th style="text-align:right;padding:6px 10px;font-weight:700;color:#aaa;border-bottom:1px solid var(--border-subtle)">Итого</th></tr></thead>';
+    +'<th style="text-align:right;padding:6px 10px;font-weight:700;color:var(--text-secondary);border-bottom:1px solid var(--border-subtle)">'+T('total')+'</th></tr></thead>';
   var tb='<tbody>'+rows.map(function(r,i){
     var tot=SHOPS.reduce(function(s,k){return s+(r[k]||0);},0);
-    return'<tr style="background:'+(i%2===0?'#0e0e0e':'#111111')+'">'
-      +'<td style="padding:6px 10px;color:#aaa;font-weight:'+(labelKey==='date'?'500':'600')+'">'+r[labelKey]+'</td>'
+    return'<tr style="background:'+(i%2===0?'var(--bg-subtle)':'var(--bg-card)')+'">'
+      +'<td style="padding:6px 10px;color:var(--text-secondary);font-weight:'+(labelKey==='date'?'500':'600')+'">'+r[labelKey]+'</td>'
       +SHOPS.map(function(s){return'<td style="text-align:right;padding:6px 10px">'+(fmt?(r[s]||0).toFixed(2):(r[s]||0).toLocaleString())+' zł</td>';}).join('')
       +'<td style="text-align:right;padding:6px 10px;font-weight:700">'+(fmt?tot.toFixed(2):tot.toLocaleString())+' zł</td></tr>';
   }).join('')+'</tbody>';
