@@ -6,30 +6,30 @@
 <title>POLAX · Аналитика</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#090909;color:#e8e8e8;min-height:100vh;padding:1.75rem}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color:var(--text-primary);min-height:100vh;padding:1.75rem}
 
-.hdr{display:flex;align-items:center;justify-content:space-between;background:#111111;border:1px solid #252525;border-radius:14px;padding:12px 18px;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
+.hdr{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:12px 18px;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
 .hdr-left{display:flex;align-items:center;gap:12px}
 .logo{width:38px;height:38px;background:#BA7517;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
-.hdr h1{font-size:20px;font-weight:700;letter-spacing:2px;color:#e8e8e8}
+.hdr h1{font-size:20px;font-weight:700;letter-spacing:2px;color:var(--text-primary)}
 .hdr p{font-size:11px;color:#888;margin-top:2px}
-.btn-back{font-size:12px;padding:7px 16px;border-radius:8px;background:#161616;color:#aaa;border:1px solid #2a2a2a;cursor:pointer;text-decoration:none;display:inline-block;font-weight:500}
+.btn-back{font-size:12px;padding:7px 16px;border-radius:8px;background:#161616;color:#aaa;border:1px solid var(--border-mid);cursor:pointer;text-decoration:none;display:inline-block;font-weight:500}
 
 /* TABS */
 .tabs{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
-.tab{font-size:12px;padding:7px 18px;border-radius:8px;border:1px solid #222;background:#111111;color:#aaa;cursor:pointer;font-weight:500;transition:all 0.15s}
+.tab{font-size:12px;padding:7px 18px;border-radius:8px;border:1px solid #222;background:var(--bg-card);color:#aaa;cursor:pointer;font-weight:500;transition:all 0.15s}
 .tab.on{background:#BA7517;color:#fff;border-color:#D4891E;font-weight:700}
-.tab:hover:not(.on):not(.future){background:#0f0f0f;border-color:#D4891E;color:#BA7517}
-.tab.future{color:#ccc;border-color:#1e1e1e;background:#0d0d0d;cursor:default;font-style:italic}
+.tab:hover:not(.on):not(.future){background:var(--bg-subtle);border-color:#D4891E;color:#BA7517}
+.tab.future{color:#ccc;border-color:#1e1e1e;background:var(--bg-deep);cursor:default;font-style:italic}
 
 .sl{font-size:9px;font-weight:700;color:#aaa;letter-spacing:1.2px;text-transform:uppercase;margin:0 0 8px 2px}
 
 .c4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
 .c5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
 @media(max-width:700px){.c4,.c5{grid-template-columns:1fr 1fr}}
-.mc{background:#111111;border:1px solid #252525;border-radius:12px;padding:12px 16px}
+.mc{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
 .mc-l{font-size:10px;color:#888;margin-bottom:6px;font-weight:600}
-.mc-v{font-size:18px;font-weight:700;color:#e8e8e8}
+.mc-v{font-size:18px;font-weight:700;color:var(--text-primary)}
 .mc-s{font-size:10px;color:#bbb;margin-top:3px}
 .mc.am .mc-v{color:#BA7517}
 .mc.bl .mc-v{color:#185FA5}
@@ -44,15 +44,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#090909;color:#e8e8e
 .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
 @media(max-width:800px){.three{grid-template-columns:1fr}}
 
-.pn{background:#111111;border:1px solid #252525;border-radius:12px;padding:14px 16px}
-.pt{font-size:12px;font-weight:700;color:#e8e8e8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.pn{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.pt{font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .tag{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700}
-.ta{background:#1a0d00;color:#D4891E}
-.tb{background:#001226;color:#3B8FD4}
-.tt{background:#001a12;color:#1A9E7A}
-.tr{background:#1a0606;color:#E04545}
+.ta{background:var(--tag-am-bg);color:#D4891E}
+.tb{background:var(--tag-bl-bg);color:#3B8FD4}
+.tt{background:var(--tag-tl-bg);color:#1A9E7A}
+.tr{background:var(--tag-rd-bg);color:#E04545}
 
-.crow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #181818;font-size:11px;color:#e8e8e8;gap:8px}
+.crow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-faint);font-size:11px;color:var(--text-primary);gap:8px}
 .crow:last-child{border-bottom:none;font-weight:700}
 .crow-r{display:flex;align-items:baseline;gap:8px;flex-shrink:0}
 .pct{font-size:10px;color:#aaa;min-width:38px;text-align:right}
@@ -61,14 +61,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#090909;color:#e8e8e
 .bi{height:4px;border-radius:2px;margin-top:3px}
 
 .tbl{width:100%;font-size:10px;border-collapse:collapse}
-.tbl th{text-align:right;padding:5px 6px;color:#aaa;font-weight:600;border-bottom:1px solid #1e1e1e;font-size:9px}
+.tbl th{text-align:right;padding:5px 6px;color:#aaa;font-weight:600;border-bottom:1px solid var(--border-subtle);font-size:9px}
 .tbl th:first-child{text-align:left}
-.tbl td{text-align:right;padding:5px 6px;border-bottom:1px solid #181818;color:#e8e8e8}
+.tbl td{text-align:right;padding:5px 6px;border-bottom:1px solid var(--border-faint);color:var(--text-primary)}
 .tbl td:first-child{text-align:left;color:#777}
-.tbl tr:last-child td{border:none;font-weight:700;color:#e8e8e8}
+.tbl tr:last-child td{border:none;font-weight:700;color:var(--text-primary)}
 .neg-c{color:#A32D2D}
 
-.chart-wrap{background:#111111;border:1px solid #252525;border-radius:12px;padding:14px 16px;margin-bottom:1.25rem}
+.chart-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:1.25rem}
 .leg{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
 .li{display:flex;align-items:center;gap:5px;font-size:10px;color:#555}
 .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
@@ -85,13 +85,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#090909;color:#e8e8e
   <div class="hdr-left">
     <div class="logo">P</div>
     <div>
-      <h1>POLAX · Аналитика</h1>
-      <p>Продажи и расходы по месяцам · все магазины · в PLN</p>
+      <h1 data-i18n="an_title">POLAX · Аналитика</h1>
+      <p data-i18n="an_sub">Продажи и расходы по месяцам · все магазины · в PLN</p>
     </div>
   </div>
-  <a href="index.html" class="btn-back">← Главный дашборд</a>
-  <a href="unit_economy.html" class="btn-back">Юнит экономика →</a>
-  <a href="categories.html" class="btn-back">Продажи по категориям →</a>
+  <a href="index.html" class="btn-back" data-i18n="nav_back">← Главный дашборд</a>
+  <a href="unit_economy.html" class="btn-back" data-i18n="nav_unit">Юнит-экономика →</a>
+  <a href="categories.html" class="btn-back" data-i18n="nav_categories">Продажи по категориям →</a>
+  <div id="polax-controls"></div>
 </div>
 
 <div class="tabs" id="tabs"></div>
@@ -101,39 +102,39 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#090909;color:#e8e8e
 
 <div class="two">
   <div class="pn">
-    <div class="pt">Продажи по магазинам <span class="tag tb" id="tag-shops"></span></div>
+    <div class="pt"><span data-i18n="shops_bd">Продажи по магазинам</span> <span class="tag tb" id="tag-shops"></span></div>
     <div id="shops-breakdown"></div>
   </div>
   <div class="pn">
-    <div class="pt">Продажи по странам <span class="tag tb" id="tag-countries"></span> <span class="nbp-badge" id="nbp-badge">НБП курс...</span></div>
+    <div class="pt"><span data-i18n="countries_bd">Продажи по странам</span> <span class="tag tb" id="tag-countries"></span> <span class="nbp-badge" id="nbp-badge" data-i18n="nbp_loading">НБП курс...</span></div>
     <div id="countries-breakdown"></div>
   </div>
 </div>
 
 <div class="two">
   <div class="pn">
-    <div class="pt">Расходы по категориям <span class="tag tr" id="tag-costs"></span></div>
+    <div class="pt"><span data-i18n="costs_bd">Расходы по категориям</span> <span class="tag tr" id="tag-costs"></span></div>
     <div id="costs-breakdown"></div>
   </div>
-  <div class="pn" style="background:#0f0f0f;border-color:#e8e0d0">
-    <div class="pt">Сводка месяца <span class="tag ta" id="tag-summary"></span></div>
+  <div class="pn" style="background:var(--bg-subtle);border-color:#e8e0d0">
+    <div class="pt"><span data-i18n="summary">Сводка месяца</span> <span class="tag ta" id="tag-summary"></span></div>
     <div id="summary-block"></div>
   </div>
 </div>
 
-<div class="sl">Детализация по магазинам</div>
+<div class="sl" data-i18n="shop_details">Детализация по магазинам</div>
 <div class="three" id="shop-tables"></div>
 
 <div class="chart-wrap">
-  <div class="pt">Динамика продаж · все магазины суммарно <span class="tag ta">PLN · по месяцам</span></div>
+  <div class="pt"><span data-i18n="dyn_title">Динамика продаж · все магазины суммарно</span> <span class="tag ta" data-i18n="dyn_tag">PLN · по месяцам</span></div>
   <div class="leg">
-    <div class="li"><div class="dot" style="background:#BA7517"></div>Все магазины · продажи</div>
-    <div class="li"><div class="dot" style="background:#A32D2D;opacity:0.6"></div>Расходы суммарно · % над столбиком</div>
+    <div class="li"><div class="dot" style="background:#BA7517"></div><span data-i18n="chart_sales">Все магазины · продажи</span></div>
+    <div class="li"><div class="dot" style="background:#A32D2D;opacity:0.6"></div><span data-i18n="chart_costs">Расходы суммарно · % над столбиком</span></div>
   </div>
   <canvas id="dynChart" style="width:100%;max-height:260px"></canvas>
 </div>
 
-<div class="footer">POLAX · АНАЛИТИКА · 2026</div>
+<div class="footer" data-i18n="f_an">POLAX · АНАЛИТИКА · 2026</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
@@ -176,7 +177,7 @@ function fetchNBPRates(){
         '  RON=' + NBP_RATES.RON.toFixed(4);
     })
     .catch(function(){
-      document.getElementById('nbp-badge').textContent = 'НБП недоступен';
+      document.getElementById('nbp-badge').textContent = T('nbp_na');
     });
 }
 
@@ -207,11 +208,11 @@ function renderTabs(){
     var idx    = available.indexOf(name);
     var hasData = idx !== -1;
     if(hasData && idx === activeMonth){
-      return '<div class="tab on">'+name+'</div>';
+      return '<div class="tab on">'+displayMonth(name)+'</div>';
     } else if(hasData){
-      return '<div class="tab" onclick="switchMonth('+idx+')">'+name+'</div>';
+      return '<div class="tab" onclick="switchMonth('+idx+')">'+displayMonth(name)+'</div>';
     } else {
-      return '<div class="tab future">'+name+'</div>';
+      return '<div class="tab future">'+displayMonth(name)+'</div>';
     }
   }).join('');
 }
@@ -225,17 +226,17 @@ function renderCards(){
     return '<div class="mc '+['am','bl','tl'][i]+'">'
       +'<div class="mc-l">'+s+'</div>'
       +'<div class="mc-v">'+fmt(m[s]||0)+' zł</div>'
-      +'<div class="mc-s">продажи PLN за месяц</div></div>';
+      +'<div class="mc-s">'+T('sales_month')+'</div></div>';
   }).join('');
   html += '<div class="mc">'
     +'<div class="mc-l" style="color:#C4153A">eMAG (RO/BG/HU)</div>'
     +'<div class="mc-v" style="color:#C4153A">'+fmt(emag)+' zł</div>'
-    +'<div class="mc-s">продажи PLN за месяц</div></div>';
+    +'<div class="mc-s">'+T('sales_month')+'</div></div>';
   html += '<div class="mc gd"><div class="mc-l">Все магазины</div>'
     +'<div class="mc-v">'+fmt(total)+' zł</div>'
-    +'<div class="mc-s">'+m.month+'</div></div>';
+    +'<div class="mc-s">'+displayMonth(m.month)+'</div></div>';
   document.getElementById('cards').innerHTML = html;
-  document.getElementById('month-label').textContent = 'Продажи за '+m.month+' · в PLN';
+  document.getElementById('month-label').textContent = T('sales_for')+' '+displayMonth(m.month)+' '+T('sales_pln_sfx');
   document.getElementById('tag-shops').textContent    = m.month;
   document.getElementById('tag-countries').textContent = m.month;
   document.getElementById('tag-costs').textContent    = m.month;
@@ -300,13 +301,13 @@ function renderCountriesBreakdown(){
   var plnEmagHU = (c.EMAG_HU || 0) * NBP_RATES.HUF;
 
   var rows = [
-    {flag:'🇵🇱', name:'Польша (Allegro)',          curr:'PLN', native:c.PL||0,      pln:plnPL,     rate:null,           color:'#BA7517'},
-    {flag:'🇨🇿', name:'Чехия (Allegro)',           curr:'CZK', native:c.CZ||0,      pln:plnCZ,     rate:NBP_RATES.CZK,  color:'#185FA5'},
-    {flag:'🇭🇺', name:'Венгрия (Allegro)',         curr:'HUF', native:c.HU||0,      pln:plnHU,     rate:NBP_RATES.HUF,  color:'#0F6E56'},
-    {flag:'🇸🇰', name:'Словакия (Allegro)',        curr:'EUR', native:c.SK||0,      pln:plnSK,     rate:NBP_RATES.EUR,  color:'#854F0B'},
-    {flag:'🇷🇴', name:'Румыния (eMAG)',  curr:'RON', native:c.EMAG_RO||0, pln:plnEmagRO, rate:NBP_RATES.RON,  color:'#C4153A'},
-    {flag:'🇧🇬', name:'Болгария (eMAG)', curr:'EUR', native:c.EMAG_BG||0, pln:plnEmagBG, rate:NBP_RATES.EUR,  color:'#C4153A'},
-    {flag:'🇭🇺', name:'Венгрия (eMAG)',  curr:'HUF', native:c.EMAG_HU||0, pln:plnEmagHU, rate:NBP_RATES.HUF,  color:'#C4153A'}
+    {flag:'', name:T('c_pl'),          curr:'PLN', native:c.PL||0,      pln:plnPL,     rate:null,           color:'#BA7517'},
+    {flag:'', name:T('c_cz'),           curr:'CZK', native:c.CZ||0,      pln:plnCZ,     rate:NBP_RATES.CZK,  color:'#185FA5'},
+    {flag:'', name:T('c_hu'),         curr:'HUF', native:c.HU||0,      pln:plnHU,     rate:NBP_RATES.HUF,  color:'#0F6E56'},
+    {flag:'', name:T('c_sk'),        curr:'EUR', native:c.SK||0,      pln:plnSK,     rate:NBP_RATES.EUR,  color:'#854F0B'},
+    {flag:'', name:T('c_ro'),  curr:'RON', native:c.EMAG_RO||0, pln:plnEmagRO, rate:NBP_RATES.RON,  color:'#C4153A'},
+    {flag:'', name:T('c_bg'), curr:'EUR', native:c.EMAG_BG||0, pln:plnEmagBG, rate:NBP_RATES.EUR,  color:'#C4153A'},
+    {flag:'', name:T('c_hu_e'),  curr:'HUF', native:c.EMAG_HU||0, pln:plnEmagHU, rate:NBP_RATES.HUF,  color:'#C4153A'}
   ];
 
   var totalPLN = plnPL + plnCZ + plnHU + plnSK + plnEmagRO + plnEmagBG + plnEmagHU;
@@ -323,7 +324,7 @@ function renderCountriesBreakdown(){
         + '</div>')
       : '';
     return '<div class="crow">'
-      +'<span>'+r.flag+' '+r.name+'</span>'
+      +'<span>'+r.name+'</span>'
       +'<div class="crow-r">'
       +'<div style="text-align:right">'
       +'<div style="font-size:11px;font-weight:600;color:'+r.color+'">≈ '+fmt(r.pln)+' zł</div>'
@@ -336,7 +337,7 @@ function renderCountriesBreakdown(){
 
   // Итого — реальная PLN-сумма по магазинам + eMAG (authoritative)
   html += '<div class="crow">'
-    +'<span style="font-weight:700;color:#e8e8e8">Итого (все → PLN)</span>'
+    +'<span style="font-weight:700;color:var(--text-primary)">'+T('total_all_pln')+'</span>'
     +'<div class="crow-r">'
     +'<span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(allTotal)+' zł</span>'
     +'<span class="pct">100%</span>'
@@ -356,11 +357,11 @@ function renderCostsBreakdown(){
   var c     = m.costs || {};
   var net   = totalCostsVal(c);
   var rows  = [
-    {name:'Obowiązkowe (комиссия)', val:c.commission||0,   sign:-1},
-    {name:'Dostawa (доставка)',      val:c.delivery||0,     sign:-1},
-    {name:'Reklama i promowanie',    val:c.ads||0,          sign:-1},
-    {name:'Abonament',               val:c.subscription||0, sign:-1},
-    {name:'Rabaty od Allegro',       val:c.discount||0,     sign:+1}
+    {name:T('cost_comm'), val:c.commission||0,   sign:-1},
+    {name:T('cost_del'), val:c.delivery||0,     sign:-1},
+    {name:T('cost_ads'), val:c.ads||0,          sign:-1},
+    {name:T('cost_sub'), val:c.subscription||0, sign:-1},
+    {name:T('cost_disc'), val:c.discount||0,     sign:+1}
   ];
   var html = rows.map(function(r){
     if(r.val === 0) return '';
@@ -379,8 +380,8 @@ function renderCostsBreakdown(){
       +'</div></div>';
   }).join('');
   var netPct = sales > 0 ? (net/sales*100).toFixed(1) : '0.0';
-  html += '<div class="crow" style="border-top:1px solid #252525;margin-top:4px;padding-top:8px">'
-    +'<span style="font-weight:700;color:#e8e8e8">Итого расходы</span>'
+  html += '<div class="crow" style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px">'
+    +'<span style="font-weight:700;color:var(--text-primary)">'+T('total_costs')+'</span>'
     +'<div class="crow-r">'
     +'<span class="neg" style="font-size:12px;font-weight:700">-'+fmt(net)+' zł</span>'
     +'<span class="pct neg" style="font-weight:700">'+netPct+'%</span>'
@@ -397,18 +398,18 @@ function renderSummaryBlock(){
   var profit = sales - costs + (c.discount||0);
   var margin = sales > 0 ? (profit/sales*100).toFixed(1) : 0;
   var html =
-    '<div class="crow"><span>Продажи (PLN)</span>'
+    '<div class="crow"><span>'+T('sales_pln')+'</span>'
     +'<div class="crow-r"><span style="font-weight:600;color:#0F6E56">'+fmt(sales)+' zł</span></div></div>'
-   +'<div class="crow"><span>Расходы (PLN, все рынки)</span>'
+   +'<div class="crow"><span>'+T('costs_pln')+'</span>'
     +'<div class="crow-r">'
     +'<span class="neg" style="font-weight:600">-'+fmt(costs)+' zł</span>'
     +'<span class="pct neg">'+(sales>0?(costs/sales*100).toFixed(1):0)+'%</span>'
     +'</div></div>';
   if(c.discount > 0){
-    html += '<div class="crow"><span>Rabaty od Allegro</span>'
+    html += '<div class="crow"><span>'+T('cost_disc')+'</span>'
       +'<div class="crow-r"><span style="color:#0F6E56;font-weight:600">+'+fmt(c.discount||0)+' zł</span></div></div>';
   }
-  html += '<div class="crow"><span>Прибыль (оценка)</span>'
+  html += '<div class="crow"><span>'+T('profit')+'</span>'
     +'<div class="crow-r">'
     +'<span style="font-weight:700;color:#0F6E56;font-size:13px">'+fmt(profit)+' zł</span>'
     +'<span class="pct" style="color:#0F6E56">'+margin+'%</span>'
@@ -437,16 +438,16 @@ function renderShopTables(){
     return '<div class="pn">'
       +'<div class="pt">'+s+' <span class="tag '+TAGS[i]+'">'+m.month+'</span></div>'
       +'<table class="tbl">'
-      +'<thead><tr><th style="text-align:left">Категория</th><th>Сумма</th><th>% продаж</th></tr></thead>'
+      +'<thead><tr><th style="text-align:left">'+T('cat_col')+'</th><th>'+T('sum_col')+'</th><th>'+T('pct_col')+'</th></tr></thead>'
       +'<tbody>'
-      +'<tr><td>Продажи</td><td>'+fmt(sales)+' zł</td><td>100%</td></tr>'
-      +row('Obowiązkowe', sc.commission||0, false)
-      +row('Dostawa',     sc.delivery||0,   false)
-      +row('Reklama',     sc.ads||0,        false)
-      +row('Abonament',   sc.subscription||0, false)
-      +row('Rabaty',      sc.discount||0,   true)
-      +'<tr style="border-top:1px solid #252525">'
-      +'<td style="font-weight:700">Итого расходы</td>'
+      +'<tr><td>'+T('sales_pln')+'</td><td>'+fmt(sales)+' zł</td><td>100%</td></tr>'
+      +row(T('cost_comm'), sc.commission||0, false)
+      +row(T('cost_del'),     sc.delivery||0,   false)
+      +row(T('cost_ads'),     sc.ads||0,        false)
+      +row(T('cost_sub'),   sc.subscription||0, false)
+      +row(T('cost_disc'),      sc.discount||0,   true)
+      +'<tr style="border-top:1px solid var(--border)">'
+      +'<td style="font-weight:700">'+T('total_costs')+'</td>'
       +'<td class="neg-c" style="font-weight:700">-'+fmt(net)+' zł</td>'
       +'<td class="neg-c" style="font-weight:700">'+pct+'%</td></tr>'
       +'</tbody></table></div>';
@@ -473,9 +474,9 @@ function renderDynChart(){
     data:{
       labels:labels,
       datasets:[
-        {label:'Продажи (все магазины)',data:sales,
+        {label:T('chart_all_s'),data:sales,
           backgroundColor:'rgba(186,117,23,0.2)',borderColor:'#BA7517',borderWidth:2,borderRadius:5},
-        {label:'Расходы суммарно (PLN)',data:costs,
+        {label:T('chart_all_c'),data:costs,
           backgroundColor:'rgba(162,45,45,0.15)',borderColor:'#A32D2D',borderWidth:2,borderRadius:5}
       ]
     },
@@ -485,13 +486,13 @@ function renderDynChart(){
         legend:{display:true,position:'bottom',labels:{font:{size:10},color:'#aaa',boxWidth:10,padding:14}},
         tooltip:{callbacks:{label:function(c){
           if(c.datasetIndex===1)
-            return ' Расходы: '+fmt(c.parsed.y)+' zł ('+costsPct[c.dataIndex]+'% от продаж)';
+            return ' '+T('total_costs')+': '+fmt(c.parsed.y)+' zł ('+costsPct[c.dataIndex]+'%)';
           return ' '+c.dataset.label+': '+fmt(c.parsed.y)+' zł';
         }}}
       },
       scales:{
-        x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{font:{size:11},color:'#666'}},
-        y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{font:{size:11},color:'#999',
+        x:{grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()},ticks:{font:{size:11},color:'#666'}},
+        y:{grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()},ticks:{font:{size:11},color:'#999',
           callback:function(v){ return (v/1000).toFixed(0)+'k zł'; }}}
       }
     },
@@ -576,5 +577,6 @@ Promise.all([
     .catch(function(){ console.warn('data.json не найден'); });
 });
 </script>
+<script src="i18n.js"></script>
 </body>
 </html>
