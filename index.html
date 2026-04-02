@@ -9,14 +9,14 @@
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color:var(--text-primary);min-height:100vh;padding:1.75rem}
 
 /* HEADER */
-.header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1.5px solid #1e1e1e}
+.header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1.5px solid var(--border)}
 .logo{width:46px;height:46px;background:#BA7517;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;letter-spacing:1px;flex-shrink:0}
 .header h1{font-size:26px;font-weight:800;letter-spacing:4px;color:var(--text-primary)}
-.header p{font-size:12px;color:#888;margin-top:3px}
+.header p{font-size:12px;color:var(--text-muted);margin-top:3px}
 
 /* LEGEND */
 .legend{display:flex;gap:16px;margin-bottom:1.25rem;flex-wrap:wrap}
-.li{display:flex;align-items:center;gap:6px;font-size:11px;color:#aaa;font-weight:500}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);font-weight:500}
 .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
 /* STORES GRID */
@@ -30,14 +30,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
 
 .sc-head{padding:12px 16px 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-subtle)}
 .sc-name{font-size:14px;font-weight:700;color:var(--text-primary);letter-spacing:0.3px}
-.sc-sub{font-size:10px;color:#999;margin-top:2px}
+.sc-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
 .tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:6px}
 .t-amber{background:var(--tag-am-bg);color:#BA7517}
 .t-teal{background:var(--tag-tl-bg);color:#0F6E56}
 .t-blue{background:var(--tag-bl-bg);color:#185FA5}
 
 /* RULES SECTION */
-.section-label{font-size:9px;font-weight:700;letter-spacing:1px;color:#aaa;padding:8px 16px 4px;text-transform:uppercase;background:var(--bg-deep)}
+.section-label{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--text-secondary);padding:8px 16px 4px;text-transform:uppercase;background:var(--bg-deep)}
 
 .rules{padding:4px 0 4px}
 .rule{display:flex;align-items:flex-start;gap:8px;padding:7px 16px;border-bottom:1px solid var(--border-faint)}
@@ -47,14 +47,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
 .ri-u{background:var(--tag-am-bg);color:#BA7517}
 .rb{flex:1}
 .rt{font-size:12px;color:var(--text-primary);line-height:1.45;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
-.rc{font-size:10px;color:#aaa;margin-top:2px}
+.rc{font-size:10px;color:var(--text-secondary);margin-top:2px}
 .badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
 .bd{background:var(--tag-gn-bg);color:#6db84d}
 .bu{background:var(--tag-am-bg);color:#BA7517}
-.ref{font-size:9px;color:#999;font-style:italic;margin-top:2px}
+.ref{font-size:9px;color:var(--text-muted);font-style:italic;margin-top:2px}
 
 /* ADS SECTION */
-.ads-block{border-top:1.5px dashed #333;background:var(--bg-deep);padding:10px 16px 12px}
+.ads-block{border-top:1.5px dashed var(--sep);background:var(--bg-deep);padding:10px 16px 12px}
 .ads-title{font-size:9px;font-weight:800;letter-spacing:1.2px;color:#BA7517;text-transform:uppercase;margin-bottom:8px}
 .ads-campaign{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px}
 .ads-campaign:last-child{margin-bottom:0}
@@ -67,25 +67,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
 .camp-tag.tl{background:var(--tag-tl-bg);color:#0F6E56}
 .camp-tag.bl{background:var(--tag-bl-bg);color:#185FA5}
 
-.ads-empty{font-size:11px;color:#bbb;font-style:italic;padding:2px 0}
+.ads-empty{font-size:11px;color:var(--text-secondary);font-style:italic;padding:2px 0}
 
 /* CALCULATOR */
 .calc{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
 .calc h2{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:14px}
 .calc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 @media(max-width:600px){.calc-inputs{grid-template-columns:1fr}}
-.ig label{font-size:11px;color:#777;display:block;margin-bottom:5px;font-weight:600}
-.ig input,.ig select{width:100%;padding:8px 10px;font-size:13px;border:1px solid #222;border-radius:7px;background:var(--bg-card);color:var(--text-primary)}
+.ig label{font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;font-weight:600}
+.ig input,.ig select{width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border-mid);border-radius:7px;background:var(--bg-card);color:var(--text-primary)}
 .res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @media(max-width:600px){.res-grid{grid-template-columns:1fr}}
-.rcard{background:var(--bg-page);border:1px solid #222;border-radius:9px;padding:12px 14px}
-.rstore{font-size:10px;color:#888;margin-bottom:5px;font-weight:600;letter-spacing:0.3px}
+.rcard{background:var(--bg-page);border:1px solid var(--border-mid);border-radius:9px;padding:12px 14px}
+.rstore{font-size:10px;color:var(--text-muted);margin-bottom:5px;font-weight:600;letter-spacing:0.3px}
 .rprice{font-size:22px;font-weight:800}
 .rdiff{font-size:10px;margin-top:3px;font-weight:500}
-.rref{font-size:10px;color:#bbb;margin-top:2px;font-style:italic}
+.rref{font-size:10px;color:var(--text-secondary);margin-top:2px;font-style:italic}
 .cdown{color:#6db84d}.cup{color:#BA7517}
 
-.footer{text-align:center;font-size:11px;color:#ccc;margin-top:0.5rem;letter-spacing:1px}
+.footer{text-align:center;font-size:11px;color:var(--text-secondary);margin-top:0.5rem;letter-spacing:1px}
 </style>
 </head>
 <body>
