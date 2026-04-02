@@ -543,13 +543,13 @@ function renderDateBar() {
   const days = getPeriodDays();
   const fmt  = s => s.split('-').reverse().join('.');
   const periodLabel = datePreset==='all'
-    ? T('p_all')+' · '+days+' дн.'
+    ? T('p_all')+' · '+days+' '+T('days_abbr')
     : datePreset==='last30'
-    ? T('p_30')+' · '+days+' дн.'
-    : fmt(dateFrom)+' — '+fmt(dateTo)+' · '+days+' дн.';
+    ? T('p_30')+' · '+days+' '+T('days_abbr')
+    : fmt(dateFrom)+' — '+fmt(dateTo)+' · '+days+' '+T('days_abbr');
 
   document.getElementById('dateBar').innerHTML = `
-    <span style="font-size:11px;color:#aaa;font-weight:600;letter-spacing:.3px">📅 ПЕРИОД:</span>
+    <span style="font-size:11px;color:var(--text-secondary);font-weight:600;letter-spacing:.3px">${T('period_lbl')}</span>
     <button class="dpreset${datePreset==='all'?' active':''}" onclick="setDatePreset('all')">${T('p_all')}</button>
     <button class="dpreset d-30${datePreset==='last30'?' active':''}" onclick="setDatePreset('last30')">${T('p_30')}</button>
     <div class="d-sep"></div>
@@ -612,11 +612,11 @@ function renderTable() {
   const maxRev = Math.max(...allFiltered.map(p => (getProductData(p,curShop)||{revenue:0}).revenue));
 
   const head = `<div class="tbl-head">
-    <span>Продукт</span>
-    <span class="${sortCol==='sales'?'sorted':''}" onclick="setSort('sales')">Продажи</span>
-    <span class="${sortCol==='revenue'?'sorted':''}" onclick="setSort('revenue')">Доход</span>
-    <span class="${sortCol==='fees'?'sorted':''}" onclick="setSort('fees')">Сборы</span>
-    <span class="${sortCol==='margin'||sortCol==='marginPct'?'sorted':''}" onclick="setSort('marginPct')">Маржа</span>
+    <span>${T('col_prod')}</span>
+    <span class="${sortCol==='sales'?'sorted':''}" onclick="setSort('sales')">${T('s_sales')}</span>
+    <span class="${sortCol==='revenue'?'sorted':''}" onclick="setSort('revenue')">${T('col_rev')}</span>
+    <span class="${sortCol==='fees'?'sorted':''}" onclick="setSort('fees')">${T('col_fees')}</span>
+    <span class="${sortCol==='margin'||sortCol==='marginPct'?'sorted':''}" onclick="setSort('marginPct')">${T('col_margin')}</span>
     <span></span>
   </div>`;
 
@@ -635,10 +635,10 @@ function renderTable() {
           <div class="pr-name">${escHtml(p.name)}</div>
           <div class="pr-meta">${meta}</div>
         </div>
-        <div class="tc" style="color:#ccc">0 шт.</div>
-        <div class="tc" style="color:#ccc">—</div>
-        <div class="tc" style="color:#ccc">—</div>
-        <div class="tc" style="color:#ccc">—</div>
+        <div class="tc" style="color:var(--text-faint)">0 ${T('units_abbr')}</div>
+        <div class="tc" style="color:var(--text-faint)">—</div>
+        <div class="tc" style="color:var(--text-faint)">—</div>
+        <div class="tc" style="color:var(--text-faint)">—</div>
         <div class="tc-arrow">›</div>
       </div>`;
     }
@@ -655,7 +655,7 @@ function renderTable() {
         <div class="pr-name">${escHtml(p.name)}</div>
         <div class="pr-meta">${meta}</div>
       </div>
-      <div class="tc">${d.sales} шт.</div>
+      <div class="tc">${d.sales} ${T('units_abbr')}</div>
       <div class="tc am">${zl(d.revenue)}
         <div class="pbar"><div class="pbar-f" style="width:${barW}%;background:${barC}"></div></div>
       </div>
@@ -692,14 +692,14 @@ function escHtml(s) {
 // ── Pagination ────────────────────────────────────────────────
 function renderPagination(totalPages, total) {
   const el = document.getElementById('pagination');
-  if (totalPages <= 1) { el.innerHTML = `<span class="pg-info">${total} товаров</span>`; return; }
+  if (totalPages <= 1) { el.innerHTML = `<span class="pg-info">${total} ${T('items_lbl')}</span>`; return; }
   let html = `<button class="pg" onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>`;
   const start = Math.max(1, curPage-2), end = Math.min(totalPages, curPage+2);
   if (start > 1) html += `<button class="pg" onclick="goPage(1)">1</button>${start>2?'<span class="pg-info">…</span>':''}`;
   for (let i=start; i<=end; i++) html += `<button class="pg${i===curPage?' pgon':''}" onclick="goPage(${i})">${i}</button>`;
   if (end < totalPages) html += `${end<totalPages-1?'<span class="pg-info">…</span>':''}<button class="pg" onclick="goPage(${totalPages})">${totalPages}</button>`;
   html += `<button class="pg" onclick="goPage(${curPage+1})" ${curPage===totalPages?'disabled':''}>›</button>`;
-  html += `<span class="pg-info">${total} товаров · стр. ${curPage} из ${totalPages}</span>`;
+  html += `<span class="pg-info">${total} ${T('items_lbl')} · ${T('page_lbl')} ${curPage} ${T('of_lbl')} ${totalPages}</span>`;
   el.innerHTML = html;
 }
 
@@ -737,34 +737,34 @@ function openSidebar(key) {
     metricsHtml = `
     <div class="mc2">
       <div class="mc">
-        <div class="mc-l">Доход</div>
+        <div class="mc-l">${T('col_rev')}</div>
         <div class="mc-v">${zl(d.revenue)}</div>
-        <div class="mc-s">${d.sales} транзакций</div>
+        <div class="mc-s">${d.sales} ${T('sb_transactions')}</div>
       </div>
       <div class="mc ${m>=0?'gr':'rd'}">
-        <div class="mc-l">Чистая маржа</div>
+        <div class="mc-l">${T('sb_net_margin')}</div>
         <div class="mc-v">${m>=0?'':'-'}${zl(m)}</div>
-        <div class="mc-s">${mp.toFixed(1)}% от выручки</div>
+        <div class="mc-s">${mp.toFixed(1)}% ${T('sb_pct_rev')}</div>
       </div>
       <div class="mc rd">
-        <div class="mc-l">Сборы Allegro</div>
+        <div class="mc-l">${T('sb_allegro_fees')}</div>
         <div class="mc-v">−${zl(d.fees)}</div>
-        <div class="mc-s">${feePct.toFixed(1)}% от выручки</div>
+        <div class="mc-s">${feePct.toFixed(1)}% ${T('sb_pct_rev')}</div>
       </div>
       <div class="mc am">
-        <div class="mc-l">ROAS</div>
+        <div class="mc-l">${T('sb_roas')}</div>
         <div class="mc-v">${roas}</div>
-        <div class="mc-s">${zl(d.ads+d.promo)} реклама+промо</div>
+        <div class="mc-s">${zl(d.ads+d.promo)} ${T('sb_ads_promo')}</div>
       </div>
       <div class="mc" style="border-color:#D4891E;background:var(--bg-subtle)">
-        <div class="mc-l" style="color:#D4891E">Реклама CPC</div>
+        <div class="mc-l" style="color:#D4891E">${T('sb_ads_cpc')}</div>
         <div class="mc-v" style="color:#BA7517">−${zl(d.ads)}</div>
-        <div class="mc-s">${adsPct.toFixed(1)}% от выручки</div>
+        <div class="mc-s">${adsPct.toFixed(1)}% ${T('sb_pct_rev')}</div>
       </div>
       <div class="mc" style="border-color:#7C3AED;background:var(--bg-deep)">
-        <div class="mc-l" style="color:#5B21B6">Промование</div>
+        <div class="mc-l" style="color:#5B21B6">${T('sb_promo')}</div>
         <div class="mc-v" style="color:#7C3AED">−${zl(d.promo)}</div>
-        <div class="mc-s">${promoPct.toFixed(1)}% от выручки</div>
+        <div class="mc-s">${promoPct.toFixed(1)}% ${T('sb_pct_rev')}</div>
       </div>
     </div>`;
 
@@ -773,7 +773,7 @@ function openSidebar(key) {
     const w = v => total > 0 ? Math.round(v/total*100)+'%' : '0%';
     distHtml = `
     <div class="dist-sec">
-      <div class="dist-lbl">Распределение выручки</div>
+      <div class="dist-lbl">${T('sb_dist')}</div>
       <div class="dist-bar">
         <div class="dist-seg" style="width:${w(costPct)};background:#6b7280;border-radius:5px 0 0 5px"></div>
         <div class="dist-seg" style="width:${w(feePct)};background:#A32D2D"></div>
@@ -782,11 +782,11 @@ function openSidebar(key) {
         <div class="dist-seg" style="width:${w(mgPct)};background:#0F6E56;border-radius:0 5px 5px 0"></div>
       </div>
       <div class="dist-leg">
-        <div class="dl"><div class="dl-dot" style="background:#6b7280"></div>Себестоимость<span class="dl-v">${costPct.toFixed(0)}%</span></div>
-        <div class="dl"><div class="dl-dot" style="background:#A32D2D"></div>Сборы Allegro<span class="dl-v">${feePct.toFixed(0)}%</span></div>
-        <div class="dl"><div class="dl-dot" style="background:#BA7517"></div>Реклама CPC<span class="dl-v">${adsPct.toFixed(0)}%</span></div>
-        <div class="dl"><div class="dl-dot" style="background:#7C3AED"></div>Промование<span class="dl-v">${promoPct.toFixed(0)}%</span></div>
-        <div class="dl"><div class="dl-dot" style="background:#0F6E56"></div>Маржа<span class="dl-v">${mgPct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#6b7280"></div>${T('s_cog')}<span class="dl-v">${costPct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#A32D2D"></div>${T('sb_allegro_fees')}<span class="dl-v">${feePct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#BA7517"></div>${T('sb_ads_cpc')}<span class="dl-v">${adsPct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#7C3AED"></div>${T('sb_promo')}<span class="dl-v">${promoPct.toFixed(0)}%</span></div>
+        <div class="dl"><div class="dl-dot" style="background:#0F6E56"></div>${T('col_margin')}<span class="dl-v">${mgPct.toFixed(0)}%</span></div>
       </div>
     </div>`;
 
@@ -795,21 +795,21 @@ function openSidebar(key) {
       const shopRows = SHOPS.filter(s => p.offers&&p.offers[s]).map(s => {
         const sd  = getShopData(p, s);
         const cog = (p.cog&&p.cog[s]) || 0;
-        if (!sd) return `<div class="sb-shop-row"><span class="sb-shop-name" style="color:${SC[s]}">${SHORT[s]}</span><span class="sb-shop-meta">нет продаж</span><span>—</span><span>—</span></div>`;
+        if (!sd) return `<div class="sb-shop-row"><span class="sb-shop-name" style="color:${SC[s]}">${SHORT[s]}</span><span class="sb-shop-meta">${T('sb_no_sales')}</span><span>—</span><span>—</span></div>`;
         const sdCost = cog * sd.sales;
         const sdM    = sd.revenue - sdCost - sd.fees - sd.ads - sd.promo;
         const sdMp   = sd.revenue > 0 ? sdM/sd.revenue*100 : 0;
         return `<div class="sb-shop-row">
           <span class="sb-shop-name" style="color:${SC[s]}">${SHORT[s]}</span>
-          <span class="sb-shop-meta">${sd.sales} шт. · COG ${fmtCog(cog)}</span>
+          <span class="sb-shop-meta">${sd.sales} ${T('units_abbr')} · COG ${fmtCog(cog)}</span>
           <span style="color:#BA7517">${zl(sd.revenue)}</span>
-          <span style="color:${sdM>=0?'#0F6E56':'#A32D2D'};font-weight:600">${sdM>=0?'':'-'}${zl(sdM)} <small style="font-weight:400;color:#aaa">${sdMp.toFixed(1)}%</small></span>
+          <span style="color:${sdM>=0?'#0F6E56':'#A32D2D'};font-weight:600">${sdM>=0?'':'-'}${zl(sdM)} <small style="font-weight:400;color:var(--text-secondary)">${sdMp.toFixed(1)}%</small></span>
         </div>`;
       }).join('');
       shopsHtml = `<div class="sb-shops">${shopRows}</div>`;
     }
   } else {
-    metricsHtml = `<div style="padding:20px;color:#aaa;font-size:13px">Нет данных за выбранный период</div>`;
+    metricsHtml = `<div style="padding:20px;color:var(--text-secondary);font-size:13px">${T('sb_no_data')}</div>`;
   }
 
   document.getElementById('sidebar').innerHTML = `
@@ -824,7 +824,7 @@ function openSidebar(key) {
           curShop==='all'
             ? fmtCog(SHOPS.map(s=>p.cog&&p.cog[s]).find(v=>v!=null&&v>0)) || '—'
             : fmtCog(p.cog&&p.cog[curShop])
-        }</span>${curShop!=='all' ? ` · 🏷 Цена: <span class="id-val" style="color:#0F6E56;font-weight:700">${d && d.sales>0 ? fmtCog(Math.round(d.revenue/d.sales*100)/100) : '—'}</span>` : ''}
+        }</span>${curShop!=='all' ? ` · ${T('sb_price_lbl')}: <span class="id-val" style="color:#0F6E56;font-weight:700">${d && d.sales>0 ? fmtCog(Math.round(d.revenue/d.sales*100)/100) : '—'}</span>` : ''}
       </div>
     </div>
     <div class="sb-body">

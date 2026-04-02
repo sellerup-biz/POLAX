@@ -75,6 +75,17 @@ var TR = {
     no_prods:'Нет товаров по выбранным фильтрам',
     period_lbl:'📅 ПЕРИОД:', from_lbl:'С', to_lbl:'По',
     loading_pill:'⟳ загрузка…',
+    units_abbr:'шт.', days_abbr:'дн.',
+    items_lbl:'товаров', page_lbl:'стр.', of_lbl:'из',
+    col_fees:'Сборы', col_qty_hdr:'Кол-во', col_sku_hdr:'SKU',
+    sb_net_margin:'Чистая маржа', sb_pct_rev:'% от выручки',
+    sb_allegro_fees:'Сборы Allegro', sb_roas:'ROAS',
+    sb_ads_cpc:'Реклама CPC', sb_ads_promo:'реклама+промо',
+    sb_promo:'Промование', sb_dist:'Распределение выручки',
+    sb_no_sales:'нет продаж', sb_transactions:'транзакций',
+    sb_no_data:'Нет данных за выбранный период',
+    sb_price_lbl:'🏷 Цена', total_cats:'категорий',
+    no_data_period:'Нет данных за выбранный период',
     // Categories
     cat_title:'POLAX · Продажи по категориям',
     cat_loading:'Загрузка каталога и данных…',
@@ -155,6 +166,17 @@ var TR = {
     no_prods:'Немає товарів із такими фільтрами',
     period_lbl:'📅 ПЕРІОД:', from_lbl:'З', to_lbl:'По',
     loading_pill:'⟳ завантаження…',
+    units_abbr:'шт.', days_abbr:'дн.',
+    items_lbl:'товарів', page_lbl:'стор.', of_lbl:'з',
+    col_fees:'Збори', col_qty_hdr:'Кількість', col_sku_hdr:'SKU',
+    sb_net_margin:'Чистий прибуток', sb_pct_rev:'% від виручки',
+    sb_allegro_fees:'Збори Allegro', sb_roas:'ROAS',
+    sb_ads_cpc:'Реклама CPC', sb_ads_promo:'реклама+просування',
+    sb_promo:'Просування', sb_dist:'Розподіл виручки',
+    sb_no_sales:'немає продажів', sb_transactions:'транзакцій',
+    sb_no_data:'Немає даних за обраний період',
+    sb_price_lbl:'🏷 Ціна', total_cats:'категорій',
+    no_data_period:'Немає даних за обраний період',
     cat_title:'POLAX · Продажі за категоріями',
     cat_loading:'Завантаження каталогу та даних…',
     cat_chart_t:'Виручка за категоріями',
@@ -232,6 +254,17 @@ var TR = {
     no_prods:'No products match selected filters',
     period_lbl:'📅 PERIOD:', from_lbl:'From', to_lbl:'To',
     loading_pill:'⟳ loading…',
+    units_abbr:'pcs', days_abbr:'days',
+    items_lbl:'items', page_lbl:'p.', of_lbl:'of',
+    col_fees:'Fees', col_qty_hdr:'Qty', col_sku_hdr:'SKUs',
+    sb_net_margin:'Net margin', sb_pct_rev:'% of revenue',
+    sb_allegro_fees:'Allegro fees', sb_roas:'ROAS',
+    sb_ads_cpc:'Ads CPC', sb_ads_promo:'ads+promo',
+    sb_promo:'Promotion', sb_dist:'Revenue distribution',
+    sb_no_sales:'no sales', sb_transactions:'transactions',
+    sb_no_data:'No data for selected period',
+    sb_price_lbl:'🏷 Price', total_cats:'categories',
+    no_data_period:'No data for selected period',
     cat_title:'POLAX · Sales by Category',
     cat_loading:'Loading catalog and data…',
     cat_chart_t:'Revenue by Category',
@@ -309,6 +342,17 @@ var TR = {
     no_prods:'Brak produktów spełniających filtry',
     period_lbl:'📅 OKRES:', from_lbl:'Od', to_lbl:'Do',
     loading_pill:'⟳ ładowanie…',
+    units_abbr:'szt.', days_abbr:'dni',
+    items_lbl:'pozycji', page_lbl:'str.', of_lbl:'z',
+    col_fees:'Opłaty', col_qty_hdr:'Ilość', col_sku_hdr:'SKU',
+    sb_net_margin:'Marża netto', sb_pct_rev:'% przychodu',
+    sb_allegro_fees:'Opłaty Allegro', sb_roas:'ROAS',
+    sb_ads_cpc:'Reklama CPC', sb_ads_promo:'reklama+promo',
+    sb_promo:'Promowanie', sb_dist:'Podział przychodu',
+    sb_no_sales:'brak sprzedaży', sb_transactions:'transakcji',
+    sb_no_data:'Brak danych dla wybranego okresu',
+    sb_price_lbl:'🏷 Cena', total_cats:'kategorii',
+    no_data_period:'Brak danych dla wybranego okresu',
     cat_title:'POLAX · Sprzedaż wg kategorii',
     cat_loading:'Ładowanie katalogu i danych…',
     cat_chart_t:'Przychód wg kategorii',
@@ -332,7 +376,7 @@ var RU_MONTH_IDX = {
 
 // ── State ─────────────────────────────────────────────────────────
 var lang  = localStorage.getItem('polax-lang')  || 'ru';
-var theme = localStorage.getItem('polax-theme') || 'dark';
+var theme = localStorage.getItem('polax-theme') || 'light';
 var _callbacks = [];
 
 // ── Translate ──────────────────────────────────────────────────────
@@ -427,6 +471,7 @@ var css = `
   #polax-controls {
     display:flex; align-items:center; gap:6px;
     margin-left:auto; flex-shrink:0; flex-wrap:wrap;
+    min-width:258px;
   }
   #polax-theme-btn {
     font-size:12px; padding:5px 13px; border-radius:20px;
@@ -469,15 +514,18 @@ function buildControls() {
 }
 
 // ── Init ───────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  buildControls();
-  // Apply saved theme (set attribute so CSS vars kick in immediately)
-  document.documentElement.setAttribute('data-theme', theme);
-  // Apply saved language (triggers data-i18n updates + callbacks)
-  applyLang(lang);
-});
-
-// Also apply theme right away (before DOMContentLoaded) to avoid flash
+// Apply theme immediately (before DOM ready) to avoid flash
 document.documentElement.setAttribute('data-theme', theme);
+
+function _polaxInit() {
+  buildControls();
+  document.documentElement.setAttribute('data-theme', theme);
+  applyLang(lang);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _polaxInit);
+} else {
+  _polaxInit();
+}
 
 })();

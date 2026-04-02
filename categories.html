@@ -408,7 +408,7 @@ function renderChart(cats) {
             font: { size: 10, family: "'Segoe UI', system-ui, sans-serif" },
             maxRotation: 35,
             minRotation: 25,
-            color: '#777',
+            color: getComputedStyle(document.documentElement).getPropertyValue('--chart-tick').trim(),
             callback: function(val, i) {
               const lbl = labels[i];
               return lbl.length > 18 ? lbl.slice(0, 16) + '…' : lbl;
@@ -419,7 +419,7 @@ function renderChart(cats) {
           grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim() },
           ticks: {
             font: { size: 10 },
-            color: '#aaa',
+            color: getComputedStyle(document.documentElement).getPropertyValue('--chart-tick').trim(),
             callback: v => v.toLocaleString('ru-RU') + ' zł'
           }
         }
@@ -433,14 +433,16 @@ function renderChart(cats) {
           ctx2.font = 'bold 10px Segoe UI, system-ui, sans-serif';
           ctx2.textAlign = 'center';
           ctx2.textBaseline = 'bottom';
-          ctx2.fillStyle = '#555';
+          const _tick = getComputedStyle(document.documentElement).getPropertyValue('--chart-tick').trim();
+          const _txt  = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+          ctx2.fillStyle = _tick;
           chart.data.datasets.forEach((ds, di) => {
             const meta = chart.getDatasetMeta(di);
             meta.data.forEach((bar, i) => {
               const v = ds.data[i];
               const p = pcts[i].toFixed(1);
               const y = bar.y - 4;
-              ctx2.fillStyle = '#1a1a1a';
+              ctx2.fillStyle = _txt;
               ctx2.fillText(v.toLocaleString('ru-RU') + ' zł', bar.x, y);
               ctx2.fillStyle = '#BA7517';
               ctx2.fillText(p + '%', bar.x, y - 12);
@@ -460,12 +462,12 @@ function renderTable(cats) {
   const maxRev = cats.length > 0 ? Math.max(...cats.map(c => c.revenue)) : 1;
 
   const colDef = [
-    {id:'name',      label:'Категория',       align:'left'},
-    {id:'revenue',   label:'Выручка',         align:'right'},
-    {id:'sales',     label:'Кол-во шт.',      align:'right'},
-    {id:'pct',       label:'% продаж',        align:'right'},
-    {id:'skus',      label:'SKU в категории', align:'right'},
-    {id:'marginPct', label:'Маржа %',         align:'right'},
+    {id:'name',      label:T('col_cat'),      align:'left'},
+    {id:'revenue',   label:T('col_rev'),      align:'right'},
+    {id:'sales',     label:T('col_qty_hdr'),  align:'right'},
+    {id:'pct',       label:T('pct_col'),      align:'right'},
+    {id:'skus',      label:T('col_sku_hdr'),  align:'right'},
+    {id:'marginPct', label:T('col_margin'),   align:'right'},
   ];
 
   const ico = col => {
@@ -486,12 +488,12 @@ function renderTable(cats) {
         <div class="cat-bar-bg" style="margin-top:4px"><div class="cat-bar-fill" style="width:${barW}%"></div></div>
       </td>
       <td class="tc-am">${zl(c.revenue)}</td>
-      <td>${c.sales.toLocaleString('ru-RU')} шт.</td>
+      <td>${c.sales.toLocaleString('ru-RU')} ${T('units_abbr')}</td>
       <td>
         <span style="font-weight:700">${c.pctRevenue.toFixed(1)}%</span>
       </td>
       <td class="tc-nt">${c.skuCount}</td>
-      <td class="${mpColor}">${c.marginPct.toFixed(1)}%<small style="display:block;font-size:10px;color:#aaa;font-weight:400">${c.marginAmt >= 0 ? '' : '-'}${zl(c.marginAmt)}</small></td>
+      <td class="${mpColor}">${c.marginPct.toFixed(1)}%<small style="display:block;font-size:10px;color:var(--text-secondary);font-weight:400">${c.marginAmt >= 0 ? '' : '-'}${zl(c.marginAmt)}</small></td>
     </tr>`;
   }).join('');
 
@@ -505,12 +507,12 @@ function renderTable(cats) {
   const mpC2 = sumMarginPct >= 30 ? 'tc-gr' : sumMarginPct >= 10 ? 'tc-am' : 'tc-rd';
 
   const footerHtml = `<tr style="background:var(--bg-subtle);border-top:2px solid var(--sep);font-weight:700">
-    <td style="font-weight:700;font-size:12px">Итого (${cats.length} категорий)</td>
+    <td style="font-weight:700;font-size:12px">${T('total')} (${cats.length} ${T('total_cats')})</td>
     <td class="tc-am" style="font-weight:700">${zl(sumRevenue)}</td>
-    <td style="font-weight:700">${sumSales.toLocaleString('ru-RU')} шт.</td>
+    <td style="font-weight:700">${sumSales.toLocaleString('ru-RU')} ${T('units_abbr')}</td>
     <td style="font-weight:700">100%</td>
     <td class="tc-nt">—</td>
-    <td class="${mpC2}" style="font-weight:700">${sumMarginPct.toFixed(1)}%<small style="display:block;font-size:10px;color:#aaa;font-weight:400">${sumMarginAmt >= 0 ? '' : '-'}${zl(sumMarginAmt)}</small></td>
+    <td class="${mpC2}" style="font-weight:700">${sumMarginPct.toFixed(1)}%<small style="display:block;font-size:10px;color:var(--text-secondary);font-weight:400">${sumMarginAmt >= 0 ? '' : '-'}${zl(sumMarginAmt)}</small></td>
   </tr>`;
 
   document.getElementById('catTbl').innerHTML = `
@@ -547,8 +549,8 @@ async function refresh() {
 function rerender() {
   const cats = buildCategoryData();
   if (cats.length === 0) {
-    document.getElementById('catChartWrap').innerHTML = '<div class="empty">Нет данных за выбранный период</div>';
-    document.getElementById('catTbl').innerHTML = '<div class="empty">Нет данных за выбранный период</div>';
+    document.getElementById('catChartWrap').innerHTML = '<div class="empty">'+T('no_data_period')+'</div>';
+    document.getElementById('catTbl').innerHTML = '<div class="empty">'+T('no_data_period')+'</div>';
     return;
   }
   renderChart(cats);
