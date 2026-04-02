@@ -371,10 +371,10 @@ function mkTotals(rows,key,elId){
   var gS=SHOPS.map(function(s){return rows.reduce(function(sum,r){return sum+(r[s]||0);},0);});
   var gT=gS.reduce(function(a,b){return a+b;},0);
   var html=SHOPS.map(function(s,i){
-    return'<div style="background:var(--bg-deep);border:1px solid #222;border-radius:8px;padding:10px 14px">'
+    return'<div style="background:var(--bg-deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px">'
       +'<div style="font-size:10px;color:'+COLORS[i]+';font-weight:700;margin-bottom:4px">'+s+'</div>'
-      +'<div style="font-size:17px;font-weight:800;color:var(--text-primary)">'+gS[i].toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</div>'
-      +'<div style="font-size:10px;color:#aaa;margin-top:2px">всего за период</div></div>';
+      +'<div style="font-size:17px;font-weight:800;color:var(--text-secondary)">'+gS[i].toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</div>'
+      +'<div style="font-size:10px;color:var(--text-faint);margin-top:2px">'+T('total_period')+'</div></div>';
   }).join('');
   html+='<div style="background:#BA7517;border-radius:8px;padding:10px 14px">'
     +'<div style="font-size:10px;color:rgba(255,255,255,0.8);font-weight:700;margin-bottom:4px">'+T('all_shops')+'</div>'
