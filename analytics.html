@@ -6,35 +6,35 @@
 <title>POLAX · Аналитика</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1a;min-height:100vh;padding:1.75rem}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#090909;color:#e8e8e8;min-height:100vh;padding:1.75rem}
 
-.hdr{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:12px 18px;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
+.hdr{display:flex;align-items:center;justify-content:space-between;background:#111111;border:1px solid #252525;border-radius:14px;padding:12px 18px;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
 .hdr-left{display:flex;align-items:center;gap:12px}
 .logo{width:38px;height:38px;background:#BA7517;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
-.hdr h1{font-size:20px;font-weight:700;letter-spacing:2px;color:#1a1a1a}
+.hdr h1{font-size:20px;font-weight:700;letter-spacing:2px;color:#e8e8e8}
 .hdr p{font-size:11px;color:#888;margin-top:2px}
-.btn-back{font-size:12px;padding:7px 16px;border-radius:8px;background:#f4f2ee;color:#555;border:1px solid #ddd;cursor:pointer;text-decoration:none;display:inline-block;font-weight:500}
+.btn-back{font-size:12px;padding:7px 16px;border-radius:8px;background:#161616;color:#aaa;border:1px solid #2a2a2a;cursor:pointer;text-decoration:none;display:inline-block;font-weight:500}
 
 /* TABS */
 .tabs{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
-.tab{font-size:12px;padding:7px 18px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#777;cursor:pointer;font-weight:500;transition:all 0.15s}
-.tab.on{background:#BA7517;color:#fff;border-color:#BA7517;font-weight:700}
-.tab:hover:not(.on):not(.future){background:#fdfaf4;border-color:#BA7517;color:#BA7517}
-.tab.future{color:#ccc;border-color:#ede9e3;background:#faf9f6;cursor:default;font-style:italic}
+.tab{font-size:12px;padding:7px 18px;border-radius:8px;border:1px solid #222;background:#111111;color:#aaa;cursor:pointer;font-weight:500;transition:all 0.15s}
+.tab.on{background:#BA7517;color:#fff;border-color:#D4891E;font-weight:700}
+.tab:hover:not(.on):not(.future){background:#0f0f0f;border-color:#D4891E;color:#BA7517}
+.tab.future{color:#ccc;border-color:#1e1e1e;background:#0d0d0d;cursor:default;font-style:italic}
 
 .sl{font-size:9px;font-weight:700;color:#aaa;letter-spacing:1.2px;text-transform:uppercase;margin:0 0 8px 2px}
 
 .c4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
 .c5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
 @media(max-width:700px){.c4,.c5{grid-template-columns:1fr 1fr}}
-.mc{background:#fff;border:1px solid #e0dcd4;border-radius:12px;padding:12px 16px}
+.mc{background:#111111;border:1px solid #252525;border-radius:12px;padding:12px 16px}
 .mc-l{font-size:10px;color:#888;margin-bottom:6px;font-weight:600}
-.mc-v{font-size:18px;font-weight:700;color:#1a1a1a}
+.mc-v{font-size:18px;font-weight:700;color:#e8e8e8}
 .mc-s{font-size:10px;color:#bbb;margin-top:3px}
 .mc.am .mc-v{color:#BA7517}
 .mc.bl .mc-v{color:#185FA5}
 .mc.tl .mc-v{color:#0F6E56}
-.mc.gd{background:#BA7517;border-color:#BA7517}
+.mc.gd{background:#BA7517;border-color:#D4891E}
 .mc.gd .mc-l{color:rgba(255,255,255,0.75)}
 .mc.gd .mc-v{color:#fff;font-size:20px}
 .mc.gd .mc-s{color:rgba(255,255,255,0.6)}
@@ -44,15 +44,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
 @media(max-width:800px){.three{grid-template-columns:1fr}}
 
-.pn{background:#fff;border:1px solid #e0dcd4;border-radius:12px;padding:14px 16px}
-.pt{font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.pn{background:#111111;border:1px solid #252525;border-radius:12px;padding:14px 16px}
+.pt{font-size:12px;font-weight:700;color:#e8e8e8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .tag{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700}
-.ta{background:#FAEEDA;color:#854F0B}
-.tb{background:#E6F1FB;color:#0C447C}
-.tt{background:#E1F5EE;color:#085041}
-.tr{background:#FCEBEB;color:#791F1F}
+.ta{background:#1a0d00;color:#D4891E}
+.tb{background:#001226;color:#3B8FD4}
+.tt{background:#001a12;color:#1A9E7A}
+.tr{background:#1a0606;color:#E04545}
 
-.crow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f2ec;font-size:11px;color:#1a1a1a;gap:8px}
+.crow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #181818;font-size:11px;color:#e8e8e8;gap:8px}
 .crow:last-child{border-bottom:none;font-weight:700}
 .crow-r{display:flex;align-items:baseline;gap:8px;flex-shrink:0}
 .pct{font-size:10px;color:#aaa;min-width:38px;text-align:right}
@@ -61,21 +61,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 .bi{height:4px;border-radius:2px;margin-top:3px}
 
 .tbl{width:100%;font-size:10px;border-collapse:collapse}
-.tbl th{text-align:right;padding:5px 6px;color:#aaa;font-weight:600;border-bottom:1px solid #f0ece4;font-size:9px}
+.tbl th{text-align:right;padding:5px 6px;color:#aaa;font-weight:600;border-bottom:1px solid #1e1e1e;font-size:9px}
 .tbl th:first-child{text-align:left}
-.tbl td{text-align:right;padding:5px 6px;border-bottom:1px solid #f5f2ec;color:#1a1a1a}
+.tbl td{text-align:right;padding:5px 6px;border-bottom:1px solid #181818;color:#e8e8e8}
 .tbl td:first-child{text-align:left;color:#777}
-.tbl tr:last-child td{border:none;font-weight:700;color:#1a1a1a}
+.tbl tr:last-child td{border:none;font-weight:700;color:#e8e8e8}
 .neg-c{color:#A32D2D}
 
-.chart-wrap{background:#fff;border:1px solid #e0dcd4;border-radius:12px;padding:14px 16px;margin-bottom:1.25rem}
+.chart-wrap{background:#111111;border:1px solid #252525;border-radius:12px;padding:14px 16px;margin-bottom:1.25rem}
 .leg{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
 .li{display:flex;align-items:center;gap:5px;font-size:10px;color:#555}
 .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 .footer{text-align:center;font-size:11px;color:#ccc;margin-top:0.5rem;letter-spacing:1px}
 
 /* NBP rate badge */
-.nbp-badge{font-size:9px;color:#aaa;padding:2px 6px;background:#f5f2ec;border-radius:3px;font-weight:500}
+.nbp-badge{font-size:9px;color:#aaa;padding:2px 6px;background:#181818;border-radius:3px;font-weight:500}
 .native-val{font-size:9px;color:#bbb;margin-top:1px}
 </style>
 </head>
@@ -115,7 +115,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
     <div class="pt">Расходы по категориям <span class="tag tr" id="tag-costs"></span></div>
     <div id="costs-breakdown"></div>
   </div>
-  <div class="pn" style="background:#fdfaf4;border-color:#e8e0d0">
+  <div class="pn" style="background:#0f0f0f;border-color:#e8e0d0">
     <div class="pt">Сводка месяца <span class="tag ta" id="tag-summary"></span></div>
     <div id="summary-block"></div>
   </div>
@@ -336,7 +336,7 @@ function renderCountriesBreakdown(){
 
   // Итого — реальная PLN-сумма по магазинам + eMAG (authoritative)
   html += '<div class="crow">'
-    +'<span style="font-weight:700;color:#1a1a1a">Итого (все → PLN)</span>'
+    +'<span style="font-weight:700;color:#e8e8e8">Итого (все → PLN)</span>'
     +'<div class="crow-r">'
     +'<span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(allTotal)+' zł</span>'
     +'<span class="pct">100%</span>'
@@ -379,8 +379,8 @@ function renderCostsBreakdown(){
       +'</div></div>';
   }).join('');
   var netPct = sales > 0 ? (net/sales*100).toFixed(1) : '0.0';
-  html += '<div class="crow" style="border-top:1px solid #e0dcd4;margin-top:4px;padding-top:8px">'
-    +'<span style="font-weight:700;color:#1a1a1a">Итого расходы</span>'
+  html += '<div class="crow" style="border-top:1px solid #252525;margin-top:4px;padding-top:8px">'
+    +'<span style="font-weight:700;color:#e8e8e8">Итого расходы</span>'
     +'<div class="crow-r">'
     +'<span class="neg" style="font-size:12px;font-weight:700">-'+fmt(net)+' zł</span>'
     +'<span class="pct neg" style="font-weight:700">'+netPct+'%</span>'
@@ -445,7 +445,7 @@ function renderShopTables(){
       +row('Reklama',     sc.ads||0,        false)
       +row('Abonament',   sc.subscription||0, false)
       +row('Rabaty',      sc.discount||0,   true)
-      +'<tr style="border-top:1px solid #e0dcd4">'
+      +'<tr style="border-top:1px solid #252525">'
       +'<td style="font-weight:700">Итого расходы</td>'
       +'<td class="neg-c" style="font-weight:700">-'+fmt(net)+' zł</td>'
       +'<td class="neg-c" style="font-weight:700">'+pct+'%</td></tr>'
@@ -482,7 +482,7 @@ function renderDynChart(){
     options:{
       responsive:true,maintainAspectRatio:true,
       plugins:{
-        legend:{display:true,position:'bottom',labels:{font:{size:10},color:'#777',boxWidth:10,padding:14}},
+        legend:{display:true,position:'bottom',labels:{font:{size:10},color:'#aaa',boxWidth:10,padding:14}},
         tooltip:{callbacks:{label:function(c){
           if(c.datasetIndex===1)
             return ' Расходы: '+fmt(c.parsed.y)+' zł ('+costsPct[c.dataIndex]+'% от продаж)';
@@ -490,8 +490,8 @@ function renderDynChart(){
         }}}
       },
       scales:{
-        x:{grid:{color:'rgba(0,0,0,0.03)'},ticks:{font:{size:11},color:'#999'}},
-        y:{grid:{color:'rgba(0,0,0,0.03)'},ticks:{font:{size:11},color:'#999',
+        x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{font:{size:11},color:'#666'}},
+        y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{font:{size:11},color:'#999',
           callback:function(v){ return (v/1000).toFixed(0)+'k zł'; }}}
       }
     },

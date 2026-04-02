@@ -6,17 +6,17 @@
 <title>POLAX — Allegro Pricing Dashboard</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1a;min-height:100vh;padding:1.75rem}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#090909;color:#e8e8e8;min-height:100vh;padding:1.75rem}
 
 /* HEADER */
-.header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1.5px solid #ddd9d0}
+.header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1.5px solid #1e1e1e}
 .logo{width:46px;height:46px;background:#BA7517;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;letter-spacing:1px;flex-shrink:0}
-.header h1{font-size:26px;font-weight:800;letter-spacing:4px;color:#1a1a1a}
+.header h1{font-size:26px;font-weight:800;letter-spacing:4px;color:#e8e8e8}
 .header p{font-size:12px;color:#888;margin-top:3px}
 
 /* LEGEND */
 .legend{display:flex;gap:16px;margin-bottom:1.25rem;flex-wrap:wrap}
-.li{display:flex;align-items:center;gap:6px;font-size:11px;color:#555;font-weight:500}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:#aaa;font-weight:500}
 .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
 /* STORES GRID */
@@ -24,66 +24,66 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 @media(max-width:900px){.stores{grid-template-columns:1fr}}
 
 /* STORE CARD */
-.sc{background:#fff;border:1px solid #e0dcd4;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.sc{background:#111111;border:1px solid #252525;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
 .sc.amber-border{border:2.5px solid #BA7517}
 .sc.blue-border{border:2.5px solid #185FA5}
 
-.sc-head{padding:12px 16px 10px;border-bottom:1px solid #f0ece4;background:#fdfaf4}
-.sc-name{font-size:14px;font-weight:700;color:#1a1a1a;letter-spacing:0.3px}
+.sc-head{padding:12px 16px 10px;border-bottom:1px solid #1e1e1e;background:#0f0f0f}
+.sc-name{font-size:14px;font-weight:700;color:#e8e8e8;letter-spacing:0.3px}
 .sc-sub{font-size:10px;color:#999;margin-top:2px}
 .tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:6px}
-.t-amber{background:#FAEEDA;color:#BA7517}
-.t-teal{background:#E1F5EE;color:#0F6E56}
-.t-blue{background:#E6F1FB;color:#185FA5}
+.t-amber{background:#1a0d00;color:#BA7517}
+.t-teal{background:#001a12;color:#0F6E56}
+.t-blue{background:#001226;color:#185FA5}
 
 /* RULES SECTION */
-.section-label{font-size:9px;font-weight:700;letter-spacing:1px;color:#aaa;padding:8px 16px 4px;text-transform:uppercase;background:#faf9f6}
+.section-label{font-size:9px;font-weight:700;letter-spacing:1px;color:#aaa;padding:8px 16px 4px;text-transform:uppercase;background:#0d0d0d}
 
 .rules{padding:4px 0 4px}
-.rule{display:flex;align-items:flex-start;gap:8px;padding:7px 16px;border-bottom:1px solid #f5f2ec}
+.rule{display:flex;align-items:flex-start;gap:8px;padding:7px 16px;border-bottom:1px solid #181818}
 .rule:last-child{border-bottom:none}
 .ri{flex-shrink:0;width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
-.ri-d{background:#EAF3DE;color:#3B6D11}
-.ri-u{background:#FAEEDA;color:#BA7517}
+.ri-d{background:#0d1a00;color:#6db84d}
+.ri-u{background:#1a0d00;color:#BA7517}
 .rb{flex:1}
-.rt{font-size:12px;color:#1a1a1a;line-height:1.45;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.rt{font-size:12px;color:#e8e8e8;line-height:1.45;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
 .rc{font-size:10px;color:#aaa;margin-top:2px}
 .badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
-.bd{background:#EAF3DE;color:#3B6D11}
-.bu{background:#FAEEDA;color:#BA7517}
+.bd{background:#0d1a00;color:#6db84d}
+.bu{background:#1a0d00;color:#BA7517}
 .ref{font-size:9px;color:#999;font-style:italic;margin-top:2px}
 
 /* ADS SECTION */
-.ads-block{border-top:1.5px dashed #e5e1d8;background:#f7f5f0;padding:10px 16px 12px}
+.ads-block{border-top:1.5px dashed #333;background:#0d0d0d;padding:10px 16px 12px}
 .ads-title{font-size:9px;font-weight:800;letter-spacing:1.2px;color:#BA7517;text-transform:uppercase;margin-bottom:8px}
 .ads-campaign{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px}
 .ads-campaign:last-child{margin-bottom:0}
 .camp-num{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#BA7517;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
 .camp-num.blue{background:#185FA5}
 .camp-body{flex:1}
-.camp-name{font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:3px}
+.camp-name{font-size:11px;font-weight:700;color:#e8e8e8;margin-bottom:3px}
 .camp-tags{display:flex;flex-wrap:wrap;gap:4px}
-.camp-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:#FAEEDA;color:#BA7517;font-weight:600}
-.camp-tag.tl{background:#E1F5EE;color:#0F6E56}
-.camp-tag.bl{background:#E6F1FB;color:#185FA5}
+.camp-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:#1a0d00;color:#BA7517;font-weight:600}
+.camp-tag.tl{background:#001a12;color:#0F6E56}
+.camp-tag.bl{background:#001226;color:#185FA5}
 
 .ads-empty{font-size:11px;color:#bbb;font-style:italic;padding:2px 0}
 
 /* CALCULATOR */
-.calc{background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
-.calc h2{font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:14px}
+.calc{background:#111111;border:1px solid #252525;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.calc h2{font-size:14px;font-weight:700;color:#e8e8e8;margin-bottom:14px}
 .calc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 @media(max-width:600px){.calc-inputs{grid-template-columns:1fr}}
 .ig label{font-size:11px;color:#777;display:block;margin-bottom:5px;font-weight:600}
-.ig input,.ig select{width:100%;padding:8px 10px;font-size:13px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#1a1a1a}
+.ig input,.ig select{width:100%;padding:8px 10px;font-size:13px;border:1px solid #222;border-radius:7px;background:#111111;color:#e8e8e8}
 .res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @media(max-width:600px){.res-grid{grid-template-columns:1fr}}
-.rcard{background:#F4F2EE;border:1px solid #e5e1d8;border-radius:9px;padding:12px 14px}
+.rcard{background:#090909;border:1px solid #222;border-radius:9px;padding:12px 14px}
 .rstore{font-size:10px;color:#888;margin-bottom:5px;font-weight:600;letter-spacing:0.3px}
 .rprice{font-size:22px;font-weight:800}
 .rdiff{font-size:10px;margin-top:3px;font-weight:500}
 .rref{font-size:10px;color:#bbb;margin-top:2px;font-style:italic}
-.cdown{color:#3B6D11}.cup{color:#BA7517}
+.cdown{color:#6db84d}.cup{color:#BA7517}
 
 .footer{text-align:center;font-size:11px;color:#ccc;margin-top:0.5rem;letter-spacing:1px}
 </style>
@@ -97,8 +97,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
     <p>Правила ценообразования · Allegro + eMAG · 4 магазина</p>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;flex-shrink:0">
-    <a href="analytics.html" style="font-size:12px;padding:7px 16px;border-radius:8px;background:#f4f2ee;color:#555;text-decoration:none;font-weight:600;border:1px solid #ddd">Подробная аналитика →</a>
-    <a href="unit_economy.html" style="font-size:12px;padding:7px 16px;border-radius:8px;background:#f4f2ee;color:#555;text-decoration:none;font-weight:600;border:1px solid #ddd">Юнит экономика →</a>
+    <a href="analytics.html" style="font-size:12px;padding:7px 16px;border-radius:8px;background:#161616;color:#aaa;text-decoration:none;font-weight:600;border:1px solid #2a2a2a">Подробная аналитика →</a>
+    <a href="unit_economy.html" style="font-size:12px;padding:7px 16px;border-radius:8px;background:#161616;color:#aaa;text-decoration:none;font-weight:600;border:1px solid #2a2a2a">Юнит экономика →</a>
     <a href="categories.html" style="font-size:12px;padding:7px 16px;border-radius:8px;background:#BA7517;color:#fff;text-decoration:none;font-weight:600">Продажи по категориям →</a>
   </div>
 </div>
@@ -106,32 +106,32 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 <div id="goalBlock"></div>
 
 <!-- DAILY SALES -->
-<div style="background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">
+<div style="background:#111111;border:1px solid #252525;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
     <div>
-      <div style="font-size:14px;font-weight:700;color:#1a1a1a">Продажи по дням · последние 30 дней</div>
-      <div style="font-size:11px;color:#999;margin-top:2px">Allegro + eMAG · обновляется каждую ночь автоматически</div>
+      <div style="font-size:14px;font-weight:700;color:#e8e8e8">Продажи по дням · последние 30 дней</div>
+      <div style="font-size:11px;color:#666;margin-top:2px">Allegro + eMAG · обновляется каждую ночь автоматически</div>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#BA7517;display:inline-block"></span>Mlot_i_Klucz</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#0F6E56;display:inline-block"></span>PolaxEuroGroup</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#185FA5;display:inline-block"></span>Sila_Narzedzi</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><span style="width:10px;height:10px;border-radius:2px;background:#C4153A;display:inline-block"></span>eMAG (RO/BG/HU)</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#aaa"><span style="width:10px;height:10px;border-radius:2px;background:#BA7517;display:inline-block"></span>Mlot_i_Klucz</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#aaa"><span style="width:10px;height:10px;border-radius:2px;background:#0F6E56;display:inline-block"></span>PolaxEuroGroup</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#aaa"><span style="width:10px;height:10px;border-radius:2px;background:#185FA5;display:inline-block"></span>Sila_Narzedzi</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#aaa"><span style="width:10px;height:10px;border-radius:2px;background:#C4153A;display:inline-block"></span>eMAG (RO/BG/HU)</div>
     </div>
   </div>
   <canvas id="salesChart" style="width:100%;max-height:300px"></canvas>
 </div>
 
 <!-- MONTHLY SALES -->
-<div style="background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem">
+<div style="background:#111111;border:1px solid #252525;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
     <div>
-      <div style="font-size:14px;font-weight:700;color:#1a1a1a">Продажи по месяцам · 2026</div>
-      <div style="font-size:11px;color:#999;margin-top:2px">Allegro + eMAG · обновляется каждую ночь автоматически</div>
+      <div style="font-size:14px;font-weight:700;color:#e8e8e8">Продажи по месяцам · 2026</div>
+      <div style="font-size:11px;color:#666;margin-top:2px">Allegro + eMAG · обновляется каждую ночь автоматически</div>
     </div>
   </div>
   <canvas id="monthlyChart" style="width:100%;max-height:320px"></canvas>
-  <div style="margin-top:1.25rem;border-top:1px solid #f0ece4;padding-top:1rem">
+  <div style="margin-top:1.25rem;border-top:1px solid #1e1e1e;padding-top:1rem">
     <div style="font-size:11px;font-weight:700;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Сумма по месяцам</div>
     <div style="overflow-x:auto"><table id="monthlyTable" style="width:100%;font-size:12px;border-collapse:collapse"></table></div>
   </div>
@@ -141,7 +141,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
 <!-- PRICING RULES -->
 <div style="font-size:11px;font-weight:700;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.75rem;padding-left:2px">Правила ценообразования · Allegro</div>
 <div class="legend">
-  <div class="li"><div class="dot" style="background:#3B6D11"></div> Дешевле рынка (−zł / −%)</div>
+  <div class="li"><div class="dot" style="background:#1a3000"></div> Дешевле рынка (−zł / −%)</div>
   <div class="li"><div class="dot" style="background:#BA7517"></div> Дороже мин. цены (+20%)</div>
   <div class="li"><div class="dot" style="background:transparent;border:2px dashed #aaa"></div> Ориентир: самая дешёвая цена на рынке</div>
 </div>
@@ -340,15 +340,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1
     <div class="ads-block">
       <div class="ads-title">ADS · Рекламные кампании</div>
       <div class="ads-campaign">
-        <div class="camp-num" style="background:#3B6D11">B</div>
+        <div class="camp-num" style="background:#1a3000">B</div>
         <div class="camp-body">
           <div class="camp-name">Компания BIG · все товары кроме:</div>
           <div class="camp-tags">
-            <span class="camp-tag" style="background:#FCEBEB;color:#A32D2D;text-decoration:line-through">OPRYSKIWACZ</span>
-            <span class="camp-tag" style="background:#FCEBEB;color:#A32D2D;text-decoration:line-through">WAŁEK</span>
-            <span class="camp-tag" style="background:#FCEBEB;color:#A32D2D;text-decoration:line-through">Żyłka, Zacisk</span>
-            <span class="camp-tag" style="background:#FCEBEB;color:#A32D2D;text-decoration:line-through">Plandeka</span>
-            <span class="camp-tag" style="background:#FCEBEB;color:#A32D2D;text-decoration:line-through">Młotek</span>
+            <span class="camp-tag" style="background:#1a0606;color:#A32D2D;text-decoration:line-through">OPRYSKIWACZ</span>
+            <span class="camp-tag" style="background:#1a0606;color:#A32D2D;text-decoration:line-through">WAŁEK</span>
+            <span class="camp-tag" style="background:#1a0606;color:#A32D2D;text-decoration:line-through">Żyłka, Zacisk</span>
+            <span class="camp-tag" style="background:#1a0606;color:#A32D2D;text-decoration:line-through">Plandeka</span>
+            <span class="camp-tag" style="background:#1a0606;color:#A32D2D;text-decoration:line-through">Młotek</span>
           </div>
         </div>
       </div>
@@ -369,9 +369,9 @@ function mkTotals(rows,key,elId){
   var gS=SHOPS.map(function(s){return rows.reduce(function(sum,r){return sum+(r[s]||0);},0);});
   var gT=gS.reduce(function(a,b){return a+b;},0);
   var html=SHOPS.map(function(s,i){
-    return'<div style="background:#f9f7f2;border:1px solid #e5e1d8;border-radius:8px;padding:10px 14px">'
+    return'<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:10px 14px">'
       +'<div style="font-size:10px;color:'+COLORS[i]+';font-weight:700;margin-bottom:4px">'+s+'</div>'
-      +'<div style="font-size:17px;font-weight:800;color:#1a1a1a">'+gS[i].toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</div>'
+      +'<div style="font-size:17px;font-weight:800;color:#e8e8e8">'+gS[i].toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</div>'
       +'<div style="font-size:10px;color:#aaa;margin-top:2px">всего за период</div></div>';
   }).join('');
   html+='<div style="background:#BA7517;border-radius:8px;padding:10px 14px">'
@@ -382,13 +382,13 @@ function mkTotals(rows,key,elId){
 }
 
 function mkTable(rows,labelKey,elId,fmt){
-  var th='<thead><tr><th style="text-align:left;padding:6px 10px;color:#999;font-weight:600;border-bottom:1px solid #f0ece4">'+(labelKey==='date'?'Дата':'Месяц')+'</th>'
-    +SHOPS.map(function(s,i){return'<th style="text-align:right;padding:6px 10px;color:'+COLORS[i]+';font-weight:600;border-bottom:1px solid #f0ece4">'+s+'</th>';}).join('')
-    +'<th style="text-align:right;padding:6px 10px;font-weight:700;border-bottom:1px solid #f0ece4">Итого</th></tr></thead>';
+  var th='<thead><tr><th style="text-align:left;padding:6px 10px;color:#666;font-weight:600;border-bottom:1px solid #1e1e1e">'+(labelKey==='date'?'Дата':'Месяц')+'</th>'
+    +SHOPS.map(function(s,i){return'<th style="text-align:right;padding:6px 10px;color:'+COLORS[i]+';font-weight:600;border-bottom:1px solid #1e1e1e">'+s+'</th>';}).join('')
+    +'<th style="text-align:right;padding:6px 10px;font-weight:700;color:#aaa;border-bottom:1px solid #1e1e1e">Итого</th></tr></thead>';
   var tb='<tbody>'+rows.map(function(r,i){
     var tot=SHOPS.reduce(function(s,k){return s+(r[k]||0);},0);
-    return'<tr style="background:'+(i%2===0?'#fdfaf4':'#fff')+'">'
-      +'<td style="padding:6px 10px;color:#555;font-weight:'+(labelKey==='date'?'500':'600')+'">'+r[labelKey]+'</td>'
+    return'<tr style="background:'+(i%2===0?'#0e0e0e':'#111111')+'">'
+      +'<td style="padding:6px 10px;color:#aaa;font-weight:'+(labelKey==='date'?'500':'600')+'">'+r[labelKey]+'</td>'
       +SHOPS.map(function(s){return'<td style="text-align:right;padding:6px 10px">'+(fmt?(r[s]||0).toFixed(2):(r[s]||0).toLocaleString())+' zł</td>';}).join('')
       +'<td style="text-align:right;padding:6px 10px;font-weight:700">'+(fmt?tot.toFixed(2):tot.toLocaleString())+' zł</td></tr>';
   }).join('')+'</tbody>';
@@ -428,8 +428,8 @@ function renderDaily(days){
         }}}
       },
       scales:{
-        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999'}},
-        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999',callback:function(v){return v+' zł';}}}
+        x:{grid:{color:'rgba(255,255,255,0.07)'},ticks:{font:{size:11},color:'#666'}},
+        y:{grid:{color:'rgba(255,255,255,0.07)'},ticks:{font:{size:11},color:'#666',callback:function(v){return v+' zł';}}}
       }
     }
   });
@@ -441,14 +441,14 @@ function renderMonthly(months){
   });
   ds.push({type:'line',label:'Все магазины',
     data:months.map(function(m){return SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);}),
-    borderColor:'#1a1a1a',backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#1a1a1a',tension:0.3,order:0});
+    borderColor:'#e8e8e8',backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#e8e8e8',tension:0.3,order:0});
   new Chart(document.getElementById('monthlyChart').getContext('2d'),{
     data:{labels:months.map(function(m){return m.month;}),datasets:ds},
     options:{responsive:true,maintainAspectRatio:true,
-      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},color:'#555',boxWidth:12,padding:14}},
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},color:'#aaa',boxWidth:12,padding:14}},
         tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toLocaleString()+' zł';}}}},
-      scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999'}},
-        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#999',callback:function(v){return v.toLocaleString()+' zł';}}}}}
+      scales:{x:{grid:{color:'rgba(255,255,255,0.07)'},ticks:{font:{size:11},color:'#666'}},
+        y:{grid:{color:'rgba(255,255,255,0.07)'},ticks:{font:{size:11},color:'#666',callback:function(v){return v.toLocaleString()+' zł';}}}}}
   });
   mkTable(months,'month','monthlyTable',false);
   mkTotals(months,'month','monthTotalsGrid');
@@ -495,18 +495,18 @@ function renderGoal(months){
   var isSame = best === curMonth;
 
   var html =
-    '<div style="background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">'
-    +'<div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px">Цель: 200 000 zł в месяц</div>'
-    +'<div style="font-size:11px;color:#999;margin-bottom:1.25rem">суммарно по всем 4 магазинам (Allegro + eMAG)</div>'
+    '<div style="background:#111111;border:1px solid #252525;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">'
+    +'<div style="font-size:14px;font-weight:700;color:#e8e8e8;margin-bottom:4px">Цель: 200 000 zł в месяц</div>'
+    +'<div style="font-size:11px;color:#666;margin-bottom:1.25rem">суммарно по всем 4 магазинам (Allegro + eMAG)</div>'
 
     // --- Лучший месяц ---
     +(isSame ? '' :
       '<div style="margin-bottom:1.25rem">'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">'
-      +'<div style="font-size:12px;font-weight:600;color:#555">Лучший месяц — <span style="color:#BA7517">'+best+'</span></div>'
+      +'<div style="font-size:12px;font-weight:600;color:#aaa">Лучший месяц — <span style="color:#BA7517">'+best+'</span></div>'
       +'<div style="font-size:13px;font-weight:700;color:#BA7517">'+bestTotal.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł &nbsp;·&nbsp; '+bestPct+'%</div>'
       +'</div>'
-      +'<div style="background:#f0ece4;border-radius:50px;height:14px;overflow:hidden">'
+      +'<div style="background:#1a1a1a;border-radius:50px;height:14px;overflow:hidden">'
       +'<div style="height:100%;border-radius:50px;background:#BA7517;width:'+bestPct+'%;transition:width 1s ease;position:relative">'
       +(bestPct>=10?'<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#fff">'+bestPct+'%</span>':'')
       +'</div></div>'
@@ -516,20 +516,20 @@ function renderGoal(months){
     // --- Текущий месяц ---
     +'<div>'
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">'
-    +'<div style="font-size:12px;font-weight:600;color:#555">'+( isSame ? 'Лучший и текущий месяц — <span style="color:#185FA5">'+curMonth+'</span>' : 'Текущий месяц — <span style="color:#185FA5">'+curMonth+'</span>')+'</div>'
+    +'<div style="font-size:12px;font-weight:600;color:#aaa">'+( isSame ? 'Лучший и текущий месяц — <span style="color:#185FA5">'+curMonth+'</span>' : 'Текущий месяц — <span style="color:#185FA5">'+curMonth+'</span>')+'</div>'
     +'<div style="font-size:13px;font-weight:700;color:#185FA5">'+curTotal.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł &nbsp;·&nbsp; '+curPct+'%</div>'
     +'</div>'
-    +'<div style="background:#f0ece4;border-radius:50px;height:14px;overflow:hidden">'
+    +'<div style="background:#1a1a1a;border-radius:50px;height:14px;overflow:hidden">'
     +'<div style="height:100%;border-radius:50px;background:#185FA5;width:'+curPct+'%;transition:width 1s ease;position:relative">'
     +(curPct>=10?'<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#fff">'+curPct+'%</span>':'')
     +'</div></div>'
     +'</div>'
 
     // --- До цели ---
-    +'<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0ece4;display:flex;gap:16px;flex-wrap:wrap">'
-    +'<div style="font-size:11px;color:#aaa">До цели (лучший): <span style="color:#1a1a1a;font-weight:600">'+Math.max(0,(GOAL-bestTotal)).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</span></div>'
+    +'<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #1e1e1e;display:flex;gap:16px;flex-wrap:wrap">'
+    +'<div style="font-size:11px;color:#aaa">До цели (лучший): <span style="color:#e8e8e8;font-weight:600">'+Math.max(0,(GOAL-bestTotal)).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</span></div>'
     +(isSame?'':
-      '<div style="font-size:11px;color:#aaa">До цели (текущий): <span style="color:#1a1a1a;font-weight:600">'+Math.max(0,(GOAL-curTotal)).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</span></div>'
+      '<div style="font-size:11px;color:#aaa">До цели (текущий): <span style="color:#e8e8e8;font-weight:600">'+Math.max(0,(GOAL-curTotal)).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</span></div>'
     )
     +'</div>'
     +'</div>';
