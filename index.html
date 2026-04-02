@@ -542,14 +542,16 @@ function renderGoal(months){
   document.getElementById('goalBlock').innerHTML = html;
 }
 
-window.onPolaxChange && onPolaxChange(function(){
+
+</script>
+<script src="i18n.js"></script>
+<script>
+onPolaxChange(function(){
   if(_lastDays) renderDaily(_lastDays);
   if(_lastMonths){ renderMonthly(_lastMonths); if(typeof renderGoal==='function') renderGoal(_lastMonths); }
-  // Re-apply data-i18n for mkTable/mkTotals which generate their own HTML
   if(_lastMonths){ mkTable(_lastMonths,'month','monthlyTable',false); mkTotals(_lastMonths,'month','monthTotalsGrid'); }
 });
 </script>
-<script src="i18n.js"></script>
 </body>
 </html>
 

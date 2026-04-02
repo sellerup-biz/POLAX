@@ -180,7 +180,7 @@ const SL    = {Mlot_i_Klucz:'Mlot i Klucz',PolaxEuroGroup:'PolaxEuroGroup',Sila_
 const SC    = {Mlot_i_Klucz:'#BA7517',PolaxEuroGroup:'#0F6E56',Sila_Narzedzi:'#185FA5'};
 const ST    = {Mlot_i_Klucz:'st-mlot',PolaxEuroGroup:'st-polax',Sila_Narzedzi:'st-sila'};
 const SHORT = {Mlot_i_Klucz:'Mlot',PolaxEuroGroup:'Polax',Sila_Narzedzi:'Sila'};
-const BADGE = {hit:'★ Хит',winning:'↑ Выигрывает',losing:'✕ Проигрышный',sleeping:'◎ Спящий',nocog:'? Нет COG'};
+function getBadge(s){return({hit:T('b_hit'),winning:T('b_win'),losing:T('b_lose'),sleeping:T('b_sleep'),nocog:T('b_nocog')})[s]||s;}
 const BCLS  = {hit:'b-hit',winning:'b-winning',losing:'b-losing',sleeping:'b-sleeping',nocog:'b-nocog'};
 const PER_PAGE = 50;
 const HIT_TOP_N = 50;             // топ N по продажам = хит
@@ -210,6 +210,7 @@ let datePreset = 'all';
 let dateFrom   = DATE_MIN;
 let dateTo     = DATE_MAX;
 let dataReady  = false;
+let _catalogUpdated = '';
 
 // ── Helpers ───────────────────────────────────────────────────
 function zl(n) {
@@ -632,7 +633,7 @@ function renderTable() {
       const meta = buildMeta(p, null);
       return `<div class="prod-row${selKey===key?' sel':''}" onclick="openSidebar('${key}')">
         <div>
-          <div class="pr-badge ${BCLS[st]}">${BADGE[st]}</div>
+          <div class="pr-badge ${BCLS[st]}">${getBadge(st)}</div>
           <div class="pr-name">${escHtml(p.name)}</div>
           <div class="pr-meta">${meta}</div>
         </div>
@@ -652,7 +653,7 @@ function renderTable() {
 
     return `<div class="prod-row${selKey===key?' sel':''}" onclick="openSidebar('${key}')">
       <div>
-        <div class="pr-badge ${BCLS[st]}">${BADGE[st]}</div>
+        <div class="pr-badge ${BCLS[st]}">${getBadge(st)}</div>
         <div class="pr-name">${escHtml(p.name)}</div>
         <div class="pr-meta">${meta}</div>
       </div>
@@ -816,7 +817,7 @@ function openSidebar(key) {
   document.getElementById('sidebar').innerHTML = `
     <div class="sb-head">
       <button class="sb-close" onclick="closeSidebar()">✕</button>
-      <div class="pr-badge ${BCLS[st]}" style="margin-top:4px">${BADGE[st]}</div>
+      <div class="pr-badge ${BCLS[st]}" style="margin-top:4px">${getBadge(st)}</div>
       <div class="sb-name">${escHtml(p.name)}</div>
       <div class="sb-ids">${idsHtml}<br>
         EAN: <span class="id-val">${p.ean||'—'}</span> ·
@@ -937,6 +938,7 @@ async function init() {
   try {
     const catalog = await loadProducts();
     const updated = catalog.updated || '';
+    _catalogUpdated = updated;
 
     // Determine date range from data
     const allYMs = Object.keys(monthData);
@@ -959,14 +961,14 @@ async function init() {
       <div class="date-bar"  id="dateBar"></div>
       <div class="filter-bar" id="filterBar"></div>
       <div class="tbl-wrap" id="tblWrap">
-        <div class="loading"><div class="loading-spin"></div><br>Загрузка данных…</div>
+        <div class="loading"><div class="loading-spin"></div><br>${T('ue_loading')}</div>
       </div>
       <div class="pagination" id="pagination"></div>`;
 
     document.getElementById('hdrSub').textContent =
-      `Юнит-экономика · Allegro PL · ${PRODUCTS.length} товаров · обновлено ${updated}`;
+      T('ue_name') + ' · Allegro PL · ' + PRODUCTS.length + ' ' + T('items_lbl') + ' · ' + T('ue_updated') + ' ' + updated;
     document.getElementById('footer').textContent =
-      `POLAX · Юнит-экономика · ${PRODUCTS.length} товаров`;
+      'POLAX · ' + T('ue_name') + ' · ' + PRODUCTS.length + ' ' + T('items_lbl');
 
     dataReady = true;
 
@@ -980,9 +982,9 @@ async function init() {
     document.getElementById('mainContent').innerHTML = `
       <div style="padding:48px;text-align:center;color:#A32D2D;font-size:13px">
         <div style="font-size:28px;margin-bottom:12px">⚠</div>
-        <strong>Ошибка загрузки данных</strong><br><br>
-        Убедитесь что <code>products.json</code> существует.<br>
-        Запустите <code>python fetch_unit_catalog.py</code> для импорта каталога.<br><br>
+        <strong>${T('ue_err_title')}</strong><br><br>
+        <code>products.json</code><br>
+        <code>python fetch_unit_catalog.py</code><br><br>
         <code style="font-size:10px;color:#888">${e.message}</code>
       </div>`;
     console.error('init error:', e);
@@ -992,5 +994,15 @@ async function init() {
 init();
 </script>
 <script src="i18n.js"></script>
+<script>
+onPolaxChange(function(){
+  if(!dataReady) return;
+  renderAll();
+  document.getElementById('hdrSub').textContent =
+    T('ue_name') + ' · Allegro PL · ' + PRODUCTS.length + ' ' + T('items_lbl') + ' · ' + T('ue_updated') + ' ' + _catalogUpdated;
+  document.getElementById('footer').textContent =
+    'POLAX · ' + T('ue_name') + ' · ' + PRODUCTS.length + ' ' + T('items_lbl');
+});
+</script>
 </body>
 </html>

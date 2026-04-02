@@ -174,7 +174,7 @@ function fetchNBPRates(){
       nbpLoaded = true;
       var dt = tables[0].effectiveDate || '';
       document.getElementById('nbp-badge').textContent =
-        'НБП ' + dt + '  CZK=' + NBP_RATES.CZK.toFixed(4) +
+        'NBP ' + dt + '  CZK=' + NBP_RATES.CZK.toFixed(4) +
         '  HUF=' + NBP_RATES.HUF.toFixed(6) +
         '  EUR=' + NBP_RATES.EUR.toFixed(4) +
         '  RON=' + NBP_RATES.RON.toFixed(4);
@@ -235,7 +235,7 @@ function renderCards(){
     +'<div class="mc-l" style="color:#C4153A">eMAG (RO/BG/HU)</div>'
     +'<div class="mc-v" style="color:#C4153A">'+fmt(emag)+' zł</div>'
     +'<div class="mc-s">'+T('sales_month')+'</div></div>';
-  html += '<div class="mc gd"><div class="mc-l">Все магазины</div>'
+  html += '<div class="mc gd"><div class="mc-l">'+T('all_shops')+'</div>'
     +'<div class="mc-v">'+fmt(total)+' zł</div>'
     +'<div class="mc-s">'+displayMonth(m.month)+'</div></div>';
   document.getElementById('cards').innerHTML = html;
@@ -273,7 +273,7 @@ function renderShopsBreakdown(){
     +'</div>'
     +'<span class="pct">'+emagPct+'%</span>'
     +'</div></div>';
-  html += '<div class="crow"><span>Итого</span>'
+  html += '<div class="crow"><span>'+T('total')+'</span>'
     +'<div class="crow-r"><span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(total)+' zł</span>'
     +'<span class="pct">100%</span></div></div>';
   document.getElementById('shops-breakdown').innerHTML = html;
@@ -581,5 +581,10 @@ Promise.all([
 });
 </script>
 <script src="i18n.js"></script>
+<script>
+onPolaxChange(function(){
+  if(typeof renderAll === 'function' && typeof DATA !== 'undefined' && DATA.months && DATA.months.length > 0) renderAll();
+});
+</script>
 </body>
 </html>
