@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLAX · Настройки</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;color:#1a1a1a;min-height:100vh;padding:1.75rem}
+
+.header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1.5px solid #e0dcd4}
+.logo{width:46px;height:46px;background:#BA7517;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;letter-spacing:.5px;flex-shrink:0;text-align:center;line-height:1.3}
+.header h1{font-size:26px;font-weight:800;letter-spacing:4px;color:#1a1a1a}
+.header p{font-size:12px;color:#888;margin-top:3px}
+.nav-link{font-size:12px;padding:7px 16px;border-radius:8px;background:#fff;color:#333;text-decoration:none;font-weight:600;border:1px solid #e0dcd4;white-space:nowrap}
+.nav-link:hover{background:#f5f0e8;border-color:#BA7517;color:#BA7517}
+.nav-link.active{background:#BA7517;color:#fff;border-color:#BA7517}
+
+.section-divider{display:flex;align-items:center;gap:12px;margin:1.5rem 0 1rem}
+.section-divider span{font-size:13px;font-weight:700;color:#1a1a1a;letter-spacing:1px;white-space:nowrap}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:#e0dcd4}
+
+.card{background:#fff;border:1px solid #e0dcd4;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.card-title{font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
+.card-desc{font-size:12px;color:#888;margin-bottom:1rem;line-height:1.6}
+
+label{font-size:12px;color:#555;display:block;margin-bottom:5px;font-weight:500}
+input[type=password],input[type=text]{width:100%;padding:8px 12px;border:1px solid #e0dcd4;border-radius:8px;font-size:13px;font-family:monospace;background:#faf9f7;color:#1a1a1a;outline:none;transition:border-color .15s}
+input:focus{border-color:#BA7517}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none}
+.btn-primary{background:#BA7517;color:#fff}
+.btn-primary:hover{background:#9a6010}
+.btn-secondary{background:#fff;color:#BA7517;border:1px solid #e0dcd4}
+.btn-secondary:hover{background:#f5f0e8;border-color:#BA7517}
+.btn-green{background:#0F6E56;color:#fff}
+.btn-green:hover{background:#0a5541}
+.btn-blue{background:#185FA5;color:#fff}
+.btn-blue:hover{background:#124d87}
+.btn:disabled{opacity:.5;cursor:default}
+
+.notice{background:#fff8ee;border:1px solid #f0d080;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;font-size:12px;color:#7a5500;line-height:1.7}
+.notice b{color:#BA7517}
+.step{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#BA7517;color:#fff;font-size:10px;font-weight:700;margin-right:6px;flex-shrink:0}
+
+/* ADS UPLOAD */
+.shop-ads-block{border:1px solid #e0dcd4;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem}
+.shop-ads-title{font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.shop-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.shop-ads-desc{font-size:12px;color:#888;margin-bottom:12px;line-height:1.5}
+
+.drop-zone{border:2px dashed #e0dcd4;border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .15s;background:#faf9f7;margin-bottom:10px}
+.drop-zone:hover,.drop-zone.drag-over{border-color:#BA7517;background:#fff8ee}
+.drop-zone input[type=file]{display:none}
+.drop-zone-icon{font-size:28px;margin-bottom:6px}
+.drop-zone-text{font-size:12px;color:#555;font-weight:500}
+.drop-zone-hint{font-size:11px;color:#aaa;margin-top:3px}
+
+.preview-box{background:#faf9f7;border:1px solid #e0dcd4;border-radius:8px;padding:10px 12px;margin-bottom:10px;display:none}
+.preview-title{font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+.preview-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f0ece4;font-size:11px}
+.preview-row:last-child{border-bottom:none;font-weight:700}
+.preview-row span:last-child{color:#BA7517;font-weight:600}
+
+.log-box{background:#faf9f7;border:1px solid #e0dcd4;border-radius:8px;padding:10px 14px;font-size:11px;font-family:monospace;color:#444;max-height:150px;overflow-y:auto;display:none;line-height:1.8;margin-top:8px}
+.log-box .ok{color:#0F6E56}
+.log-box .err{color:#A32D2D}
+.log-box .info{color:#888}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">POL<br>AX</div>
+  <div>
+    <h1>POLAX</h1>
+    <p>Настройки · Авторизация · Данные</p>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;align-items:center">
+    <a href="index.html" class="nav-link">Главный</a>
+    <a href="analytics.html" class="nav-link">Аналитика</a>
+    <a href="categories.html" class="nav-link">Категории</a>
+    <a href="unit_economy.html" class="nav-link">Юнит-экономика</a>
+    <a href="settings.html" class="nav-link active">Настройки</a>
+  </div>
+</div>
+
+<!-- ══════════ УПРАВЛЕНИЕ ДАННЫМИ ══════════ -->
+<div class="section-divider"><span>Управление данными</span></div>
+
+<div class="card">
+  <div class="card-title">⟳ Синхронизация · Пересборка</div>
+  <div class="card-desc">
+    <b>Синхронизация</b> — запускает <code style="font-size:11px;background:#f5f0e8;padding:1px 5px;border-radius:3px">fetch.yml</code>: вчера (полный) + сегодня (частичный), обновляет <code style="font-size:11px;background:#f5f0e8;padding:1px 5px;border-radius:3px">data.json</code>. Автозапуск в 3:00 UTC.<br>
+    <b>Пересобрать юнит-данные</b> — запускает <code style="font-size:11px;background:#f5f0e8;padding:1px 5px;border-radius:3px">unit_history.yml</code>: пересобирает unit_data за последние N дней.
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-primary" onclick="triggerSync()">⟳ Синхронизация</button>
+    <div style="width:1px;height:28px;background:#e0dcd4"></div>
+    <button class="btn btn-secondary" onclick="triggerUnitHistory()">📦 Пересобрать юнит-данные</button>
+    <input type="number" id="unitDays" value="100" min="7" max="365" style="width:70px;padding:6px 8px;border:1px solid #e0dcd4;border-radius:8px;font-size:12px;font-family:inherit" title="Количество дней">
+    <span style="font-size:11px;color:#aaa">дней</span>
+  </div>
+  <div id="syncStatus" style="font-size:11px;color:#888;margin-top:8px;display:none"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">⬆ Загрузить цены · Обновить COG</div>
+  <div class="card-desc">
+    <b>Шаг 1:</b> Загрузи файл с ценами закупки (<code style="font-size:11px;background:#f5f0e8;padding:1px 5px;border-radius:3px">priceVAT.xls</code>) в репозиторий.<br>
+    <b>Шаг 2:</b> Нажми «Обновить COG» — запустится <code style="font-size:11px;background:#f5f0e8;padding:1px 5px;border-radius:3px">upload_cog.yml</code>, обновит себестоимость в <code style="font-size:11px;background:#f5f0e8;padding:1px 5px;border-radius:3px">products.json</code>.
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="uploadXLS()">⬆ Загрузить цены</button>
+    <button class="btn btn-green" onclick="triggerUpdateCOG()">⟳ Обновить COG</button>
+  </div>
+  <div id="cogStatus" style="font-size:11px;color:#888;margin-top:8px;display:none"></div>
+</div>
+
+<!-- ══════════ АВТОРИЗАЦИЯ ══════════ -->
+<div class="section-divider"><span>Авторизация Allegro</span></div>
+
+<div class="notice">
+  <b>Порядок действий:</b><br>
+  <span class="step">1</span> Введи GitHub Token ниже<br>
+  <span class="step">2</span> Войди в браузере в аккаунт Allegro нужного магазина<br>
+  <span class="step">3</span> Нажми кнопку → подтверди авторизацию на Allegro<br>
+  <span class="step">4</span> Токен сохранится автоматически в GitHub Secrets
+</div>
+
+<div class="card">
+  <div class="card-title">GitHub Token</div>
+  <div class="card-desc">Нужен для сохранения токенов в Secrets и обновления данных.<br>Personal Access Token (contents: read+write, secrets: write)</div>
+  <label for="gh_token">Personal Access Token</label>
+  <input type="password" id="gh_token" placeholder="github_pat_..." autocomplete="off">
+</div>
+
+<div class="card">
+  <div class="card-title" style="color:#BA7517">&#9679; Mlot_i_Klucz</div>
+  <div class="card-desc">Войди в браузере под аккаунтом <b>Mlot_i_Klucz</b>, затем нажми кнопку.</div>
+  <a href="#" class="btn btn-primary" onclick="authorize('MLOT','eb3ca104a8564c2a8e238c2589e797e5');return false;">Авторизовать Mlot_i_Klucz &rarr;</a>
+</div>
+
+<div class="card">
+  <div class="card-title" style="color:#0F6E56">&#9679; PolaxEuroGroup</div>
+  <div class="card-desc">Войди в браузере под аккаунтом <b>PolaxEuroGroup</b>, затем нажми кнопку.</div>
+  <a href="#" class="btn btn-green" onclick="authorize('POLAX','9b34ac0f7525469da337b335d47e231b');return false;">Авторизовать PolaxEuroGroup &rarr;</a>
+</div>
+
+<div class="card">
+  <div class="card-title" style="color:#185FA5">&#9679; Sila_Narzedzi</div>
+  <div class="card-desc">Войди в браузере под аккаунтом <b>Sila_Narzedzi</b>, затем нажми кнопку.</div>
+  <a href="#" class="btn btn-blue" onclick="authorize('SILA','d64fb7b5c6bf4cc09527fb4eed4a3776');return false;">Авторизовать Sila_Narzedzi &rarr;</a>
+</div>
+
+<!-- ══════════ ЗАГРУЗКА РЕКЛАМНЫХ РАСХОДОВ ══════════ -->
+<div class="section-divider"><span>Загрузка рекламных расходов</span></div>
+
+<div class="card">
+  <div class="card-title">Загрузить файл статистики Allegro Ads</div>
+  <div class="card-desc">
+    Скачай файл из кабинета Allegro Ads каждого магазина: <b>Статистика → Экспорт → по офферам</b><br>
+    Формат: <code style="font-size:11px;background:#f5f0e8;padding:1px 5px;border-radius:3px">statystyki_oferty_ДД-ММ-ГГГГ_ДД-ММ-ГГГГ.xlsx</code><br>
+    Колонки: <b>D</b> = ID оффера, <b>J</b> = стоимость (PLN), <b>N</b> = дата (DD-MM-YYYY)
+  </div>
+
+  <!-- Mlot_i_Klucz -->
+  <div class="shop-ads-block">
+    <div class="shop-ads-title">
+      <span class="shop-dot" style="background:#BA7517"></span>
+      Mlot_i_Klucz
+    </div>
+    <div class="shop-ads-desc">Загрузи экспорт из кабинета магазина Mlot_i_Klucz</div>
+    <div class="drop-zone" id="dz-Mlot_i_Klucz" onclick="document.getElementById('f-Mlot_i_Klucz').click()">
+      <input type="file" id="f-Mlot_i_Klucz" accept=".xlsx" onchange="onFileSelected(this,'Mlot_i_Klucz')">
+      <div class="drop-zone-icon">📊</div>
+      <div class="drop-zone-text" id="dt-Mlot_i_Klucz">Нажмите или перетащите файл</div>
+      <div class="drop-zone-hint">statystyki_oferty_*.xlsx</div>
+    </div>
+    <div class="preview-box" id="pb-Mlot_i_Klucz"><div class="preview-title">Предпросмотр</div><div id="pc-Mlot_i_Klucz"></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" id="ab-Mlot_i_Klucz" onclick="applyAds('Mlot_i_Klucz')" disabled>⬆ Применить Mlot_i_Klucz</button>
+      <button class="btn btn-secondary" id="cb-Mlot_i_Klucz" onclick="clearFile('Mlot_i_Klucz')" style="display:none">✕ Очистить</button>
+    </div>
+    <div class="log-box" id="lb-Mlot_i_Klucz"></div>
+  </div>
+
+  <!-- PolaxEuroGroup -->
+  <div class="shop-ads-block">
+    <div class="shop-ads-title">
+      <span class="shop-dot" style="background:#0F6E56"></span>
+      PolaxEuroGroup
+    </div>
+    <div class="shop-ads-desc">Загрузи экспорт из кабинета магазина PolaxEuroGroup</div>
+    <div class="drop-zone" id="dz-PolaxEuroGroup" onclick="document.getElementById('f-PolaxEuroGroup').click()">
+      <input type="file" id="f-PolaxEuroGroup" accept=".xlsx" onchange="onFileSelected(this,'PolaxEuroGroup')">
+      <div class="drop-zone-icon">📊</div>
+      <div class="drop-zone-text" id="dt-PolaxEuroGroup">Нажмите или перетащите файл</div>
+      <div class="drop-zone-hint">statystyki_oferty_*.xlsx</div>
+    </div>
+    <div class="preview-box" id="pb-PolaxEuroGroup"><div class="preview-title">Предпросмотр</div><div id="pc-PolaxEuroGroup"></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-green" id="ab-PolaxEuroGroup" onclick="applyAds('PolaxEuroGroup')" disabled>⬆ Применить PolaxEuroGroup</button>
+      <button class="btn btn-secondary" id="cb-PolaxEuroGroup" onclick="clearFile('PolaxEuroGroup')" style="display:none">✕ Очистить</button>
+    </div>
+    <div class="log-box" id="lb-PolaxEuroGroup"></div>
+  </div>
+
+  <!-- Sila_Narzedzi -->
+  <div class="shop-ads-block">
+    <div class="shop-ads-title">
+      <span class="shop-dot" style="background:#185FA5"></span>
+      Sila_Narzedzi
+    </div>
+    <div class="shop-ads-desc">Загрузи экспорт из кабинета магазина Sila_Narzedzi</div>
+    <div class="drop-zone" id="dz-Sila_Narzedzi" onclick="document.getElementById('f-Sila_Narzedzi').click()">
+      <input type="file" id="f-Sila_Narzedzi" accept=".xlsx" onchange="onFileSelected(this,'Sila_Narzedzi')">
+      <div class="drop-zone-icon">📊</div>
+      <div class="drop-zone-text" id="dt-Sila_Narzedzi">Нажмите или перетащите файл</div>
+      <div class="drop-zone-hint">statystyki_oferty_*.xlsx</div>
+    </div>
+    <div class="preview-box" id="pb-Sila_Narzedzi"><div class="preview-title">Предпросмотр</div><div id="pc-Sila_Narzedzi"></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-blue" id="ab-Sila_Narzedzi" onclick="applyAds('Sila_Narzedzi')" disabled>⬆ Применить Sila_Narzedzi</button>
+      <button class="btn btn-secondary" id="cb-Sila_Narzedzi" onclick="clearFile('Sila_Narzedzi')" style="display:none">✕ Очистить</button>
+    </div>
+    <div class="log-box" id="lb-Sila_Narzedzi"></div>
+  </div>
+</div>
+
+<div style="margin-top:1rem;font-size:11px;color:#aaa">POLAX · НАСТРОЙКИ · 2026</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+var GH_REPO = 'sellerup-biz/POLAX';
+var REDIRECT_URI = 'https://sellerup-biz.github.io/POLAX/callback.html';
+
+// parsedAds per shop: { shopName: { 'YYYY-MM': { offerId: totalAds } } }
+var parsedAds = {};
+
+// ── AUTH ──────────────────────────────────────────────────────
+function authorize(shop, clientId) {
+  var ghToken = document.getElementById('gh_token').value.trim();
+  if (!ghToken) { alert('Введи GitHub Token перед авторизацией!'); return; }
+  sessionStorage.setItem('gh_token', ghToken);
+  sessionStorage.setItem('pending_shop', shop);
+  var url = 'https://allegro.pl/auth/oauth/authorize?response_type=code&client_id=' + clientId
+    + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI);
+  window.location.href = url;
+}
+
+// ── DRAG & DROP ───────────────────────────────────────────────
+['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'].forEach(function(shop){
+  var dz = document.getElementById('dz-'+shop);
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', function(){ dz.classList.remove('drag-over'); });
+  dz.addEventListener('drop', function(e){
+    e.preventDefault(); dz.classList.remove('drag-over');
+    var f = e.dataTransfer.files[0];
+    if (f && f.name.endsWith('.xlsx')) processFile(f, shop);
+  });
+});
+
+function onFileSelected(input, shop) {
+  if (input.files[0]) processFile(input.files[0], shop);
+}
+
+// ── PARSE EXCEL ───────────────────────────────────────────────
+// Columns (0-based): D=3 offer_id, J=9 cost PLN, N=13 date DD-MM-YYYY
+function processFile(file, shop) {
+  document.getElementById('dt-'+shop).textContent = '⏳ Читаю: ' + file.name;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb = XLSX.read(e.target.result, {type:'array'});
+      // Try sheet named 'Statystyki_*', fallback to first sheet
+      var sheetName = wb.SheetNames.find(function(n){ return n.startsWith('Statystyki'); }) || wb.SheetNames[0];
+      var ws = wb.Sheets[sheetName];
+      var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+      var agg = {}; // { 'YYYY-MM': { offerId: cost } }
+      var totalRows = 0, totalPLN = 0;
+
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var offerId = String(row[3]||'').trim();
+        var cost    = parseFloat(String(row[9]||'0').replace(',','.'));
+        var dateRaw = String(row[13]||'').trim(); // DD-MM-YYYY
+
+        if (!offerId || !dateRaw || isNaN(cost) || cost <= 0) continue;
+
+        var parts = dateRaw.split('-');
+        if (parts.length !== 3) continue;
+        var ym = parts[2] + '-' + parts[1]; // YYYY-MM
+
+        if (!agg[ym]) agg[ym] = {};
+        agg[ym][offerId] = (agg[ym][offerId]||0) + cost;
+        totalRows++;
+        totalPLN += cost;
+      }
+
+      if (totalRows === 0) {
+        alert('Не найдено данных. Проверь формат файла (колонки D=offer_id, J=стоимость, N=дата).');
+        document.getElementById('dt-'+shop).textContent = 'Нажмите или перетащите файл';
+        return;
+      }
+
+      parsedAds[shop] = agg;
+      document.getElementById('dt-'+shop).textContent = '✓ ' + file.name;
+      document.getElementById('ab-'+shop).disabled = false;
+      document.getElementById('cb-'+shop).style.display = 'inline-flex';
+
+      var months = Object.keys(agg).sort();
+      var html = months.map(function(ym){
+        var offers = Object.keys(agg[ym]).length;
+        var sum = Object.values(agg[ym]).reduce(function(a,b){return a+b;},0);
+        return '<div class="preview-row"><span>'+ym+'</span><span>'+offers+' офф · '+sum.toFixed(2)+' PLN</span></div>';
+      }).join('');
+      html += '<div class="preview-row"><span>Итого</span><span>'+totalPLN.toFixed(2)+' PLN ('+totalRows+' записей)</span></div>';
+      document.getElementById('pc-'+shop).innerHTML = html;
+      document.getElementById('pb-'+shop).style.display = 'block';
+    } catch(err) {
+      alert('Ошибка чтения файла: ' + err.message);
+      document.getElementById('dt-'+shop).textContent = 'Нажмите или перетащите файл';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function clearFile(shop) {
+  parsedAds[shop] = null;
+  document.getElementById('f-'+shop).value = '';
+  document.getElementById('dt-'+shop).textContent = 'Нажмите или перетащите файл';
+  document.getElementById('ab-'+shop).disabled = true;
+  document.getElementById('cb-'+shop).style.display = 'none';
+  document.getElementById('pb-'+shop).style.display = 'none';
+  document.getElementById('lb-'+shop).style.display = 'none';
+  document.getElementById('lb-'+shop).innerHTML = '';
+}
+
+// ── APPLY ADS TO GITHUB ───────────────────────────────────────
+function log(shop, msg, cls) {
+  var box = document.getElementById('lb-'+shop);
+  box.style.display = 'block';
+  box.innerHTML += '<div class="'+(cls||'info')+'">'+msg+'</div>';
+  box.scrollTop = box.scrollHeight;
+}
+
+function ghHeaders() {
+  var tok = document.getElementById('gh_token').value.trim();
+  if (!tok) throw new Error('GitHub Token не введён');
+  return {'Authorization':'token '+tok,'Content-Type':'application/json'};
+}
+
+function ghGet(path) {
+  return fetch('https://api.github.com/repos/'+GH_REPO+'/contents/'+path, {headers:ghHeaders()})
+    .then(function(r){
+      if (!r.ok) throw new Error('GET '+path+' → '+r.status);
+      return r.json();
+    });
+}
+
+function ghPut(path, content, sha, message) {
+  return fetch('https://api.github.com/repos/'+GH_REPO+'/contents/'+path, {
+    method:'PUT', headers:ghHeaders(),
+    body: JSON.stringify({message:message, content:btoa(unescape(encodeURIComponent(content))), sha:sha})
+  }).then(function(r){
+    if (!r.ok) return r.json().then(function(e){ throw new Error('PUT '+path+' → '+r.status+': '+(e.message||'')); });
+    return r.json();
+  });
+}
+
+async function applyAds(shop) {
+  if (!parsedAds[shop]) { alert('Сначала выбери файл для '+shop); return; }
+  var ghToken = document.getElementById('gh_token').value.trim();
+  if (!ghToken) { alert('Введи GitHub Token'); return; }
+
+  document.getElementById('ab-'+shop).disabled = true;
+  document.getElementById('lb-'+shop).innerHTML = '';
+  log(shop, 'Начинаю обновление unit_data для '+shop+'...', 'info');
+
+  var months = Object.keys(parsedAds[shop]).sort();
+
+  for (var mi = 0; mi < months.length; mi++) {
+    var ym = months[mi];
+    var filePath = 'unit_data/' + ym + '.json';
+    log(shop, 'Читаю ' + filePath + '...', 'info');
+
+    var ghFile, monthData;
+    try {
+      ghFile = await ghGet(filePath);
+      var raw = decodeURIComponent(escape(atob(ghFile.content.replace(/\n/g,''))));
+      monthData = JSON.parse(raw);
+    } catch(e) {
+      log(shop, '⚠ ' + filePath + ' не найден, пропускаю: ' + e.message, 'err');
+      continue;
+    }
+
+    var days = monthData.days || {};
+    var adsForMonth = parsedAds[shop][ym]; // { offerId: totalAds }
+    var allDates = Object.keys(days);
+    if (allDates.length === 0) { log(shop, '  Нет дней в '+ym+', пропускаю', 'info'); continue; }
+
+    var updatedEntries = 0, newEntries = 0;
+
+    Object.keys(adsForMonth).forEach(function(oid) {
+      var totalAds = adsForMonth[oid];
+      var adsPerDay = totalAds / allDates.length;
+
+      allDates.forEach(function(date) {
+        var dayShops = days[date];
+        if (!dayShops[shop]) dayShops[shop] = {};
+        if (dayShops[shop][oid]) {
+          dayShops[shop][oid][3] = parseFloat(((dayShops[shop][oid][3]||0) + adsPerDay).toFixed(4));
+          updatedEntries++;
+        } else {
+          dayShops[shop][oid] = [0, 0.0, 0.0, parseFloat(adsPerDay.toFixed(4)), 0.0];
+          newEntries++;
+        }
+      });
+    });
+
+    log(shop, '  '+ym+': обновлено '+updatedEntries+', новых '+newEntries+' записей', 'info');
+
+    var newContent = JSON.stringify(monthData);
+    var msg = 'Update ads ['+shop+'] unit_data/'+ym+'.json from Allegro Ads export';
+    try {
+      await ghPut(filePath, newContent, ghFile.sha, msg);
+      log(shop, '  ✓ '+filePath+' сохранён', 'ok');
+    } catch(e) {
+      log(shop, '  ✗ Ошибка: ' + e.message, 'err');
+    }
+  }
+
+  log(shop, '', 'info');
+  log(shop, '✓ Готово! Данные обновлены. GitHub Pages обновится через ~30-60 сек.', 'ok');
+  document.getElementById('ab-'+shop).disabled = false;
+}
+
+// ── SYNC / COG ACTIONS ───────────────────────────────────────
+function showStatus(elId, type, msg) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  var colors = {ok:'#0F6E56', err:'#A32D2D', info:'#BA7517'};
+  el.style.color = colors[type]||'#888';
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function triggerWorkflow(workflowFile, statusElId, body) {
+  var token = document.getElementById('gh_token').value.trim();
+  if (!token) { alert('Введи GitHub Token выше'); return; }
+  showStatus(statusElId, 'info', '⏳ Запускаю workflow...');
+  fetch('https://api.github.com/repos/'+GH_REPO+'/actions/workflows/'+workflowFile+'/dispatches', {
+    method:'POST',
+    headers:{'Authorization':'token '+token,'Content-Type':'application/json'},
+    body: JSON.stringify(body || {ref:'main'})
+  }).then(function(r){
+    if (r.status===204) showStatus(statusElId,'ok','✓ Запущен! Данные обновятся через несколько минут.');
+    else if (r.status===401||r.status===403) showStatus(statusElId,'err','✗ Неверный GitHub Token');
+    else showStatus(statusElId,'err','✗ Ошибка HTTP '+r.status);
+  }).catch(function(e){ showStatus(statusElId,'err','✗ Ошибка сети: '+e.message); });
+}
+
+function triggerSync() { triggerWorkflow('fetch.yml', 'syncStatus'); }
+function triggerUpdateCOG() { triggerWorkflow('upload_cog.yml', 'cogStatus'); }
+function triggerUnitHistory() {
+  var days = document.getElementById('unitDays').value || '100';
+  var today = new Date().toISOString().slice(0,10);
+  var from = new Date(Date.now() - (parseInt(days)-1)*86400000).toISOString().slice(0,10);
+  triggerWorkflow('unit_history.yml', 'syncStatus', {
+    ref:'main', inputs:{ unit_from: from, unit_to: today }
+  });
+}
+
+function uploadXLS() {
+  var token = document.getElementById('gh_token').value.trim();
+  if (!token) { alert('Введи GitHub Token выше'); return; }
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = '.xls,.xlsx,.csv';
+  input.onchange = function(){
+    var file = input.files[0]; if (!file) return;
+    showStatus('cogStatus','info','⏳ Загружаю '+file.name+'...');
+    var reader = new FileReader();
+    reader.onload = function(){
+      var base64 = btoa(new Uint8Array(reader.result).reduce(function(d,b){return d+String.fromCharCode(b);},''));
+      var apiUrl = 'https://api.github.com/repos/'+GH_REPO+'/contents/priceVAT.xls';
+      var headers = {'Authorization':'token '+token,'Content-Type':'application/json'};
+      fetch(apiUrl,{headers:headers}).then(function(r){return r.ok?r.json():null;}).then(function(ex){
+        var body = {message:'Upload priceVAT.xls '+new Date().toISOString().slice(0,10), content:base64};
+        if (ex&&ex.sha) body.sha = ex.sha;
+        return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+      }).then(function(r){
+        if (r.ok) showStatus('cogStatus','ok','✓ Файл загружен! Теперь нажми «Обновить COG».');
+        else r.text().then(function(t){showStatus('cogStatus','err','✗ Ошибка: '+t.slice(0,100));});
+      }).catch(function(e){showStatus('cogStatus','err','✗ '+e.message);});
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  input.click();
+}
+</script>
+</body>
+</html>
