@@ -173,20 +173,50 @@ def day_range(date_str):
             f"{date_str}T23:59:59+0{tz}:00")
 
 
+# ── НБП — курсы валют ─────────────────────────────────────────
+
+_nbp_cache = {}  # "YYYY-MM-DD:CUR" -> rate
+
+def get_nbp_rate(date_str, currency):
+    """Курс CZK/HUF/EUR к PLN на дату (или ближайший предыдущий)."""
+    cur = currency.upper()
+    if cur == "PLN":
+        return 1.0
+    key = f"{date_str}:{cur}"
+    if key in _nbp_cache:
+        return _nbp_cache[key]
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    for delta in range(0, 5):
+        d = (dt - timedelta(days=delta)).strftime("%Y-%m-%d")
+        try:
+            r = requests.get(
+                f"https://api.nbp.pl/api/exchangerates/rates/a/{cur.lower()}/{d}/?format=json",
+                timeout=10)
+            if r.status_code == 200:
+                rate = r.json()["rates"][0]["mid"]
+                _nbp_cache[key] = rate
+                return rate
+        except Exception:
+            pass
+    fallback = {"CZK": 0.16, "HUF": 0.01, "EUR": 4.25}
+    rate = fallback.get(cur, 1.0)
+    print(f"  ⚠ NBP rate not found for {cur} {date_str}, using fallback {rate}")
+    _nbp_cache[key] = rate
+    return rate
+
+
 # ── API calls ─────────────────────────────────────────────────
 
 def get_sales_by_offer(token, date_str):
     """
-    GET /order/checkout-forms (status=READY_FOR_PROCESSING, lineItems.boughtAt range)
+    GET /order/checkout-forms (lineItems.boughtAt range)
     Returns: {offer_id: [sales_count, revenue_pln]}
 
-    Uses checkout-forms API which contains lineItems with offer.id + quantity.
-    READY_FOR_PROCESSING = paid orders only.
-    Filters to allegro-pl + allegro-business-pl marketplaces only.
+    Includes all marketplaces (PL, CZ, HU, SK).
+    Non-PLN prices are converted to PLN via NBP historical rates.
     sales_count = sum of item quantities.
-    revenue     = sum of (quantity × unit_price) per offer.
+    revenue     = sum of (quantity × unit_price_pln) per offer.
     """
-    dt     = datetime.strptime(date_str, "%Y-%m-%d")
     d_from = f"{date_str}T00:00:00.000Z"
     d_to   = f"{date_str}T23:59:59.999Z"
     by_offer = defaultdict(lambda: [0, 0.0])
@@ -212,19 +242,17 @@ def get_sales_by_offer(token, date_str):
         forms = data.get("checkoutForms", [])
 
         for form in forms:
-            # Skip cancelled orders
             if form.get("status") == "CANCELLED":
-                continue
-            # Only PL market (allegro-pl + allegro-business-pl)
-            mkt = (form.get("marketplace") or {}).get("id", "allegro-pl")
-            if mkt not in ("allegro-pl", "allegro-business-pl"):
                 continue
 
             for item in form.get("lineItems", []):
                 try:
-                    oid   = item["offer"]["id"]
-                    qty   = int(item.get("quantity", 1))
-                    price = float(item["price"]["amount"])
+                    oid      = item["offer"]["id"]
+                    qty      = int(item.get("quantity", 1))
+                    price    = float(item["price"]["amount"])
+                    currency = item["price"].get("currency", "PLN").upper()
+                    if currency != "PLN":
+                        price = price * get_nbp_rate(date_str, currency)
                     by_offer[oid][0] += qty
                     by_offer[oid][1] += qty * price
                 except Exception:

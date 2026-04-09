@@ -334,10 +334,39 @@ def get_unit_bcat(tid, tname):
     return "IGNORE"
 
 
+_unit_nbp_cache = {}  # "YYYY-MM-DD:CUR" -> rate
+
+def get_unit_nbp_rate(date_str, currency):
+    """Historical NBP rate for CZK/HUF/EUR on a given date."""
+    cur = currency.upper()
+    if cur == "PLN":
+        return 1.0
+    key = f"{date_str}:{cur}"
+    if key in _unit_nbp_cache:
+        return _unit_nbp_cache[key]
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    for delta in range(0, 5):
+        d = (dt - timedelta(days=delta)).strftime("%Y-%m-%d")
+        try:
+            r = requests.get(
+                f"https://api.nbp.pl/api/exchangerates/rates/a/{cur.lower()}/{d}/?format=json",
+                timeout=10)
+            if r.status_code == 200:
+                rate = r.json()["rates"][0]["mid"]
+                _unit_nbp_cache[key] = rate
+                return rate
+        except Exception:
+            pass
+    fallback = {"CZK": 0.16, "HUF": 0.01, "EUR": 4.25}
+    rate = fallback.get(cur, 1.0)
+    _unit_nbp_cache[key] = rate
+    return rate
+
+
 def get_unit_sales_by_offer(token, date_str):
-    """checkout-forms (READY_FOR_PROCESSING, lineItems.boughtAt) → {offer_id: [qty, revenue_pln]}
-    READY_FOR_PROCESSING = paid orders. lineItems.boughtAt = correct param name.
-    Filters to allegro-pl + allegro-business-pl only."""
+    """checkout-forms (lineItems.boughtAt) → {offer_id: [qty, revenue_pln]}
+    Includes all marketplaces (PL, CZ, HU, SK).
+    Non-PLN prices converted to PLN via NBP historical rates."""
     result = defaultdict(lambda: [0, 0.0])
     offset = 0
     d_from = f"{date_str}T00:00:00.000Z"
@@ -353,13 +382,14 @@ def get_unit_sales_by_offer(token, date_str):
         forms = resp.json().get("checkoutForms", [])
         for form in forms:
             if form.get("status") == "CANCELLED": continue
-            mkt = (form.get("marketplace") or {}).get("id", "allegro-pl")
-            if mkt not in ("allegro-pl", "allegro-business-pl"): continue
             for item in form.get("lineItems", []):
                 try:
-                    oid   = item["offer"]["id"]
-                    qty   = int(item.get("quantity", 1))
-                    price = float(item["price"]["amount"])
+                    oid      = item["offer"]["id"]
+                    qty      = int(item.get("quantity", 1))
+                    price    = float(item["price"]["amount"])
+                    currency = item["price"].get("currency", "PLN").upper()
+                    if currency != "PLN":
+                        price = price * get_unit_nbp_rate(date_str, currency)
                     result[oid][0] += qty
                     result[oid][1] += qty * price
                 except Exception: pass
