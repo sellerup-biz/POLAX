@@ -146,7 +146,7 @@ var DATA = { months: [] };
 var SHOPS  = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
 var COLORS = ['#BA7517','#185FA5','#0F6E56'];
 var TAGS   = ['ta','tb','tt'];
-var activeMonth = 0;
+var activeMonth = -1; // будет установлен после загрузки данных
 var dynChart    = null;
 
 // Курсы НБП (загружаются асинхронно при старте)
@@ -560,7 +560,7 @@ Promise.all([
     m.countries = normalizeCountries(m.countries);
     if(!m.costs) m.costs = {commission:0,delivery:0,ads:0,subscription:0,discount:0};
   });
-  activeMonth = 0;
+  activeMonth = DATA.months.length - 1;
   renderAll();
 })
 .catch(function(e){
@@ -575,7 +575,7 @@ Promise.all([
         m.countries = normalizeCountries(m.countries);
         if(!m.costs) m.costs = {commission:0,delivery:0,ads:0,subscription:0,discount:0};
       });
-      activeMonth = 0;
+      activeMonth = DATA.months.length - 1;
       renderAll();
     })
     .catch(function(){ console.warn('data.json не найден'); });
