@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POLAX · Настройки</title>
@@ -82,6 +83,7 @@ input:focus{border-color:#BA7517}
     <a href="categories.html" class="nav-link">Категории</a>
     <a href="unit_economy.html" class="nav-link">Юнит-экономика</a>
     <a href="settings.html" class="nav-link active">Настройки</a>
+    <button onclick="__polaxLogout()" class="nav-link" style="color:#A32D2D;border-color:#f0c0c0;background:#fff;cursor:pointer">Выйти</button>
   </div>
 </div>
 

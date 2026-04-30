@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POLAX — Allegro Pricing Dashboard</title>
@@ -101,6 +102,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
     <a href="unit_economy.html" data-i18n="nav_unit" style="font-size:12px;padding:7px 16px;border-radius:8px;background:var(--bg-deep);color:var(--text-secondary);text-decoration:none;font-weight:600;border:1px solid var(--border-mid)">Юнит-экономика →</a>
     <a href="categories.html" data-i18n="nav_categories" style="font-size:12px;padding:7px 16px;border-radius:8px;background:#BA7517;color:#fff;text-decoration:none;font-weight:600">Продажи по категориям →</a>
     <a href="settings.html" data-i18n="nav_settings" style="font-size:12px;padding:7px 16px;border-radius:8px;background:var(--bg-deep);color:var(--text-secondary);text-decoration:none;font-weight:600;border:1px solid var(--border-mid)">Настройки</a>
+    <button onclick="__polaxLogout()" style="font-size:12px;padding:7px 16px;border-radius:8px;background:var(--bg-deep);color:#A32D2D;font-weight:600;border:1px solid #f0c0c0;cursor:pointer">Выйти</button>
     <div id="polax-controls"></div>
   </div>
 </div>
