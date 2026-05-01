@@ -366,12 +366,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 var SHOPS=['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi','EMAG'];
+// "Wartość sprzedaży i dostawy" как в Allegro UI: товар + доставка покупателя.
+// Доставка покупателя приходит из checkout-forms (см. fetch.py / fetch_history.py).
+function shopGross(rec, shopName){
+  var base = rec[shopName]||0;
+  var bd   = (rec.shop_buyerDelivery||{})[shopName]||0;
+  return base + bd;
+}
+function totalGross(rec){
+  return SHOPS.reduce(function(s,k){return s+shopGross(rec,k);},0);
+}
 var _salesChart=null, _monthlyChart=null, _lastDays=null, _lastMonths=null;
 var COLORS=['#BA7517','#0F6E56','#185FA5','#C4153A'];
 var BG=['rgba(186,117,23,0.18)','rgba(15,110,86,0.18)','rgba(24,95,165,0.18)','rgba(196,21,58,0.18)'];
 
 function mkTotals(rows,key,elId){
-  var gS=SHOPS.map(function(s){return rows.reduce(function(sum,r){return sum+(r[s]||0);},0);});
+  var gS=SHOPS.map(function(s){return rows.reduce(function(sum,r){return sum+shopGross(r,s);},0);});
   var gT=gS.reduce(function(a,b){return a+b;},0);
   var html=SHOPS.map(function(s,i){
     return'<div style="background:var(--bg-deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px">'
@@ -391,11 +401,11 @@ function mkTable(rows,labelKey,elId,fmt){
     +SHOPS.map(function(s,i){return'<th style="text-align:right;padding:6px 10px;color:'+COLORS[i]+';font-weight:600;border-bottom:1px solid var(--border-subtle)">'+s+'</th>';}).join('')
     +'<th style="text-align:right;padding:6px 10px;font-weight:700;color:var(--text-secondary);border-bottom:1px solid var(--border-subtle)">'+T('total')+'</th></tr></thead>';
   var tb='<tbody>'+rows.map(function(r,i){
-    var tot=SHOPS.reduce(function(s,k){return s+(r[k]||0);},0);
+    var tot=totalGross(r);
     var cellLabel = labelKey==='month' ? (typeof displayMonth==='function' ? displayMonth(r[labelKey]) : r[labelKey]) : r[labelKey];
     return'<tr style="background:'+(i%2===0?'var(--bg-subtle)':'var(--bg-card)')+'">'
       +'<td style="padding:6px 10px;color:var(--text-secondary);font-weight:'+(labelKey==='date'?'500':'600')+'">'+cellLabel+'</td>'
-      +SHOPS.map(function(s){return'<td style="text-align:right;padding:6px 10px">'+(fmt?(r[s]||0).toFixed(2):(r[s]||0).toLocaleString())+' zł</td>';}).join('')
+      +SHOPS.map(function(s){var v=shopGross(r,s);return'<td style="text-align:right;padding:6px 10px">'+(fmt?v.toFixed(2):v.toLocaleString())+' zł</td>';}).join('')
       +'<td style="text-align:right;padding:6px 10px;font-weight:700">'+(fmt?tot.toFixed(2):tot.toLocaleString())+' zł</td></tr>';
   }).join('')+'</tbody>';
   document.getElementById(elId).innerHTML=th+tb;
@@ -407,7 +417,7 @@ function renderDaily(days){
   var datasets = SHOPS.map(function(s,i){
     return{
       label:s,
-      data:days.map(function(d){return d[s]||0;}),
+      data:days.map(function(d){return shopGross(d,s);}),
       backgroundColor:days.map(function(d){return d.date===todayStr?BG[i].replace('0.18','0.09'):BG[i];}),
       borderColor:days.map(function(d){return d.date===todayStr?COLORS[i]+'88':COLORS[i];}),
       borderWidth:2,
@@ -443,10 +453,10 @@ function renderDaily(days){
 
 function renderMonthly(months){
   var ds=SHOPS.map(function(s,i){
-    return{type:'bar',label:s,data:months.map(function(m){return m[s]||0;}),backgroundColor:BG[i],borderColor:COLORS[i],borderWidth:2,borderRadius:4};
+    return{type:'bar',label:s,data:months.map(function(m){return shopGross(m,s);}),backgroundColor:BG[i],borderColor:COLORS[i],borderWidth:2,borderRadius:4};
   });
   ds.push({type:'line',label:T('all_shops'),
-    data:months.map(function(m){return SHOPS.reduce(function(s,k){return s+(m[k]||0);},0);}),
+    data:months.map(function(m){return totalGross(m);}),
     borderColor:getComputedStyle(document.documentElement).getPropertyValue('--chart-line').trim(),backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--chart-line').trim(),tension:0.3,order:0});
   if(_monthlyChart){_monthlyChart.destroy();} _monthlyChart=new Chart(document.getElementById('monthlyChart').getContext('2d'),{
     data:{labels:months.map(function(m){return m.month;}),datasets:ds},
@@ -488,13 +498,13 @@ function renderGoal(months){
   var best = null;
   var bestTotal = 0;
   for(var i=0;i<months.length;i++){
-    var tot = SHOPS_LIST.reduce(function(s,k){return s+(months[i][k]||0);},0);
+    var tot = SHOPS_LIST.reduce(function(s,k){return s+(months[i][k]||0);},0) + (months[i].buyerDelivery||0);
     if(tot > bestTotal){ bestTotal = tot; best = months[i].month; }
   }
 
   // Текущий месяц (последний в массиве)
   var cur = months[months.length-1];
-  var curTotal = SHOPS_LIST.reduce(function(s,k){return s+(cur[k]||0);},0);
+  var curTotal = SHOPS_LIST.reduce(function(s,k){return s+(cur[k]||0);},0) + (cur.buyerDelivery||0);
   var curMonth = cur.month;
 
   var bestPct  = Math.min(100, Math.round(bestTotal / GOAL * 100));
