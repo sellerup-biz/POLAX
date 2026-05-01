@@ -213,6 +213,49 @@ def get_sales_for_month(token, year, month):
     }
 
 
+# ── ДОСТАВКА, ОПЛАЧЕННАЯ ПОКУПАТЕЛЕМ (для brutto-выручки) ─────
+
+def get_buyer_delivery_for_month(token, year, month):
+    """
+    Сумма delivery.cost.amount по всем не-CANCELLED checkout-forms за месяц.
+    Это входит в Allegro UI 'Wartość sprzedaży i dostawy'.
+    """
+    last_day = calendar.monthrange(year, month)[1]
+    d_from   = f"{year}-{month:02d}-01T00:00:00.000Z"
+    d_to     = f"{year}-{month:02d}-{last_day:02d}T23:59:59.999Z"
+    total    = 0.0
+    offset   = 0
+    while True:
+        try:
+            resp = requests.get(
+                "https://api.allegro.pl/order/checkout-forms",
+                headers=hdrs(token),
+                params={
+                    "lineItems.boughtAt.gte": d_from,
+                    "lineItems.boughtAt.lte": d_to,
+                    "limit": 100, "offset": offset,
+                },
+                timeout=30,
+            )
+        except Exception as e:
+            print(f"      ⚠ buyer-delivery {year}-{month:02d}: {e}")
+            break
+        if resp.status_code != 200:
+            print(f"      ⚠ buyer-delivery {year}-{month:02d}: HTTP {resp.status_code}")
+            break
+        forms = resp.json().get("checkoutForms", [])
+        for form in forms:
+            if form.get("status") == "CANCELLED":
+                continue
+            try:
+                total += float(form["delivery"]["cost"]["amount"])
+            except Exception:
+                pass
+        if len(forms) < 100: break
+        offset += 100
+    return round(total, 2)
+
+
 # ── РАСХОДЫ ───────────────────────────────────────────────────
 
 def get_billing_for_month(token, year, month, marketplace_id=None):
@@ -300,6 +343,8 @@ def update_months(data):
         "Mlot_i_Klucz":0,"PolaxEuroGroup":0,"Sila_Narzedzi":0,
         "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0},
         "costs":empty_costs(),
+        "buyerDelivery":0.0,
+        "shop_buyerDelivery":{"Mlot_i_Klucz":0.0,"PolaxEuroGroup":0.0,"Sila_Narzedzi":0.0},
         "shop_costs":empty_shop_costs(),
     })
     for day in data["days"]:
@@ -314,11 +359,16 @@ def update_months(data):
         for cat in COST_CATS:
             months_map[mk]["costs"][cat] = round(
                 months_map[mk]["costs"][cat] + day.get("costs",{}).get(cat, 0), 2)
+        months_map[mk]["buyerDelivery"] = round(
+            months_map[mk]["buyerDelivery"] + day.get("buyerDelivery", 0), 2)
         for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]:
             sc = day.get("shop_costs", {}).get(shop, {})
             for cat in COST_CATS:
                 months_map[mk]["shop_costs"][shop][cat] = round(
                     months_map[mk]["shop_costs"][shop][cat] + sc.get(cat, 0), 2)
+            sbd = day.get("shop_buyerDelivery", {}).get(shop, 0)
+            months_map[mk]["shop_buyerDelivery"][shop] = round(
+                months_map[mk]["shop_buyerDelivery"][shop] + sbd, 2)
 
     MONTH_RU_REV = {v:k for k,v in MONTH_RU.items()}
     data["months"] = [
@@ -372,9 +422,9 @@ for year, month in months:
 # month_data[mk][shop_name] = {sales, total (PLN), costs_pln}
 
 month_data = defaultdict(lambda: {
-    "Mlot_i_Klucz":   {"sales":{},"total":0.0,"costs_pln":{c:0.0 for c in COST_CATS}},
-    "PolaxEuroGroup": {"sales":{},"total":0.0,"costs_pln":{c:0.0 for c in COST_CATS}},
-    "Sila_Narzedzi":  {"sales":{},"total":0.0,"costs_pln":{c:0.0 for c in COST_CATS}},
+    "Mlot_i_Klucz":   {"sales":{},"total":0.0,"costs_pln":{c:0.0 for c in COST_CATS},"buyer_d":0.0},
+    "PolaxEuroGroup": {"sales":{},"total":0.0,"costs_pln":{c:0.0 for c in COST_CATS},"buyer_d":0.0},
+    "Sila_Narzedzi":  {"sales":{},"total":0.0,"costs_pln":{c:0.0 for c in COST_CATS},"buyer_d":0.0},
 })
 
 for shop_name, shop in SHOPS.items():
@@ -458,6 +508,11 @@ for shop_name, shop in SHOPS.items():
         total_costs = sum(v for k,v in costs_pln_rounded.items() if k != "discount")
         print(f"    ─── Итого расходы (все валюты → PLN): {total_costs:>8,.2f}")
 
+        # ── Доставка покупателя (для brutto-выручки) ─────────
+        buyer_d = get_buyer_delivery_for_month(token, year, month)
+        month_data[mk][shop_name]["buyer_d"] = buyer_d
+        print(f"    Доставка покупателя (PLN): {buyer_d:>8,.2f}")
+
 # ── ШАГ 3: Формируем записи и сохраняем ──────────────────────
 
 # Удаляем старые записи за период из data.json
@@ -487,6 +542,7 @@ for mk in sorted(month_data.keys(), key=lambda x: (int(x[-4:]), MONTH_RU_REV[x[:
             costs_total[cat] += shop_d["costs_pln"].get(cat, 0.0)
     costs_total = {k: round(v, 2) for k, v in costs_total.items()}
 
+    buyer_d_total = round(ml["buyer_d"] + pl["buyer_d"] + si["buyer_d"], 2)
     day_entry = {
         "date":          f"{mk_year:04d}-{mk_month:02d}-01",
         "Mlot_i_Klucz":  round(ml["total"], 2),
@@ -494,6 +550,12 @@ for mk in sorted(month_data.keys(), key=lambda x: (int(x[-4:]), MONTH_RU_REV[x[:
         "Sila_Narzedzi": round(si["total"], 2),
         "countries":     countries,
         "costs":         costs_total,
+        "buyerDelivery": buyer_d_total,
+        "shop_buyerDelivery": {
+            "Mlot_i_Klucz":   round(ml["buyer_d"], 2),
+            "PolaxEuroGroup": round(pl["buyer_d"], 2),
+            "Sila_Narzedzi":  round(si["buyer_d"], 2),
+        },
         "shop_costs": {
             "Mlot_i_Klucz":   {k: round(v, 2) for k, v in ml["costs_pln"].items()},
             "PolaxEuroGroup":  {k: round(v, 2) for k, v in pl["costs_pln"].items()},
