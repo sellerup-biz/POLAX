@@ -257,6 +257,49 @@ def get_sales_for_day(token, date_str):
     }
 
 
+# ── ДОСТАВКА, ОПЛАЧЕННАЯ ПОКУПАТЕЛЕМ (для brutto-выручки) ─────
+
+def get_buyer_delivery_for_day(token, date_str):
+    """
+    Сумма delivery.cost.amount по всем не-CANCELLED checkout-forms за день.
+    Это входит в Allegro UI 'Wartość sprzedaży i dostawy' наравне с товаром.
+    Только PL/business-PL (для CZ/HU/SK можно расширить позже).
+    """
+    d_from = f"{date_str}T00:00:00.000Z"
+    d_to   = f"{date_str}T23:59:59.999Z"
+    total  = 0.0
+    offset = 0
+    while True:
+        try:
+            resp = requests.get(
+                "https://api.allegro.pl/order/checkout-forms",
+                headers=hdrs(token),
+                params={
+                    "lineItems.boughtAt.gte": d_from,
+                    "lineItems.boughtAt.lte": d_to,
+                    "limit": 100, "offset": offset,
+                },
+                timeout=30,
+            )
+        except Exception as e:
+            print(f"    ⚠ buyer-delivery {date_str}: {e}")
+            break
+        if resp.status_code != 200:
+            print(f"    ⚠ buyer-delivery {date_str}: HTTP {resp.status_code}")
+            break
+        forms = resp.json().get("checkoutForms", [])
+        for form in forms:
+            if form.get("status") == "CANCELLED":
+                continue
+            try:
+                total += float(form["delivery"]["cost"]["amount"])
+            except Exception:
+                pass
+        if len(forms) < 100: break
+        offset += 100
+    return round(total, 2)
+
+
 # ── РАСХОДЫ ───────────────────────────────────────────────────
 
 def get_billing_for_day(token, date_str, marketplace_id=None):
@@ -472,6 +515,8 @@ def collect_day(access_tokens, date_str, nbp, partial=False):
         "countries":     {"allegro-pl":0.0,"allegro-cz":0.0,"allegro-hu":0.0,"allegro-sk":0.0,
                           "emag-ro":0.0,"emag-bg":0.0,"emag-hu":0.0},
         "costs":         {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
+        "buyerDelivery": 0.0,
+        "shop_buyerDelivery": {"Mlot_i_Klucz":0.0,"PolaxEuroGroup":0.0,"Sila_Narzedzi":0.0},
         "shop_costs":    {
             "Mlot_i_Klucz":   {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
             "PolaxEuroGroup":  {"commission":0.0,"delivery":0.0,"ads":0.0,"subscription":0.0,"discount":0.0},
@@ -518,8 +563,13 @@ def collect_day(access_tokens, date_str, nbp, partial=False):
             entry["costs"][cat] = round(entry["costs"][cat] + costs_pln.get(cat, 0.0), 2)
             entry["shop_costs"][shop_name][cat] = round(costs_pln.get(cat, 0.0), 2)
 
+        # Доставка покупателя — для brutto-выручки (как Allegro UI "sprzedaży i dostawy")
+        bdel = get_buyer_delivery_for_day(token, date_str)
+        entry["shop_buyerDelivery"][shop_name] = bdel
+        entry["buyerDelivery"] = round(entry["buyerDelivery"] + bdel, 2)
+
         total_costs = sum(v for k,v in costs_pln.items() if k != "discount")
-        print(f"PLN={total:,.2f}  costs={total_costs:,.2f}")
+        print(f"PLN={total:,.2f}  costs={total_costs:,.2f}  buyer_d={bdel:,.2f}")
 
     # Финальное округление
     for mkt in entry["countries"]: entry["countries"][mkt] = round(entry["countries"][mkt], 2)
@@ -551,6 +601,8 @@ def update_months(data):
         "countries":{"allegro-pl":0,"allegro-cz":0,"allegro-hu":0,"allegro-sk":0,
                      "emag-ro":0,"emag-bg":0,"emag-hu":0},
         "costs":empty_costs(),
+        "buyerDelivery": 0.0,
+        "shop_buyerDelivery": {"Mlot_i_Klucz":0.0,"PolaxEuroGroup":0.0,"Sila_Narzedzi":0.0},
         "shop_costs":empty_shop_costs(),
     })
     for day in data["days"]:
@@ -566,11 +618,16 @@ def update_months(data):
         for cat in COST_CATS:
             months_map[mk]["costs"][cat] = round(
                 months_map[mk]["costs"][cat] + day.get("costs",{}).get(cat, 0), 2)
+        months_map[mk]["buyerDelivery"] = round(
+            months_map[mk]["buyerDelivery"] + day.get("buyerDelivery", 0), 2)
         for shop in ["Mlot_i_Klucz","PolaxEuroGroup","Sila_Narzedzi"]:
             sc = day.get("shop_costs", {}).get(shop, {})
             for cat in COST_CATS:
                 months_map[mk]["shop_costs"][shop][cat] = round(
                     months_map[mk]["shop_costs"][shop][cat] + sc.get(cat, 0), 2)
+            sbd = day.get("shop_buyerDelivery", {}).get(shop, 0)
+            months_map[mk]["shop_buyerDelivery"][shop] = round(
+                months_map[mk]["shop_buyerDelivery"][shop] + sbd, 2)
     MONTH_RU_REV = {v:k for k,v in MONTH_RU.items()}
     data["months"] = [
         {"month":k,**v}
