@@ -366,12 +366,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 var SHOPS=['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi','EMAG'];
-// "Wartość sprzedaży i dostawy" как в Allegro UI: товар + доставка покупателя.
-// Доставка покупателя приходит из checkout-forms (см. fetch.py / fetch_history.py).
+// Для POLAX `payment-operations` (group=INCOME) уже возвращает brutto
+// (товар + доставка) — проверено сравнением с Allegro UI на Sila_Narzedzi
+// (137 185 PLN API ≈ 136 819 PLN UI по всем рынкам, Δ 0,3%).
+// Поэтому ДОБАВЛЯТЬ `buyerDelivery` отдельно НЕ нужно — это даст double-count.
+// shop_buyerDelivery остаётся в data.json только для аудита/диагностики.
 function shopGross(rec, shopName){
-  var base = rec[shopName]||0;
-  var bd   = (rec.shop_buyerDelivery||{})[shopName]||0;
-  return base + bd;
+  return rec[shopName]||0;
 }
 function totalGross(rec){
   return SHOPS.reduce(function(s,k){return s+shopGross(rec,k);},0);
@@ -498,13 +499,13 @@ function renderGoal(months){
   var best = null;
   var bestTotal = 0;
   for(var i=0;i<months.length;i++){
-    var tot = SHOPS_LIST.reduce(function(s,k){return s+(months[i][k]||0);},0) + (months[i].buyerDelivery||0);
+    var tot = SHOPS_LIST.reduce(function(s,k){return s+(months[i][k]||0);},0);
     if(tot > bestTotal){ bestTotal = tot; best = months[i].month; }
   }
 
   // Текущий месяц (последний в массиве)
   var cur = months[months.length-1];
-  var curTotal = SHOPS_LIST.reduce(function(s,k){return s+(cur[k]||0);},0) + (cur.buyerDelivery||0);
+  var curTotal = SHOPS_LIST.reduce(function(s,k){return s+(cur[k]||0);},0);
   var curMonth = cur.month;
 
   var bestPct  = Math.min(100, Math.round(bestTotal / GOAL * 100));
