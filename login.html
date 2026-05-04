@@ -58,14 +58,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;min-height:1
 
 <script>
 // Уже залогинен — сразу на главную
-if(localStorage.getItem('polax_auth')==='ok_UG9sYXhFdXJvR3JvdXA'){window.location.replace('index.html');}
+if(localStorage.getItem('polax_auth')==='ok_UG9sYXhFdXJvR3JvdXA'){window.location.replace('admin.html');}
 
 function doLogin(){
   var u=document.getElementById('login').value.trim();
   var p=document.getElementById('password').value;
   if(btoa(u)===btoa('PolaxEuroGroup') && btoa(p)===btoa('GpqXB52yBo73')){
     localStorage.setItem('polax_auth','ok_UG9sYXhFdXJvR3JvdXA');
-    window.location.replace('index.html');
+    window.location.replace('admin.html');
   } else {
     var err=document.getElementById('err');
     err.classList.add('show');
