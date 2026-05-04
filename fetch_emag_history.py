@@ -11,12 +11,15 @@ import json
 import os
 from base64 import b64encode
 from datetime import date, timedelta
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*a, **k): pass  # CI: env vars приходят напрямую
 
 load_dotenv()
 
-USERNAME  = os.getenv("EMAG_USERNAME",  "sellerup@foks.ai")
-PASSWORD  = os.getenv("EMAG_PASSWORD",  "OURDgAI")
+USERNAME  = os.getenv("EMAG_USERNAME") or "sellerup@foks.ai"
+PASSWORD  = os.getenv("EMAG_PASSWORD") or "OURDgAI"
 DATA_FILE = "data.json"
 
 HISTORY_FROM = os.getenv("HISTORY_FROM", "2026-01-01")
