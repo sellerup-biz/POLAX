@@ -55,6 +55,15 @@ table tfoot td{font-weight:700;border-top:2px solid var(--border-mid);border-bot
 .footer{text-align:center;font-size:11px;color:var(--text-faint);margin-top:1.5rem;letter-spacing:1px}
 .chart-wrap{position:relative;width:100%}
 canvas{max-width:100%;display:block}
+
+/* ── Goal block ── */
+.goal-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.goal-bar-bg{background:var(--bg-deep);border-radius:50px;height:14px;overflow:hidden}
+.goal-bar-fill{height:100%;border-radius:50px;width:0;transition:width 1s ease;position:relative}
+.goal-bar-fill .pct{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#fff}
+.goal-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.goal-row-label{font-size:12px;font-weight:600;color:var(--text-secondary)}
+.goal-row-val{font-size:13px;font-weight:700}
 </style>
 </head>
 <body>
@@ -69,6 +78,9 @@ canvas{max-width:100%;display:block}
     <a href="login.html" class="btn-admin">Админ-панель →</a>
   </div>
 </div>
+
+<!-- ── Цель и прогресс ─────────────────────────────────────── -->
+<div id="goalBlock"></div>
 
 <!-- ── Продажи по дням ─────────────────────────────────────── -->
 <div class="card">
@@ -214,6 +226,69 @@ function renderMonthly(months){
   document.getElementById('monthTotalsGrid').innerHTML = html;
 }
 
+function displayMonth(m){ return m; }
+
+function renderGoal(months){
+  var GOAL = 200000;
+
+  // best month
+  var best = null, bestTotal = 0;
+  for (var i = 0; i < months.length; i++){
+    var tot = totalSales(months[i]);
+    if (tot > bestTotal){ bestTotal = tot; best = months[i].month; }
+  }
+
+  // current month = last in array
+  var cur = months[months.length - 1];
+  var curTotal = totalSales(cur);
+  var curMonth = cur.month;
+
+  var bestPct = Math.min(100, Math.round(bestTotal / GOAL * 100));
+  var curPct  = Math.min(100, Math.round(curTotal  / GOAL * 100));
+  var isSame  = best === curMonth;
+
+  var html = '<div class="goal-card">'
+    + '<div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:4px">Цель: ' + fmt(GOAL) + ' / месяц</div>'
+    + '<div style="font-size:11px;color:var(--text-faint);margin-bottom:1.25rem">Прогресс по магазинам Allegro + eMAG</div>';
+
+  // best month (skip if same as current)
+  if (!isSame) {
+    html += '<div style="margin-bottom:1.25rem">'
+      + '<div class="goal-row">'
+      +   '<div class="goal-row-label">Лучший месяц — <span style="color:#BA7517">' + displayMonth(best) + '</span></div>'
+      +   '<div class="goal-row-val" style="color:#BA7517">' + fmt2(bestTotal) + ' &nbsp;·&nbsp; ' + bestPct + '%</div>'
+      + '</div>'
+      + '<div class="goal-bar-bg"><div class="goal-bar-fill" style="background:#BA7517;width:' + bestPct + '%">'
+      +   (bestPct >= 10 ? '<span class="pct">' + bestPct + '%</span>' : '')
+      + '</div></div>'
+      + '</div>';
+  }
+
+  // current month
+  html += '<div>'
+    + '<div class="goal-row">'
+    +   '<div class="goal-row-label">' + (isSame ? 'Текущий и лучший — ' : 'Текущий месяц — ')
+    +     '<span style="color:#185FA5">' + displayMonth(curMonth) + '</span></div>'
+    +   '<div class="goal-row-val" style="color:#185FA5">' + fmt2(curTotal) + ' &nbsp;·&nbsp; ' + curPct + '%</div>'
+    + '</div>'
+    + '<div class="goal-bar-bg"><div class="goal-bar-fill" style="background:#185FA5;width:' + curPct + '%">'
+    +   (curPct >= 10 ? '<span class="pct">' + curPct + '%</span>' : '')
+    + '</div></div>'
+    + '</div>';
+
+  // remaining to goal
+  html += '<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-subtle);display:flex;gap:16px;flex-wrap:wrap">'
+    + '<div style="font-size:11px;color:var(--text-secondary)">До цели в лучшем месяце: '
+    +   '<span style="color:var(--text-primary);font-weight:600">' + fmt2(Math.max(0, GOAL - bestTotal)) + '</span></div>';
+  if (!isSame) {
+    html += '<div style="font-size:11px;color:var(--text-secondary)">До цели в этом месяце: '
+      + '<span style="color:var(--text-primary);font-weight:600">' + fmt2(Math.max(0, GOAL - curTotal)) + '</span></div>';
+  }
+  html += '</div></div>';
+
+  document.getElementById('goalBlock').innerHTML = html;
+}
+
 function renderCosts(months){
   var body = '';
   var tot = {commission:0, delivery:0, ads:0, subscription:0};
@@ -259,6 +334,7 @@ fetch('data.json?_=' + Date.now())
       if (recent.length > 0) renderDaily(recent);
     }
     if (d.months && d.months.length > 0) {
+      renderGoal(d.months);
       renderMonthly(d.months);
       renderCosts(d.months);
     }
