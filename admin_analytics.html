@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLAX · Аналитика</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color:var(--text-primary);min-height:100vh;padding:1.75rem}
+
+.hdr{display:flex;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:12px 18px;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
+.hdr-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;flex-shrink:0}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;background:#BA7517;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
+.hdr h1{font-size:20px;font-weight:700;letter-spacing:2px;color:var(--text-primary)}
+.hdr p{font-size:11px;color:var(--text-muted);margin-top:2px}
+.btn-back{font-size:12px;padding:7px 16px;border-radius:8px;background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border-mid);cursor:pointer;text-decoration:none;display:inline-block;font-weight:500}
+
+/* TABS */
+.tabs{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+.tab{font-size:12px;padding:7px 18px;border-radius:8px;border:1px solid var(--border-mid);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;font-weight:500;transition:all 0.15s}
+.tab.on{background:#BA7517;color:#fff;border-color:#D4891E;font-weight:700}
+.tab:hover:not(.on):not(.future){background:var(--bg-subtle);border-color:#D4891E;color:#BA7517}
+.tab.future{color:var(--text-faint);border-color:var(--border-subtle);background:var(--bg-deep);cursor:default;font-style:italic}
+
+.sl{font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1.2px;text-transform:uppercase;margin:0 0 8px 2px}
+
+.c4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
+.c5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
+@media(max-width:700px){.c4,.c5{grid-template-columns:1fr 1fr}}
+.mc{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+.mc-l{font-size:10px;color:var(--text-muted);margin-bottom:6px;font-weight:600}
+.mc-v{font-size:18px;font-weight:700;color:var(--text-primary)}
+.mc-s{font-size:10px;color:var(--text-secondary);margin-top:3px}
+.mc.am .mc-v{color:#BA7517}
+.mc.bl .mc-v{color:#185FA5}
+.mc.tl .mc-v{color:#0F6E56}
+.mc.gd{background:#BA7517;border-color:#D4891E}
+.mc.gd .mc-l{color:rgba(255,255,255,0.75)}
+.mc.gd .mc-v{color:#fff;font-size:20px}
+.mc.gd .mc-s{color:rgba(255,255,255,0.6)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+@media(max-width:700px){.two{grid-template-columns:1fr}}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1.25rem}
+@media(max-width:800px){.three{grid-template-columns:1fr}}
+
+.pn{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.pt{font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tag{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700}
+.ta{background:var(--tag-am-bg);color:#D4891E}
+.tb{background:var(--tag-bl-bg);color:#3B8FD4}
+.tt{background:var(--tag-tl-bg);color:#1A9E7A}
+.tr{background:var(--tag-rd-bg);color:#E04545}
+
+.crow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-faint);font-size:11px;color:var(--text-primary);gap:8px}
+.crow:last-child{border-bottom:none;font-weight:700}
+.crow-r{display:flex;align-items:baseline;gap:8px;flex-shrink:0}
+.pct{font-size:10px;color:var(--text-secondary);min-width:38px;text-align:right}
+.pct.neg{color:#A32D2D}
+.neg{color:#A32D2D}
+.bi{height:4px;border-radius:2px;margin-top:3px}
+
+.tbl{width:100%;font-size:10px;border-collapse:collapse}
+.tbl th{text-align:right;padding:5px 6px;color:var(--text-secondary);font-weight:600;border-bottom:1px solid var(--border-subtle);font-size:9px}
+.tbl th:first-child{text-align:left}
+.tbl td{text-align:right;padding:5px 6px;border-bottom:1px solid var(--border-faint);color:var(--text-primary)}
+.tbl td:first-child{text-align:left;color:var(--text-muted)}
+.tbl tr:last-child td{border:none;font-weight:700;color:var(--text-primary)}
+.neg-c{color:#A32D2D}
+
+.chart-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:1.25rem}
+.leg{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-secondary)}
+.dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.footer{text-align:center;font-size:11px;color:var(--text-secondary);margin-top:0.5rem;letter-spacing:1px}
+
+/* NBP rate badge */
+.nbp-badge{font-size:9px;color:var(--text-secondary);padding:2px 6px;background:var(--bg-deep);border-radius:3px;font-weight:500}
+.native-val{font-size:9px;color:var(--text-secondary);margin-top:1px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="logo">P</div>
+    <div>
+      <h1 data-i18n="an_title">POLAX · Аналитика</h1>
+      <p data-i18n="an_sub">Продажи и расходы по месяцам · все магазины · в PLN</p>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <a href="admin.html" class="btn-back" data-i18n="nav_back">← Главный дашборд</a>
+    <a href="admin_unit_economy.html" class="btn-back" data-i18n="nav_unit">Юнит-экономика →</a>
+    <a href="admin_categories.html" class="btn-back" data-i18n="nav_categories">Продажи по категориям →</a>
+    <a href="settings.html" class="btn-back" data-i18n="nav_settings">Настройки</a>
+    <button onclick="__polaxLogout()" class="btn-back" style="color:#A32D2D;border-color:#f0c0c0;background:var(--bg-deep)">Выйти</button>
+    <div id="polax-controls"></div>
+  </div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="sl" id="month-label">Продажи за месяц · в PLN</div>
+<div class="c5" id="cards"></div>
+
+<div class="two">
+  <div class="pn">
+    <div class="pt"><span data-i18n="shops_bd">Продажи по магазинам</span> <span class="tag tb" id="tag-shops"></span></div>
+    <div id="shops-breakdown"></div>
+  </div>
+  <div class="pn">
+    <div class="pt"><span data-i18n="countries_bd">Продажи по странам</span> <span class="tag tb" id="tag-countries"></span> <span class="nbp-badge" id="nbp-badge" data-i18n="nbp_loading">НБП курс...</span></div>
+    <div id="countries-breakdown"></div>
+  </div>
+</div>
+
+<div class="two">
+  <div class="pn">
+    <div class="pt"><span data-i18n="costs_bd">Расходы по категориям</span> <span class="tag tr" id="tag-costs"></span></div>
+    <div id="costs-breakdown"></div>
+  </div>
+  <div class="pn" style="background:var(--bg-subtle);border-color:#e8e0d0">
+    <div class="pt"><span data-i18n="summary">Сводка месяца</span> <span class="tag ta" id="tag-summary"></span></div>
+    <div id="summary-block"></div>
+  </div>
+</div>
+
+<div class="sl" data-i18n="shop_details">Детализация по магазинам</div>
+<div class="three" id="shop-tables"></div>
+
+<div class="chart-wrap">
+  <div class="pt"><span data-i18n="dyn_title">Динамика продаж · все магазины суммарно</span> <span class="tag ta" data-i18n="dyn_tag">PLN · по месяцам</span></div>
+  <div class="leg">
+    <div class="li"><div class="dot" style="background:#BA7517"></div><span data-i18n="chart_sales">Все магазины · продажи</span></div>
+    <div class="li"><div class="dot" style="background:#A32D2D;opacity:0.6"></div><span data-i18n="chart_costs">Расходы суммарно · % над столбиком</span></div>
+  </div>
+  <canvas id="dynChart" style="width:100%;max-height:260px"></canvas>
+</div>
+
+<div class="footer" data-i18n="f_an">POLAX · АНАЛИТИКА · 2026</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+var DATA = { months: [] };
+var SHOPS  = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi'];
+var COLORS = ['#BA7517','#185FA5','#0F6E56'];
+var TAGS   = ['ta','tb','tt'];
+var activeMonth = -1; // будет установлен после загрузки данных
+var dynChart    = null;
+
+// Курсы НБП (загружаются асинхронно при старте)
+// PLN за 1 единицу иностранной валюты
+var NBP_RATES = { CZK: 0, HUF: 0, EUR: 0, RON: 0 };
+var nbpLoaded = false;
+
+function fmt(n){
+  return n.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+// ── NBP КУРСЫ ─────────────────────────────────────────────────
+// Получаем текущие курсы НБП (таблица А) для конвертации
+// CZK/HUF/EUR → PLN в блоке "Продажи по странам"
+function fetchNBPRates(){
+  return fetch('https://api.nbp.pl/api/exchangerates/tables/a/?format=json')
+    .then(function(r){ return r.json(); })
+    .then(function(tables){
+      var rates = tables[0].rates;
+      rates.forEach(function(r){
+        if(r.code === 'CZK') NBP_RATES.CZK = r.mid;
+        if(r.code === 'HUF') NBP_RATES.HUF = r.mid;
+        if(r.code === 'EUR') NBP_RATES.EUR = r.mid;
+        if(r.code === 'RON') NBP_RATES.RON = r.mid;
+      });
+      nbpLoaded = true;
+      var dt = tables[0].effectiveDate || '';
+      document.getElementById('nbp-badge').textContent =
+        'NBP ' + dt + '  CZK=' + NBP_RATES.CZK.toFixed(4) +
+        '  HUF=' + NBP_RATES.HUF.toFixed(6) +
+        '  EUR=' + NBP_RATES.EUR.toFixed(4) +
+        '  RON=' + NBP_RATES.RON.toFixed(4);
+    })
+    .catch(function(){
+      document.getElementById('nbp-badge').textContent = T('nbp_na');
+    });
+}
+
+// ── НОРМАЛИЗАЦИЯ СТРАН ────────────────────────────────────────
+// Хранит нативные валюты: PL=PLN, CZ=CZK, HU=HUF, SK=EUR
+function normalizeCountries(c){
+  if(!c) return {PL:0, CZ:0, HU:0, SK:0, EMAG_RO:0, EMAG_BG:0, EMAG_HU:0};
+  return {
+    PL:      (c['allegro-pl']||c['PL']||0) + (c['allegro-business-pl']||0),
+    CZ:       c['allegro-cz']||c['CZ']||0,
+    HU:       c['allegro-hu']||c['HU']||0,
+    SK:       c['allegro-sk']||c['SK']||0,
+    EMAG_RO:  c['emag-ro']||c['EMAG_RO']||0,   // RON
+    EMAG_BG:  c['emag-bg']||c['EMAG_BG']||0,   // EUR
+    EMAG_HU:  c['emag-hu']||c['EMAG_HU']||0    // HUF
+  };
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+var ALL_MONTHS = [
+  "Янв 2026","Фев 2026","Мар 2026","Апр 2026","Май 2026","Июн 2026",
+  "Июл 2026","Авг 2026","Сен 2026","Окт 2026","Ноя 2026","Дек 2026"
+];
+
+function renderTabs(){
+  var available = DATA.months.map(function(m){ return m.month; });
+  document.getElementById('tabs').innerHTML = ALL_MONTHS.map(function(name){
+    var idx    = available.indexOf(name);
+    var hasData = idx !== -1;
+    if(hasData && idx === activeMonth){
+      return '<div class="tab on">'+displayMonth(name)+'</div>';
+    } else if(hasData){
+      return '<div class="tab" onclick="switchMonth('+idx+')">'+displayMonth(name)+'</div>';
+    } else {
+      return '<div class="tab future">'+displayMonth(name)+'</div>';
+    }
+  }).join('');
+}
+
+// ── CARDS ─────────────────────────────────────────────────────
+function renderCards(){
+  var m     = DATA.months[activeMonth];
+  var emag  = m['EMAG'] || 0;
+  var total = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + emag;
+  var html  = SHOPS.map(function(s,i){
+    return '<div class="mc '+['am','bl','tl'][i]+'">'
+      +'<div class="mc-l">'+s+'</div>'
+      +'<div class="mc-v">'+fmt(m[s]||0)+' zł</div>'
+      +'<div class="mc-s">'+T('sales_month')+'</div></div>';
+  }).join('');
+  html += '<div class="mc">'
+    +'<div class="mc-l" style="color:#C4153A">eMAG (RO/BG/HU)</div>'
+    +'<div class="mc-v" style="color:#C4153A">'+fmt(emag)+' zł</div>'
+    +'<div class="mc-s">'+T('sales_month')+'</div></div>';
+  html += '<div class="mc gd"><div class="mc-l">'+T('all_shops')+'</div>'
+    +'<div class="mc-v">'+fmt(total)+' zł</div>'
+    +'<div class="mc-s">'+displayMonth(m.month)+'</div></div>';
+  document.getElementById('cards').innerHTML = html;
+  document.getElementById('month-label').textContent = T('sales_for')+' '+displayMonth(m.month)+' '+T('sales_pln_sfx');
+  document.getElementById('tag-shops').textContent    = m.month;
+  document.getElementById('tag-countries').textContent = m.month;
+  document.getElementById('tag-costs').textContent    = m.month;
+  document.getElementById('tag-summary').textContent  = m.month;
+}
+
+// ── SHOPS BREAKDOWN ───────────────────────────────────────────
+function renderShopsBreakdown(){
+  var m     = DATA.months[activeMonth];
+  var emag  = m['EMAG'] || 0;
+  var total = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + emag;
+  var html  = SHOPS.map(function(s,i){
+    var val = m[s]||0;
+    var pct = total > 0 ? Math.round(val/total*100) : 0;
+    return '<div class="crow"><span>'+s+'</span>'
+      +'<div class="crow-r">'
+      +'<div style="text-align:right">'
+      +'<div style="font-size:11px;font-weight:600;color:'+COLORS[i]+'">'+fmt(val)+' zł</div>'
+      +'<div class="bi" style="background:'+COLORS[i]+';width:'+pct+'%"></div>'
+      +'</div>'
+      +'<span class="pct">'+pct+'%</span>'
+      +'</div></div>';
+  }).join('');
+  // eMAG row
+  var emagPct = total > 0 ? Math.round(emag/total*100) : 0;
+  html += '<div class="crow"><span>eMAG (RO/BG/HU)</span>'
+    +'<div class="crow-r">'
+    +'<div style="text-align:right">'
+    +'<div style="font-size:11px;font-weight:600;color:#C4153A">'+fmt(emag)+' zł</div>'
+    +'<div class="bi" style="background:#C4153A;width:'+emagPct+'%"></div>'
+    +'</div>'
+    +'<span class="pct">'+emagPct+'%</span>'
+    +'</div></div>';
+  html += '<div class="crow"><span>'+T('total')+'</span>'
+    +'<div class="crow-r"><span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(total)+' zł</span>'
+    +'<span class="pct">100%</span></div></div>';
+  document.getElementById('shops-breakdown').innerHTML = html;
+}
+
+// ── COUNTRIES BREAKDOWN ───────────────────────────────────────
+// CZK/HUF/EUR конвертируются в PLN по текущему курсу НБП для:
+//   • расчёта долей (bar width)
+//   • отображения PLN-эквивалента
+// Нативные суммы показываются как подпись
+function renderCountriesBreakdown(){
+  var m = DATA.months[activeMonth];
+  var c = m.countries || {};
+
+  // PLN-эквиваленты для каждой страны
+  var plnPL = c.PL || 0;
+  var plnCZ = (c.CZ || 0) * NBP_RATES.CZK;
+  var plnHU = (c.HU || 0) * NBP_RATES.HUF;
+  var plnSK = (c.SK || 0) * NBP_RATES.EUR;
+
+  // Общая PLN-сумма продаж по магазинам + eMAG (для % столбца)
+  var shopTotal = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
+  var emagTotal = m['EMAG'] || 0;
+
+  // eMAG нативные суммы и PLN-эквиваленты
+  var plnEmagRO = (c.EMAG_RO || 0) * NBP_RATES.RON;
+  var plnEmagBG = (c.EMAG_BG || 0) * NBP_RATES.EUR;
+  var plnEmagHU = (c.EMAG_HU || 0) * NBP_RATES.HUF;
+
+  var rows = [
+    {flag:'', name:T('c_pl'),          curr:'PLN', native:c.PL||0,      pln:plnPL,     rate:null,           color:'#BA7517'},
+    {flag:'', name:T('c_cz'),           curr:'CZK', native:c.CZ||0,      pln:plnCZ,     rate:NBP_RATES.CZK,  color:'#185FA5'},
+    {flag:'', name:T('c_hu'),         curr:'HUF', native:c.HU||0,      pln:plnHU,     rate:NBP_RATES.HUF,  color:'#0F6E56'},
+    {flag:'', name:T('c_sk'),        curr:'EUR', native:c.SK||0,      pln:plnSK,     rate:NBP_RATES.EUR,  color:'#854F0B'},
+    {flag:'', name:T('c_ro'),  curr:'RON', native:c.EMAG_RO||0, pln:plnEmagRO, rate:NBP_RATES.RON,  color:'#C4153A'},
+    {flag:'', name:T('c_bg'), curr:'EUR', native:c.EMAG_BG||0, pln:plnEmagBG, rate:NBP_RATES.EUR,  color:'#C4153A'},
+    {flag:'', name:T('c_hu_e'),  curr:'HUF', native:c.EMAG_HU||0, pln:plnEmagHU, rate:NBP_RATES.HUF,  color:'#C4153A'}
+  ];
+
+  var totalPLN = plnPL + plnCZ + plnHU + plnSK + plnEmagRO + plnEmagBG + plnEmagHU;
+
+  var allTotal = shopTotal + emagTotal;
+  var html = rows.map(function(r){
+    var pct  = allTotal > 0 ? (r.pln / allTotal * 100).toFixed(1) : '0.0';
+    var barW = totalPLN > 0  ? Math.round(r.pln / totalPLN * 100)   : 0;
+    var nativeStr = r.curr !== 'PLN'
+      ? ('<div class="native-val">'
+        + r.native.toLocaleString('ru-RU',{minimumFractionDigits:0,maximumFractionDigits:0})
+        + ' ' + r.curr
+        + (r.rate ? ' × '+r.rate.toFixed(4)+' НБП' : '')
+        + '</div>')
+      : '';
+    return '<div class="crow">'
+      +'<span>'+r.name+'</span>'
+      +'<div class="crow-r">'
+      +'<div style="text-align:right">'
+      +'<div style="font-size:11px;font-weight:600;color:'+r.color+'">≈ '+fmt(r.pln)+' zł</div>'
+      + nativeStr
+      +'<div class="bi" style="background:'+r.color+';width:'+barW+'%;opacity:0.75"></div>'
+      +'</div>'
+      +'<span class="pct">'+pct+'%</span>'
+      +'</div></div>';
+  }).join('');
+
+  // Итого — реальная PLN-сумма по магазинам + eMAG (authoritative)
+  html += '<div class="crow">'
+    +'<span style="font-weight:700;color:var(--text-primary)">'+T('total_all_pln')+'</span>'
+    +'<div class="crow-r">'
+    +'<span style="font-size:12px;font-weight:700;color:#BA7517">'+fmt(allTotal)+' zł</span>'
+    +'<span class="pct">100%</span>'
+    +'</div></div>';
+
+  document.getElementById('countries-breakdown').innerHTML = html;
+}
+
+// ── COSTS BREAKDOWN ───────────────────────────────────────────
+function totalCostsVal(c){
+  return (c.commission||0)+(c.delivery||0)+(c.ads||0)+(c.subscription||0)+(c.other||0);
+}
+
+function renderCostsBreakdown(){
+  var m     = DATA.months[activeMonth];
+  var sales = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + (m['EMAG']||0);
+  var c     = m.costs || {};
+  var net   = totalCostsVal(c);
+  var rows  = [
+    {name:T('cost_comm'), val:c.commission||0,   sign:-1},
+    {name:T('cost_del'), val:c.delivery||0,     sign:-1},
+    {name:T('cost_ads'), val:c.ads||0,          sign:-1},
+    {name:T('cost_sub'), val:c.subscription||0, sign:-1},
+    {name:T('cost_disc'), val:c.discount||0,     sign:+1}
+  ];
+  var html = rows.map(function(r){
+    if(r.val === 0) return '';
+    var pct    = sales > 0 ? (r.val/sales*100).toFixed(1) : '0.0';
+    var sign   = r.sign === 1 ? '+' : '-';
+    var valCls = r.sign === 1
+      ? 'style="color:#0F6E56;font-size:11px;font-weight:600"'
+      : 'class="neg" style="font-size:11px;font-weight:600"';
+    var pctCls = r.sign === 1
+      ? 'style="color:#0F6E56;min-width:38px;text-align:right;font-size:10px"'
+      : 'class="pct neg"';
+    return '<div class="crow"><span>'+r.name+'</span>'
+      +'<div class="crow-r">'
+      +'<span '+valCls+'>'+sign+fmt(r.val)+' zł</span>'
+      +'<span '+pctCls+'>'+pct+'%</span>'
+      +'</div></div>';
+  }).join('');
+  var netPct = sales > 0 ? (net/sales*100).toFixed(1) : '0.0';
+  html += '<div class="crow" style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px">'
+    +'<span style="font-weight:700;color:var(--text-primary)">'+T('total_costs')+'</span>'
+    +'<div class="crow-r">'
+    +'<span class="neg" style="font-size:12px;font-weight:700">-'+fmt(net)+' zł</span>'
+    +'<span class="pct neg" style="font-weight:700">'+netPct+'%</span>'
+    +'</div></div>';
+  document.getElementById('costs-breakdown').innerHTML = html;
+}
+
+// ── SUMMARY BLOCK ─────────────────────────────────────────────
+function renderSummaryBlock(){
+  var m      = DATA.months[activeMonth];
+  var c      = m.costs || {};
+  var sales  = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + (m['EMAG']||0);
+  var costs  = (c.commission||0)+(c.delivery||0)+(c.ads||0)+(c.subscription||0);
+  var profit = sales - costs + (c.discount||0);
+  var margin = sales > 0 ? (profit/sales*100).toFixed(1) : 0;
+  var html =
+    '<div class="crow"><span>'+T('sales_pln')+'</span>'
+    +'<div class="crow-r"><span style="font-weight:600;color:#0F6E56">'+fmt(sales)+' zł</span></div></div>'
+   +'<div class="crow"><span>'+T('costs_pln')+'</span>'
+    +'<div class="crow-r">'
+    +'<span class="neg" style="font-weight:600">-'+fmt(costs)+' zł</span>'
+    +'<span class="pct neg">'+(sales>0?(costs/sales*100).toFixed(1):0)+'%</span>'
+    +'</div></div>';
+  if(c.discount > 0){
+    html += '<div class="crow"><span>'+T('cost_disc')+'</span>'
+      +'<div class="crow-r"><span style="color:#0F6E56;font-weight:600">+'+fmt(c.discount||0)+' zł</span></div></div>';
+  }
+  html += '<div class="crow"><span>'+T('profit')+'</span>'
+    +'<div class="crow-r">'
+    +'<span style="font-weight:700;color:#0F6E56;font-size:13px">'+fmt(profit)+' zł</span>'
+    +'<span class="pct" style="color:#0F6E56">'+margin+'%</span>'
+    +'</div></div>';
+  document.getElementById('summary-block').innerHTML = html;
+}
+
+// ── SHOP TABLES ───────────────────────────────────────────────
+// Расходы распределяются пропорционально доле продаж каждого магазина
+function renderShopTables(){
+  var m        = DATA.months[activeMonth];
+  var c        = m.costs || {};
+  var allSales = SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0);
+  var html = SHOPS.map(function(s,i){
+    var sales = m[s] || 0;
+    var sc = (m.shop_costs && m.shop_costs[s]) ? m.shop_costs[s] : {};
+    var net = (sc.commission||0) + (sc.delivery||0) + (sc.ads||0) + (sc.subscription||0);
+    var pct = sales > 0 ? (net/sales*100).toFixed(1) : '0.0';
+    function row(label, val, isPos){
+      if(val === 0) return '';
+      var sign = isPos ? '+' : '-';
+      var cls  = isPos ? 'style="color:#0F6E56"' : 'class="neg-c"';
+      var pp   = sales > 0 ? (val/sales*100).toFixed(1) : '0.0';
+      return '<tr><td>'+label+'</td><td '+cls+'>'+sign+fmt(val)+' zł</td><td '+cls+'>'+pp+'%</td></tr>';
+    }
+    return '<div class="pn">'
+      +'<div class="pt">'+s+' <span class="tag '+TAGS[i]+'">'+m.month+'</span></div>'
+      +'<table class="tbl">'
+      +'<thead><tr><th style="text-align:left">'+T('cat_col')+'</th><th>'+T('sum_col')+'</th><th>'+T('pct_col')+'</th></tr></thead>'
+      +'<tbody>'
+      +'<tr><td>'+T('sales_pln')+'</td><td>'+fmt(sales)+' zł</td><td>100%</td></tr>'
+      +row(T('cost_comm'), sc.commission||0, false)
+      +row(T('cost_del'),     sc.delivery||0,   false)
+      +row(T('cost_ads'),     sc.ads||0,        false)
+      +row(T('cost_sub'),   sc.subscription||0, false)
+      +row(T('cost_disc'),      sc.discount||0,   true)
+      +'<tr style="border-top:1px solid var(--border)">'
+      +'<td style="font-weight:700">'+T('total_costs')+'</td>'
+      +'<td class="neg-c" style="font-weight:700">-'+fmt(net)+' zł</td>'
+      +'<td class="neg-c" style="font-weight:700">'+pct+'%</td></tr>'
+      +'</tbody></table></div>';
+  }).join('');
+  document.getElementById('shop-tables').innerHTML = html;
+}
+
+// ── DYNAMIC CHART ─────────────────────────────────────────────
+function renderDynChart(){
+  var labels   = DATA.months.map(function(m){ return m.month; });
+  var sales    = DATA.months.map(function(m){
+    return SHOPS.reduce(function(s,k){ return s+(m[k]||0); }, 0) + (m['EMAG']||0);
+  });
+  var costs    = DATA.months.map(function(m){
+    var c = m.costs || {};
+    return (c.commission||0)+(c.delivery||0)+(c.ads||0)+(c.subscription||0);
+  });
+  var costsPct = DATA.months.map(function(m,i){
+    return sales[i] > 0 ? parseFloat((costs[i]/sales[i]*100).toFixed(1)) : 0;
+  });
+  if(dynChart) dynChart.destroy();
+  dynChart = new Chart(document.getElementById('dynChart').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:labels,
+      datasets:[
+        {label:T('chart_all_s'),data:sales,
+          backgroundColor:'rgba(186,117,23,0.2)',borderColor:'#BA7517',borderWidth:2,borderRadius:5},
+        {label:T('chart_all_c'),data:costs,
+          backgroundColor:'rgba(162,45,45,0.15)',borderColor:'#A32D2D',borderWidth:2,borderRadius:5}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10},color:'#aaa',boxWidth:10,padding:14}},
+        tooltip:{callbacks:{label:function(c){
+          if(c.datasetIndex===1)
+            return ' '+T('total_costs')+': '+fmt(c.parsed.y)+' zł ('+costsPct[c.dataIndex]+'%)';
+          return ' '+c.dataset.label+': '+fmt(c.parsed.y)+' zł';
+        }}}
+      },
+      scales:{
+        x:{grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()},ticks:{font:{size:11},color:'#666'}},
+        y:{grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()},ticks:{font:{size:11},color:'#999',
+          callback:function(v){ return (v/1000).toFixed(0)+'k zł'; }}}
+      }
+    },
+    plugins:[{
+      id:'costLabels',
+      afterDatasetDraw:function(chart,args){
+        if(args.index !== 1) return;
+        var ctx  = chart.ctx;
+        var meta = chart.getDatasetMeta(1);
+        meta.data.forEach(function(bar,i){
+          ctx.save();
+          ctx.font='bold 11px Segoe UI,sans-serif';
+          ctx.fillStyle='#A32D2D';
+          ctx.textAlign='center';
+          ctx.textBaseline='bottom';
+          ctx.fillText(costsPct[i]+'%', bar.x, bar.y-4);
+          ctx.restore();
+        });
+      }
+    }]
+  });
+}
+
+// ── ПЕРЕКЛЮЧЕНИЕ МЕСЯЦА ───────────────────────────────────────
+function switchMonth(i){
+  activeMonth = i;
+  renderTabs();
+  renderCards();
+  renderShopsBreakdown();
+  renderCountriesBreakdown();
+  renderCostsBreakdown();
+  renderShopTables();
+  renderSummaryBlock();
+}
+
+function renderAll(){
+  renderTabs();
+  renderCards();
+  renderShopsBreakdown();
+  renderCountriesBreakdown();
+  renderCostsBreakdown();
+  renderShopTables();
+  renderSummaryBlock();
+  renderDynChart();
+}
+
+// ── ЗАГРУЗКА ДАННЫХ ───────────────────────────────────────────
+// 1. Сначала грузим data.json
+// 2. Параллельно грузим курсы НБП
+// 3. Рендерим как только оба готовы
+Promise.all([
+  fetch('data.json').then(function(r){ return r.json(); }),
+  fetchNBPRates()
+])
+.then(function(results){
+  var d = results[0];
+  if(!d.months || d.months.length === 0) return;
+  DATA = d;
+  // Нормализуем ключи стран в каждом месяце
+  DATA.months.forEach(function(m){
+    m.countries = normalizeCountries(m.countries);
+    if(!m.costs) m.costs = {commission:0,delivery:0,ads:0,subscription:0,discount:0};
+  });
+  activeMonth = DATA.months.length - 1;
+  renderAll();
+})
+.catch(function(e){
+  console.warn('Ошибка загрузки:', e);
+  // Пробуем без НБП — всё равно рендерим данные
+  fetch('data.json')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.months || d.months.length === 0) return;
+      DATA = d;
+      DATA.months.forEach(function(m){
+        m.countries = normalizeCountries(m.countries);
+        if(!m.costs) m.costs = {commission:0,delivery:0,ads:0,subscription:0,discount:0};
+      });
+      activeMonth = DATA.months.length - 1;
+      renderAll();
+    })
+    .catch(function(){ console.warn('data.json не найден'); });
+});
+</script>
+<script src="i18n.js"></script>
+<script>
+onPolaxChange(function(){
+  if(typeof renderAll === 'function' && typeof DATA !== 'undefined' && DATA.months && DATA.months.length > 0) renderAll();
+});
+</script>
+</body>
+</html>
