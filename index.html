@@ -53,7 +53,8 @@ table .bold{font-weight:700}
 table tfoot td{font-weight:700;border-top:2px solid var(--border-mid);border-bottom:none;padding-top:10px}
 
 .footer{text-align:center;font-size:11px;color:var(--text-faint);margin-top:1.5rem;letter-spacing:1px}
-canvas{max-width:100%}
+.chart-wrap{position:relative;width:100%}
+canvas{max-width:100%;display:block}
 </style>
 </head>
 <body>
@@ -78,7 +79,7 @@ canvas{max-width:100%}
     </div>
     <div class="legend" id="legendDaily"></div>
   </div>
-  <canvas id="dailyChart" height="90"></canvas>
+  <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
 </div>
 
 <!-- ── Продажи по месяцам ──────────────────────────────────── -->
@@ -90,7 +91,7 @@ canvas{max-width:100%}
     </div>
     <div class="legend" id="legendMonthly"></div>
   </div>
-  <canvas id="monthlyChart" height="90"></canvas>
+  <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
 
   <div style="margin-top:1.25rem;border-top:1px solid var(--border-subtle);padding-top:1rem">
     <div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Сумма по месяцам</div>
@@ -159,7 +160,7 @@ function renderDaily(days){
     type: 'bar',
     data: {labels: labels, datasets: datasets},
     options: {
-      responsive: true, maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: true, aspectRatio: 4,
       plugins: {
         legend: {display: false},
         tooltip: {callbacks: {label: function(c){
@@ -188,7 +189,7 @@ function renderMonthly(months){
   new Chart(document.getElementById('monthlyChart').getContext('2d'), {
     data: {labels: months.map(function(m){return m.month;}), datasets: ds},
     options: {
-      responsive: true, maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: true, aspectRatio: 4,
       plugins: {
         legend: {display: true, position: 'bottom', labels: {font:{size:11},color:'#888',boxWidth:12,padding:14}},
         tooltip: {callbacks: {label: function(c){return ' '+c.dataset.label+': '+fmt2(c.parsed.y);}}},
