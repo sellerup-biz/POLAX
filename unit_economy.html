@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
+<!-- public version: no auth gate -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POLAX · Юнит-экономика</title>
+<title>POLAX · Продажи по товарам</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color:var(--text-primary);min-height:100vh;padding:1.5rem}
@@ -144,6 +144,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
 .footer{text-align:center;font-size:11px;color:var(--text-secondary);margin-top:.5rem;letter-spacing:1px}
 .btn-csv{font-size:12px;padding:5px 13px;border-radius:8px;border:1px solid #1A9E7A;background:var(--tag-tl-bg);color:#1A9E7A;cursor:pointer;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;margin-left:auto}
 .btn-csv:hover{background:#0F6E56;color:#fff;border-color:#0F6E56}
+
+/* === PUBLIC OVERRIDES === */
+/* Hide profit-revealing columns: 4=Сборы, 5=Маржа */
+.tbl-head, .prod-row { grid-template-columns: 1fr 90px 130px 22px !important; }
+.tbl-head > span:nth-child(4), .tbl-head > span:nth-child(5),
+.prod-row > div:nth-child(4), .prod-row > div:nth-child(5) { display: none !important; }
+/* Hide COG line and status badges in public */
+.cog-line { display: none !important; }
+.pr-badge { display: none !important; }
+/* Hide CSV button (admin-only) */
+.btn-csv { display: none !important; }
 </style>
 </head>
 <body>
@@ -152,15 +163,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
   <div class="logo">P</div>
   <div>
     <h1>POLAX</h1>
-    <p id="hdrSub" data-i18n="ue_title">POLAX · Юнит-экономика</p>
+    <p id="hdrSub">POLAX · Продажи по товарам</p>
   </div>
   <div class="hdr-nav">
-    <a href="index.html" class="btn-nav" data-i18n="nav_main">← Главная</a>
-    <a href="analytics.html" class="btn-nav" data-i18n="nav_analytics">Аналитика →</a>
-    <a href="categories.html" class="btn-nav" data-i18n="nav_categories">Продажи по категориям →</a>
-    <a href="settings.html" class="btn-nav" data-i18n="nav_settings">Настройки</a>
-    <button onclick="__polaxLogout()" class="btn-nav" style="color:#A32D2D;border-color:#f0c0c0;background:var(--bg-deep)">Выйти</button>
-    <div id="polax-controls"></div>
+    <a href="index.html" class="btn-nav">← Главная</a>
+    <a href="analytics.html" class="btn-nav">Аналитика →</a>
+    <a href="categories.html" class="btn-nav">Продажи по категориям →</a>
+    <a href="login.html" class="btn-nav" style="background:#BA7517;color:#fff;border-color:#BA7517">Админ-панель →</a>
   </div>
 </div>
 
@@ -709,7 +718,8 @@ function renderPagination(totalPages, total) {
 }
 
 // ── Sidebar (product detail) ──────────────────────────────────
-function openSidebar(key) {
+function openSidebar(key) { return; /* disabled in public version (would expose COG/margin) */ }
+function _openSidebar_admin_only(key) {
   const idx = keyToIdx[key];
   if (idx === undefined) return;
   const p   = PRODUCTS[idx];
