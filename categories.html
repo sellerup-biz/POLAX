@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
+<!-- public version: no auth gate -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POLAX · Продажи по категориям</title>
@@ -109,10 +109,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
     <p id="hdrSub" data-i18n="cat_title">POLAX · Продажи по категориям</p>
   </div>
   <div class="hdr-nav">
-    <a href="index.html" class="btn-nav" data-i18n="nav_main">← Главная</a>
-    <a href="analytics.html" class="btn-nav" data-i18n="nav_analytics">Аналитика →</a>
-    <a href="unit_economy.html" class="btn-nav" data-i18n="nav_unit">Юнит-экономика →</a>
-    <a href="settings.html" class="btn-nav" data-i18n="nav_settings">Настройки</a>
+    <a href="index.html" class="btn-nav">← Главная</a>
+    <a href="analytics.html" class="btn-nav">Аналитика →</a>
+    <a href="login.html" class="btn-nav" style="background:#BA7517;color:#fff;border-color:#BA7517">Админ-панель →</a>
     <button onclick="__polaxLogout()" class="btn-nav" style="color:#A32D2D;border-color:#f0c0c0;background:var(--bg-deep)">Выйти</button>
     <div id="polax-controls"></div>
   </div>
@@ -471,7 +470,7 @@ function renderTable(cats) {
     {id:'sales',     label:T('col_qty_hdr'),  align:'right'},
     {id:'pct',       label:T('pct_col'),      align:'right'},
     {id:'skus',      label:T('col_sku_hdr'),  align:'right'},
-    {id:'marginPct', label:T('col_margin'),   align:'right'},
+    // marginPct hidden in public
   ];
 
   const ico = col => {
@@ -497,7 +496,6 @@ function renderTable(cats) {
         <span style="font-weight:700">${c.pctRevenue.toFixed(1)}%</span>
       </td>
       <td class="tc-nt">${c.skuCount}</td>
-      <td class="${mpColor}">${c.marginPct.toFixed(1)}%<small style="display:block;font-size:10px;color:var(--text-secondary);font-weight:400">${c.marginAmt >= 0 ? '' : '-'}${zl(c.marginAmt)}</small></td>
     </tr>`;
   }).join('');
 
@@ -516,7 +514,6 @@ function renderTable(cats) {
     <td style="font-weight:700">${sumSales.toLocaleString('ru-RU')} ${T('units_abbr')}</td>
     <td style="font-weight:700">100%</td>
     <td class="tc-nt">—</td>
-    <td class="${mpC2}" style="font-weight:700">${sumMarginPct.toFixed(1)}%<small style="display:block;font-size:10px;color:var(--text-secondary);font-weight:400">${sumMarginAmt >= 0 ? '' : '-'}${zl(sumMarginAmt)}</small></td>
   </tr>`;
 
   document.getElementById('catTbl').innerHTML = `
