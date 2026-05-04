@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLAX — Allegro Pricing Dashboard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color:var(--text-primary);min-height:100vh;padding:1.75rem}
+
+/* HEADER */
+.header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1.5px solid var(--border)}
+.logo{width:46px;height:46px;background:#BA7517;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;letter-spacing:1px;flex-shrink:0}
+.header h1{font-size:26px;font-weight:800;letter-spacing:4px;color:var(--text-primary)}
+.header p{font-size:12px;color:var(--text-muted);margin-top:3px}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;margin-bottom:1.25rem;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);font-weight:500}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* STORES GRID */
+.stores{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:1.5rem}
+@media(max-width:900px){.stores{grid-template-columns:1fr}}
+
+/* STORE CARD */
+.sc{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.sc.amber-border{border:2.5px solid #BA7517}
+.sc.blue-border{border:2.5px solid #185FA5}
+
+.sc-head{padding:12px 16px 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-subtle)}
+.sc-name{font-size:14px;font-weight:700;color:var(--text-primary);letter-spacing:0.3px}
+.sc-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:6px}
+.t-amber{background:var(--tag-am-bg);color:#BA7517}
+.t-teal{background:var(--tag-tl-bg);color:#0F6E56}
+.t-blue{background:var(--tag-bl-bg);color:#185FA5}
+
+/* RULES SECTION */
+.section-label{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--text-secondary);padding:8px 16px 4px;text-transform:uppercase;background:var(--bg-deep)}
+
+.rules{padding:4px 0 4px}
+.rule{display:flex;align-items:flex-start;gap:8px;padding:7px 16px;border-bottom:1px solid var(--border-faint)}
+.rule:last-child{border-bottom:none}
+.ri{flex-shrink:0;width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+.ri-d{background:var(--tag-gn-bg);color:#6db84d}
+.ri-u{background:var(--tag-am-bg);color:#BA7517}
+.rb{flex:1}
+.rt{font-size:12px;color:var(--text-primary);line-height:1.45;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.rc{font-size:10px;color:var(--text-secondary);margin-top:2px}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.bd{background:var(--tag-gn-bg);color:#6db84d}
+.bu{background:var(--tag-am-bg);color:#BA7517}
+.ref{font-size:9px;color:var(--text-muted);font-style:italic;margin-top:2px}
+
+/* ADS SECTION */
+.ads-block{border-top:1.5px dashed var(--sep);background:var(--bg-deep);padding:10px 16px 12px}
+.ads-title{font-size:9px;font-weight:800;letter-spacing:1.2px;color:#BA7517;text-transform:uppercase;margin-bottom:8px}
+.ads-campaign{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px}
+.ads-campaign:last-child{margin-bottom:0}
+.camp-num{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#BA7517;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.camp-num.blue{background:#185FA5}
+.camp-body{flex:1}
+.camp-name{font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px}
+.camp-tags{display:flex;flex-wrap:wrap;gap:4px}
+.camp-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--tag-am-bg);color:#BA7517;font-weight:600}
+.camp-tag.tl{background:var(--tag-tl-bg);color:#0F6E56}
+.camp-tag.bl{background:var(--tag-bl-bg);color:#185FA5}
+
+.ads-empty{font-size:11px;color:var(--text-secondary);font-style:italic;padding:2px 0}
+
+/* CALCULATOR */
+.calc{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.calc h2{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:14px}
+.calc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:600px){.calc-inputs{grid-template-columns:1fr}}
+.ig label{font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;font-weight:600}
+.ig input,.ig select{width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border-mid);border-radius:7px;background:var(--bg-card);color:var(--text-primary)}
+.res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.res-grid{grid-template-columns:1fr}}
+.rcard{background:var(--bg-page);border:1px solid var(--border-mid);border-radius:9px;padding:12px 14px}
+.rstore{font-size:10px;color:var(--text-muted);margin-bottom:5px;font-weight:600;letter-spacing:0.3px}
+.rprice{font-size:22px;font-weight:800}
+.rdiff{font-size:10px;margin-top:3px;font-weight:500}
+.rref{font-size:10px;color:var(--text-secondary);margin-top:2px;font-style:italic}
+.cdown{color:#6db84d}.cup{color:#BA7517}
+
+.footer{text-align:center;font-size:11px;color:var(--text-secondary);margin-top:0.5rem;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">P</div>
+  <div>
+    <h1>POLAX</h1>
+    <p data-i18n="hdr_sub">Правила ценообразования · Allegro + eMAG · 4 магазина</p>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;align-items:center">
+    <a href="analytics.html" data-i18n="nav_analytics" style="font-size:12px;padding:7px 16px;border-radius:8px;background:var(--bg-deep);color:var(--text-secondary);text-decoration:none;font-weight:600;border:1px solid var(--border-mid)">Аналитика →</a>
+    <a href="unit_economy.html" data-i18n="nav_unit" style="font-size:12px;padding:7px 16px;border-radius:8px;background:var(--bg-deep);color:var(--text-secondary);text-decoration:none;font-weight:600;border:1px solid var(--border-mid)">Юнит-экономика →</a>
+    <a href="categories.html" data-i18n="nav_categories" style="font-size:12px;padding:7px 16px;border-radius:8px;background:#BA7517;color:#fff;text-decoration:none;font-weight:600">Продажи по категориям →</a>
+    <a href="settings.html" data-i18n="nav_settings" style="font-size:12px;padding:7px 16px;border-radius:8px;background:var(--bg-deep);color:var(--text-secondary);text-decoration:none;font-weight:600;border:1px solid var(--border-mid)">Настройки</a>
+    <button onclick="__polaxLogout()" style="font-size:12px;padding:7px 16px;border-radius:8px;background:var(--bg-deep);color:#A32D2D;font-weight:600;border:1px solid #f0c0c0;cursor:pointer">Выйти</button>
+    <div id="polax-controls"></div>
+  </div>
+</div>
+
+<div id="goalBlock"></div>
+
+<!-- DAILY SALES -->
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:var(--text-primary)" data-i18n="daily_title">Продажи по дням · последние 30 дней</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-top:2px" data-i18n="update_auto">Allegro + eMAG · обновляется каждую ночь автоматически</div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary)"><span style="width:10px;height:10px;border-radius:2px;background:#BA7517;display:inline-block"></span>Mlot_i_Klucz</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary)"><span style="width:10px;height:10px;border-radius:2px;background:#0F6E56;display:inline-block"></span>PolaxEuroGroup</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary)"><span style="width:10px;height:10px;border-radius:2px;background:#185FA5;display:inline-block"></span>Sila_Narzedzi</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary)"><span style="width:10px;height:10px;border-radius:2px;background:#C4153A;display:inline-block"></span>eMAG (RO/BG/HU)</div>
+    </div>
+  </div>
+  <canvas id="salesChart" style="width:100%;max-height:300px"></canvas>
+</div>
+
+<!-- MONTHLY SALES -->
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:var(--text-primary)" data-i18n="monthly_title">Продажи по месяцам · 2026</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-top:2px" data-i18n="update_auto">Allegro + eMAG · обновляется каждую ночь автоматически</div>
+    </div>
+  </div>
+  <canvas id="monthlyChart" style="width:100%;max-height:320px"></canvas>
+  <div style="margin-top:1.25rem;border-top:1px solid var(--border-subtle);padding-top:1rem">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px" data-i18n="monthly_totals">Сумма по месяцам</div>
+    <div style="overflow-x:auto"><table id="monthlyTable" style="width:100%;font-size:12px;border-collapse:collapse"></table></div>
+  </div>
+  <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px" id="monthTotalsGrid"></div>
+</div>
+
+<!-- PRICING RULES -->
+<div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.75rem;padding-left:2px" data-i18n="pricing_section">Правила ценообразования · Allegro</div>
+<div class="legend">
+  <div class="li"><div class="dot" style="background:var(--tag-gn-t)"></div> <span data-i18n="legend_cheaper">Дешевле рынка (−zł / −%)</span></div>
+  <div class="li"><div class="dot" style="background:#BA7517"></div> <span data-i18n="legend_pricier">Дороже мин. цены (+20%)</span></div>
+  <div class="li"><div class="dot" style="background:transparent;border:2px dashed var(--text-secondary)"></div> <span data-i18n="legend_ref">Ориентир: самая дешёвая цена на рынке</span></div>
+</div>
+
+<div class="stores">
+
+  <!-- ===== Mlot_i_Klucz ===== -->
+  <div class="sc">
+    <div class="sc-head">
+      <div class="sc-name">Mlot_i_Klucz</div>
+      <div><span class="tag t-amber" data-i18n="shop_rules_2">2 правила цены</span></div>
+    </div>
+    <div class="section-label"><span data-i18n="pricing_section">Правила ценообразования</span></div>
+    <div class="rules">
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">Młotek <span class="badge bd">−0.4 zł</span></div>
+          <div class="ref" data-i18n="rule_cheaper">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt"><span data-i18n="rule_all">Все товары</span> <span class="badge bu">+20%</span></div>
+          <div class="ref" data-i18n="rule_above">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+    </div>
+    <div class="ads-block">
+      <div class="ads-title" data-i18n="ads_title">ADS · Рекламные кампании</div>
+      <div class="ads-campaign">
+        <div class="camp-num">1</div>
+        <div class="camp-body">
+          <div class="camp-name"><span data-i18n="camp_company">Компания</span> Mlotek</div>
+          <div class="camp-tags"><span class="camp-tag">Młotek</span><span class="camp-tag">Молотки</span></div>
+        </div>
+      </div>
+      <div class="ads-campaign">
+        <div class="camp-num">2</div>
+        <div class="camp-body">
+          <div class="camp-name"><span data-i18n="camp_company">Компания</span> Walek</div>
+          <div class="camp-tags"><span class="camp-tag tl">WAŁEK</span></div>
+        </div>
+      </div>
+      <div class="ads-campaign">
+        <div class="camp-num" style="background:#185FA5">G</div>
+        <div class="camp-body">
+          <div class="camp-name">Google · <span data-i18n="goog_prod">товары</span> 50–100 zł</div>
+          <div class="camp-tags"><span class="camp-tag bl"><span data-i18n="range_from">от</span> 50 zł <span data-i18n="range_to">до</span> 100 zł</span></div>
+        </div>
+      </div>
+      <div class="ads-campaign">
+        <div class="camp-num" style="background:#185FA5">G</div>
+        <div class="camp-body">
+          <div class="camp-name">Google · <span data-i18n="goog_prod">товары</span> 30–50 zł</div>
+          <div class="camp-tags"><span class="camp-tag bl"><span data-i18n="range_from">от</span> 30 zł <span data-i18n="range_to">до</span> 50 zł</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PolaxEuroGroup ===== -->
+  <div class="sc amber-border">
+    <div class="sc-head">
+      <div class="sc-name">PolaxEuroGroup</div>
+      <div><span class="tag t-teal" data-i18n="shop_rules_5">5 правил цены + ADS</span></div>
+    </div>
+    <div class="section-label"><span data-i18n="pricing_section">Правила ценообразования</span></div>
+    <div class="rules">
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">OPRYSKIWACZ <span class="badge bd">−1.00 zł</span></div>
+          <div class="ref" data-i18n="rule_cheaper">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">WAŁEK <span class="badge bd">−0.5%</span></div>
+          <div class="ref" data-i18n="rule_cheaper_ads">чем самая дешёвая цена на рынке · отдельный ADS</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">Żyłka, Zacisk <span class="badge bd">−0.5%</span></div>
+          <div class="ref" data-i18n="rule_cheaper">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt">Plandeka <span class="badge bd">−1.00 zł</span></div>
+          <div class="ref" data-i18n="rule_cheaper">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt"><span data-i18n="rule_all_other">Все остальные товары</span> <span class="badge bu">+20%</span></div>
+          <div class="ref" data-i18n="rule_above">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+    </div>
+    <div class="ads-block">
+      <div class="ads-title" data-i18n="ads_title">ADS · Рекламные кампании</div>
+      <div class="ads-campaign">
+        <div class="camp-num">1</div>
+        <div class="camp-body">
+          <div class="camp-name"><span data-i18n="camp_company">Компания</span> OPRYSKIWACZ + <span data-i18n="camp_group">группа</span></div>
+          <div class="camp-tags">
+            <span class="camp-tag">OPRYSKIWACZ</span>
+            <span class="camp-tag">Żyłka</span>
+            <span class="camp-tag">Zacisk</span>
+            <span class="camp-tag">Plandeka</span>
+          </div>
+        </div>
+      </div>
+      <div class="ads-campaign">
+        <div class="camp-num">2</div>
+        <div class="camp-body">
+          <div class="camp-name"><span data-i18n="camp_company">Компания</span> WAŁEK</div>
+          <div class="camp-tags"><span class="camp-tag tl">WAŁEK</span></div>
+        </div>
+      </div>
+      <div class="ads-campaign">
+        <div class="camp-num" style="background:#185FA5">G</div>
+        <div class="camp-body">
+          <div class="camp-name">Google · <span data-i18n="goog_prod">товары</span> &gt;100 zł</div>
+          <div class="camp-tags"><span class="camp-tag bl"><span data-i18n="range_above_all">все товары &gt;</span> 100 zł</span></div>
+        </div>
+      </div>
+      <div class="ads-campaign">
+        <div class="camp-num" style="background:#185FA5">G</div>
+        <div class="camp-body">
+          <div class="camp-name">Google · <span data-i18n="goog_prod">товары</span> 10–30 zł</div>
+          <div class="camp-tags"><span class="camp-tag bl"><span data-i18n="range_from">от</span> 10 zł <span data-i18n="range_to">до</span> 30 zł</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Sila_Narzedzi ===== -->
+  <div class="sc blue-border">
+    <div class="sc-head">
+      <div class="sc-name">Sila_Narzedzi</div>
+      <div><span class="tag t-blue" data-i18n="shop_rules_6">6 правил цены</span></div>
+    </div>
+    <div class="section-label"><span data-i18n="pricing_section">Правила ценообразования</span></div>
+    <div class="rules">
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">Młotek <span class="badge bu">+20%</span></div>
+          <div class="ref" data-i18n="rule_above">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">OPRYSKIWACZ <span class="badge bu">+20%</span></div>
+          <div class="ref" data-i18n="rule_above">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">Żyłka, Zacisk <span class="badge bu">+20%</span></div>
+          <div class="ref" data-i18n="rule_above">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">WAŁEK <span class="badge bu">+20%</span></div>
+          <div class="ref" data-i18n="rule_above">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-u">↑</div>
+        <div class="rb">
+          <div class="rt">Plandeka <span class="badge bu">+20%</span></div>
+          <div class="ref" data-i18n="rule_above">от самой дешёвой цены на рынке</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="ri ri-d">↓</div>
+        <div class="rb">
+          <div class="rt"><span data-i18n="rule_all_other">Все остальные товары</span> <span class="badge bd">−0.5%</span></div>
+          <div class="ref" data-i18n="rule_cheaper">чем самая дешёвая цена на рынке</div>
+        </div>
+      </div>
+    </div>
+    <div class="ads-block">
+      <div class="ads-title" data-i18n="ads_title">ADS · Рекламные кампании</div>
+      <div class="ads-campaign">
+        <div class="camp-num" style="background:var(--tag-gn-bg)">B</div>
+        <div class="camp-body">
+          <div class="camp-name"><span data-i18n="camp_company">Компания</span> BIG · <span data-i18n="camp_all_except">все товары кроме:</span></div>
+          <div class="camp-tags">
+            <span class="camp-tag" style="background:var(--tag-rd-bg);color:#A32D2D;text-decoration:line-through">OPRYSKIWACZ</span>
+            <span class="camp-tag" style="background:var(--tag-rd-bg);color:#A32D2D;text-decoration:line-through">WAŁEK</span>
+            <span class="camp-tag" style="background:var(--tag-rd-bg);color:#A32D2D;text-decoration:line-through">Żyłka, Zacisk</span>
+            <span class="camp-tag" style="background:var(--tag-rd-bg);color:#A32D2D;text-decoration:line-through">Plandeka</span>
+            <span class="camp-tag" style="background:var(--tag-rd-bg);color:#A32D2D;text-decoration:line-through">Młotek</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer"><span data-i18n="f_main">POLAX · ALLEGRO PRICING RULES · 2026</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+var SHOPS=['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi','EMAG'];
+// Для POLAX `payment-operations` (group=INCOME) уже возвращает brutto
+// (товар + доставка) — проверено сравнением с Allegro UI на Sila_Narzedzi
+// (137 185 PLN API ≈ 136 819 PLN UI по всем рынкам, Δ 0,3%).
+// Поэтому ДОБАВЛЯТЬ `buyerDelivery` отдельно НЕ нужно — это даст double-count.
+// shop_buyerDelivery остаётся в data.json только для аудита/диагностики.
+function shopGross(rec, shopName){
+  return rec[shopName]||0;
+}
+function totalGross(rec){
+  return SHOPS.reduce(function(s,k){return s+shopGross(rec,k);},0);
+}
+var _salesChart=null, _monthlyChart=null, _lastDays=null, _lastMonths=null;
+var COLORS=['#BA7517','#0F6E56','#185FA5','#C4153A'];
+var BG=['rgba(186,117,23,0.18)','rgba(15,110,86,0.18)','rgba(24,95,165,0.18)','rgba(196,21,58,0.18)'];
+
+function mkTotals(rows,key,elId){
+  var gS=SHOPS.map(function(s){return rows.reduce(function(sum,r){return sum+shopGross(r,s);},0);});
+  var gT=gS.reduce(function(a,b){return a+b;},0);
+  var html=SHOPS.map(function(s,i){
+    return'<div style="background:var(--bg-deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px">'
+      +'<div style="font-size:10px;color:'+COLORS[i]+';font-weight:700;margin-bottom:4px">'+s+'</div>'
+      +'<div style="font-size:17px;font-weight:800;color:var(--text-secondary)">'+gS[i].toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</div>'
+      +'<div style="font-size:10px;color:var(--text-faint);margin-top:2px">'+T('total_period')+'</div></div>';
+  }).join('');
+  html+='<div style="background:#BA7517;border-radius:8px;padding:10px 14px">'
+    +'<div style="font-size:10px;color:rgba(255,255,255,0.8);font-weight:700;margin-bottom:4px">'+T('all_shops')+'</div>'
+    +'<div style="font-size:17px;font-weight:800;color:#fff">'+gT.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px">'+T('total_sum')+'</div></div>';
+  document.getElementById(elId).innerHTML=html;
+}
+
+function mkTable(rows,labelKey,elId,fmt){
+  var th='<thead><tr><th style="text-align:left;padding:6px 10px;color:#666;font-weight:600;border-bottom:1px solid var(--border-subtle)">'+(labelKey==='date'?T('daily_title').split('·')[0].trim():T('monthly_title').split('·')[0].trim())+'</th>'
+    +SHOPS.map(function(s,i){return'<th style="text-align:right;padding:6px 10px;color:'+COLORS[i]+';font-weight:600;border-bottom:1px solid var(--border-subtle)">'+s+'</th>';}).join('')
+    +'<th style="text-align:right;padding:6px 10px;font-weight:700;color:var(--text-secondary);border-bottom:1px solid var(--border-subtle)">'+T('total')+'</th></tr></thead>';
+  var tb='<tbody>'+rows.map(function(r,i){
+    var tot=totalGross(r);
+    var cellLabel = labelKey==='month' ? (typeof displayMonth==='function' ? displayMonth(r[labelKey]) : r[labelKey]) : r[labelKey];
+    return'<tr style="background:'+(i%2===0?'var(--bg-subtle)':'var(--bg-card)')+'">'
+      +'<td style="padding:6px 10px;color:var(--text-secondary);font-weight:'+(labelKey==='date'?'500':'600')+'">'+cellLabel+'</td>'
+      +SHOPS.map(function(s){var v=shopGross(r,s);return'<td style="text-align:right;padding:6px 10px">'+(fmt?v.toFixed(2):v.toLocaleString())+' zł</td>';}).join('')
+      +'<td style="text-align:right;padding:6px 10px;font-weight:700">'+(fmt?tot.toFixed(2):tot.toLocaleString())+' zł</td></tr>';
+  }).join('')+'</tbody>';
+  document.getElementById(elId).innerHTML=th+tb;
+}
+
+function renderDaily(days){
+  var todayStr = new Date().toISOString().slice(0,10);
+  // Для сегодняшнего дня (partial) — пунктирная рамка и пониженная прозрачность
+  var datasets = SHOPS.map(function(s,i){
+    return{
+      label:s,
+      data:days.map(function(d){return shopGross(d,s);}),
+      backgroundColor:days.map(function(d){return d.date===todayStr?BG[i].replace('0.18','0.09'):BG[i];}),
+      borderColor:days.map(function(d){return d.date===todayStr?COLORS[i]+'88':COLORS[i];}),
+      borderWidth:2,
+      borderRadius:4,
+      borderDash:[]
+    };
+  });
+  if(_salesChart){_salesChart.destroy();} _salesChart=new Chart(document.getElementById('salesChart').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:days.map(function(d){
+        return d.date===todayStr ? d.date+' ▸' : d.date;
+      }),
+      datasets:datasets
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(c){
+          var day=days[c.dataIndex];
+          var suffix=day&&day.partial?' '+T('partial'):'';
+          return' '+c.dataset.label+': '+c.parsed.y.toFixed(2)+' zł'+suffix;
+        }}}
+      },
+      scales:{
+        x:{grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()},ticks:{font:{size:11},color:'#666'}},
+        y:{grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()},ticks:{font:{size:11},color:'#666',callback:function(v){return v+' zł';}}}
+      }
+    }
+  });
+}
+
+function renderMonthly(months){
+  var ds=SHOPS.map(function(s,i){
+    return{type:'bar',label:s,data:months.map(function(m){return shopGross(m,s);}),backgroundColor:BG[i],borderColor:COLORS[i],borderWidth:2,borderRadius:4};
+  });
+  ds.push({type:'line',label:T('all_shops'),
+    data:months.map(function(m){return totalGross(m);}),
+    borderColor:getComputedStyle(document.documentElement).getPropertyValue('--chart-line').trim(),backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--chart-line').trim(),tension:0.3,order:0});
+  if(_monthlyChart){_monthlyChart.destroy();} _monthlyChart=new Chart(document.getElementById('monthlyChart').getContext('2d'),{
+    data:{labels:months.map(function(m){return m.month;}),datasets:ds},
+    options:{responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},color:'#aaa',boxWidth:12,padding:14}},
+        tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toLocaleString()+' zł';}}}},
+      scales:{x:{grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()},ticks:{font:{size:11},color:'#666'}},
+        y:{grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()},ticks:{font:{size:11},color:'#666',callback:function(v){return v.toLocaleString()+' zł';}}}}}
+  });
+  mkTable(months,'month','monthlyTable',false);
+  mkTotals(months,'month','monthTotalsGrid');
+}
+
+fetch('data.json')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.days && d.days.length>0){
+      var cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+      var recent=d.days.filter(function(day){return new Date(day.date)>=cutoff;});
+      _lastDays=recent;
+      if(recent.length>0) renderDaily(recent);
+    }
+    if(d.months && d.months.length>0){
+      _lastMonths=d.months;
+      renderMonthly(d.months);
+      renderGoal(d.months);
+    }
+  })
+  .catch(function(){
+    document.getElementById('salesChart').closest('div').style.display='none';
+    document.getElementById('monthlyChart').closest('div').style.display='none';
+  });
+
+function renderGoal(months){
+  var GOAL = 200000;
+  var SHOPS_LIST = ['Mlot_i_Klucz','PolaxEuroGroup','Sila_Narzedzi','EMAG'];
+
+  // Находим лучший месяц
+  var best = null;
+  var bestTotal = 0;
+  for(var i=0;i<months.length;i++){
+    var tot = SHOPS_LIST.reduce(function(s,k){return s+(months[i][k]||0);},0);
+    if(tot > bestTotal){ bestTotal = tot; best = months[i].month; }
+  }
+
+  // Текущий месяц (последний в массиве)
+  var cur = months[months.length-1];
+  var curTotal = SHOPS_LIST.reduce(function(s,k){return s+(cur[k]||0);},0);
+  var curMonth = cur.month;
+
+  var bestPct  = Math.min(100, Math.round(bestTotal / GOAL * 100));
+  var curPct   = Math.min(100, Math.round(curTotal  / GOAL * 100));
+
+  var isSame = best === curMonth;
+
+  var html =
+    '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:4px">'+T('goal_title')+'</div>'
+    +'<div style="font-size:11px;color:var(--text-faint);margin-bottom:1.25rem">'+T('goal_sub')+'</div>'
+
+    // --- Лучший месяц ---
+    +(isSame ? '' :
+      '<div style="margin-bottom:1.25rem">'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">'
+      +'<div style="font-size:12px;font-weight:600;color:var(--text-secondary)">'+T('goal_best')+' — <span style="color:#BA7517">'+displayMonth(best)+'</span></div>'
+      +'<div style="font-size:13px;font-weight:700;color:#BA7517">'+bestTotal.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł &nbsp;·&nbsp; '+bestPct+'%</div>'
+      +'</div>'
+      +'<div style="background:var(--progress-bg);border-radius:50px;height:14px;overflow:hidden">'
+      +'<div style="height:100%;border-radius:50px;background:#BA7517;width:'+bestPct+'%;transition:width 1s ease;position:relative">'
+      +(bestPct>=10?'<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#fff">'+bestPct+'%</span>':'')
+      +'</div></div>'
+      +'</div>'
+    )
+
+    // --- Текущий месяц ---
+    +'<div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">'
+    +'<div style="font-size:12px;font-weight:600;color:var(--text-secondary)">'+( isSame ? T('goal_best_cur')+' — <span style="color:#185FA5">'+displayMonth(curMonth)+'</span>' : T('goal_current')+' — <span style="color:#185FA5">'+displayMonth(curMonth)+'</span>')+'</div>'
+    +'<div style="font-size:13px;font-weight:700;color:#185FA5">'+curTotal.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł &nbsp;·&nbsp; '+curPct+'%</div>'
+    +'</div>'
+    +'<div style="background:var(--progress-bg);border-radius:50px;height:14px;overflow:hidden">'
+    +'<div style="height:100%;border-radius:50px;background:#185FA5;width:'+curPct+'%;transition:width 1s ease;position:relative">'
+    +(curPct>=10?'<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#fff">'+curPct+'%</span>':'')
+    +'</div></div>'
+    +'</div>'
+
+    // --- До цели ---
+    +'<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-subtle);display:flex;gap:16px;flex-wrap:wrap">'
+    +'<div style="font-size:11px;color:var(--text-secondary)">'+T('goal_to_best')+' <span style="color:var(--text-primary);font-weight:600">'+Math.max(0,(GOAL-bestTotal)).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</span></div>'
+    +(isSame?'':
+      '<div style="font-size:11px;color:var(--text-secondary)">'+T('goal_to_cur')+' <span style="color:var(--text-primary);font-weight:600">'+Math.max(0,(GOAL-curTotal)).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł</span></div>'
+    )
+    +'</div>'
+    +'</div>';
+
+  document.getElementById('goalBlock').innerHTML = html;
+}
+
+
+</script>
+<script src="i18n.js"></script>
+<script>
+onPolaxChange(function(){
+  if(_lastDays) renderDaily(_lastDays);
+  if(_lastMonths){ renderMonthly(_lastMonths); if(typeof renderGoal==='function') renderGoal(_lastMonths); }
+  if(_lastMonths){ mkTable(_lastMonths,'month','monthlyTable',false); mkTotals(_lastMonths,'month','monthTotalsGrid'); }
+});
+</script>
+</body>
+</html>
+
