@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POLAX — Продажи</title>
@@ -72,13 +73,13 @@ canvas{max-width:100%;display:block}
   <div class="logo">P</div>
   <div>
     <h1>POLAX</h1>
-    <p>Продажи · Allegro + eMAG · публичная версия</p>
+    <p>Продажи · Allegro + eMAG</p>
   </div>
   <div class="header-right">
     <a href="categories.html" class="btn-admin">Категории →</a>
     <a href="analytics.html" class="btn-admin">Аналитика →</a>
     <a href="unit_economy.html" class="btn-admin">Товары →</a>
-    <a href="login.html" class="btn-admin" style="background:#BA7517;color:#fff;border-color:#BA7517">Админ-панель →</a>
+    <button onclick="__polaxLogout()" class="btn-admin" style="color:#A32D2D;border-color:#f0c0c0;background:var(--bg-deep)">Выйти</button>
   </div>
 </div>
 

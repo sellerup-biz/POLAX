@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- public version: no auth gate -->
+<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POLAX · Аналитика</title>
@@ -94,7 +94,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-page);color
   <div class="hdr-right">
     <a href="index.html" class="btn-back">← Главный дашборд</a>
     <a href="categories.html" class="btn-back">Продажи по категориям →</a>
-    <a href="login.html" class="btn-back" style="background:#BA7517;color:#fff;border-color:#BA7517">Админ-панель →</a>
+    <a href="unit_economy.html" class="btn-back">Товары →</a>
     <button onclick="__polaxLogout()" class="btn-back" style="color:#A32D2D;border-color:#f0c0c0;background:var(--bg-deep)">Выйти</button>
     <div id="polax-controls"></div>
   </div>
