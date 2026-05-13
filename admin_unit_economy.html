@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<script>if(localStorage.getItem("polax_auth")!=="ok_UG9sYXhFdXJvR3JvdXA"){window.location.replace("login.html");}window.__polaxLogout=function(){localStorage.removeItem("polax_auth");window.location.replace("login.html");};</script>
+<script>(function(){var a=localStorage.getItem('polax_auth');if(a!=='ok_UG9sYXhFdXJvR3JvdXA'&&a!=='ok_UG9sYXhWaWV3'){window.location.replace('login.html');return;}window.__polaxRole=localStorage.getItem('polax_role')||'admin';window.__polaxIsViewer=window.__polaxRole==='viewer';if(window.__polaxIsViewer){window.location.replace('unit_economy.html');return;}window.__polaxLogout=function(){localStorage.removeItem('polax_auth');localStorage.removeItem('polax_role');window.location.replace('login.html');};}())</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POLAX · Юнит-экономика</title>

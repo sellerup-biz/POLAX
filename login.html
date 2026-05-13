@@ -57,15 +57,24 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F2EE;min-height:1
 </div>
 
 <script>
-// Уже залогинен — сразу на главную
-if(localStorage.getItem('polax_auth')==='ok_UG9sYXhFdXJvR3JvdXA'){window.location.replace('admin.html');}
+// Уже залогинен — редирект по роли
+(function(){
+  var a=localStorage.getItem('polax_auth'), r=localStorage.getItem('polax_role');
+  if(a==='ok_UG9sYXhFdXJvR3JvdXA'){window.location.replace('admin.html');}
+  else if(a==='ok_UG9sYXhWaWV3'){window.location.replace('index.html');}
+})();
 
 function doLogin(){
   var u=document.getElementById('login').value.trim();
   var p=document.getElementById('password').value;
   if(btoa(u)===btoa('PolaxEuroGroup') && btoa(p)===btoa('GpqXB52yBo73')){
     localStorage.setItem('polax_auth','ok_UG9sYXhFdXJvR3JvdXA');
+    localStorage.setItem('polax_role','admin');
     window.location.replace('admin.html');
+  } else if(btoa(u)===btoa('PolaxView') && btoa(p)===btoa('Allegro2026')){
+    localStorage.setItem('polax_auth','ok_UG9sYXhWaWV3');
+    localStorage.setItem('polax_role','viewer');
+    window.location.replace('index.html');
   } else {
     var err=document.getElementById('err');
     err.classList.add('show');
