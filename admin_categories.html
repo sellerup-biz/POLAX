@@ -143,7 +143,7 @@ let loadingYMs = new Set();
 let aggCache   = null;
 
 let DATE_MIN   = '2026-01-01';
-let DATE_MAX   = '2026-03-22';
+let DATE_MAX   = new Date().toISOString().slice(0,10);
 
 let curShop    = 'all';
 let sortCol    = 'revenue';
@@ -651,7 +651,8 @@ function renderDateBar() {
 async function init() {
   try {
     const data = await loadProducts();
-    if (data.updated) {
+    // DATE_MAX = today by default; only restrict if products.json.updated is newer
+    if (data.updated && data.updated > DATE_MAX) {
       DATE_MAX = data.updated;
       dateTo   = DATE_MAX;
     }

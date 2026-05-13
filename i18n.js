@@ -9,7 +9,7 @@ var TR = {
     // Nav
     nav_analytics:'Аналитика →', nav_unit:'Юнит-экономика →',
     nav_categories:'Продажи по категориям →', nav_main:'← Главная',
-    nav_back:'← Главный дашборд',
+    nav_back:'← Главный дашборд', nav_settings:'Настройки',
     // Theme
     theme_light:'Светлая', theme_dark:'Тёмная',
     // Index
@@ -115,7 +115,7 @@ var TR = {
   uk: {
     nav_analytics:'Аналітика →', nav_unit:'Юніт-економіка →',
     nav_categories:'Продажі за категоріями →', nav_main:'← Головна',
-    nav_back:'← Головний дашборд',
+    nav_back:'← Головний дашборд', nav_settings:'Налаштування',
     theme_light:'Світла', theme_dark:'Темна',
     hdr_sub:'Правила ціноутворення · Allegro + eMAG · 4 магазини',
     daily_title:'Продажі по днях · останні 30 днів',
@@ -212,7 +212,7 @@ var TR = {
   en: {
     nav_analytics:'Analytics →', nav_unit:'Unit Economy →',
     nav_categories:'Sales by Category →', nav_main:'← Home',
-    nav_back:'← Main Dashboard',
+    nav_back:'← Main Dashboard', nav_settings:'Settings',
     theme_light:'Light', theme_dark:'Dark',
     hdr_sub:'Pricing Rules · Allegro + eMAG · 4 stores',
     daily_title:'Daily Sales · Last 30 Days',
@@ -309,7 +309,7 @@ var TR = {
   pl: {
     nav_analytics:'Analityka →', nav_unit:'Ekonomia jednostkowa →',
     nav_categories:'Sprzedaż wg kategorii →', nav_main:'← Strona główna',
-    nav_back:'← Główny dashboard',
+    nav_back:'← Główny dashboard', nav_settings:'Ustawienia',
     theme_light:'Jasny', theme_dark:'Ciemny',
     hdr_sub:'Zasady cenowe · Allegro + eMAG · 4 sklepy',
     daily_title:'Sprzedaż dzienna · ostatnie 30 dni',
